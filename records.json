@@ -14,8 +14,9 @@
     "description": "asd",
     "newSPRequisites": "qqew",
     "newLSIRequisites": "aqsda",
-    "completed": false,
+    "completed": true,
     "id": "rec_1784544474418",
-    "createdAt": "2026-07-20T10:47:54.418Z"
+    "createdAt": "2026-07-20T10:47:54.418Z",
+    "completedAt": "2026-07-20T11:20:58.381Z"
   }
 ]

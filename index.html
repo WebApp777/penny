@@ -784,12 +784,6 @@
             border-bottom: 2px solid var(--accent);
         }
 
-        th:first-child,
-        th:last-child {
-            white-space: normal;
-            line-height: 1.2;
-        }
-
         tbody tr {
             border-bottom: 1px solid var(--glass-border);
             transition: background 0.15s;
@@ -1443,6 +1437,26 @@
             background: var(--success);
             color: white;
         }
+
+        .export-btn.import-btn {
+            border-color: var(--warning);
+            color: var(--warning);
+        }
+
+        .export-btn.import-btn:hover {
+            background: var(--warning);
+            color: white;
+        }
+
+        .export-btn.act-btn {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .export-btn.act-btn:hover {
+            background: var(--accent);
+            color: white;
+        }
     </style>
 </head>
 
@@ -1598,7 +1612,7 @@
                         <div class="form-group" style="grid-column: 1 / -1;"><label for="recordDescription">📝
                                 Описание</label><textarea id="recordDescription" placeholder="Введите описание"
                                 rows="2"></textarea></div>
-                        <button type="submit" class="submit-btn">➕ Добавить запись</button>
+                        <button type="submit" class="submit-btn">Добавить запись</button>
                     </form>
                     <h2 style="margin-top: 2rem;">Таблица записей</h2>
                     <div class="filter-bar" id="recordsFilterBar">
@@ -1631,17 +1645,17 @@
                         <table id="recordsTable">
                             <thead>
                                 <tr>
-                                    <th>Дата<br>и время</th>
-                                    <th>Пользо<br>ватель</th>
-                                    <th>№<br>Заявки</th>
-                                    <th>Важ<br>ность</th>
-                                    <th>Ста<br>тус</th>
-                                    <th>Серийный<br>номер</th>
-                                    <th>Изде<br>лие</th>
-                                    <th>Тип<br>техники</th>
-                                    <th>Располо<br>жение</th>
-                                    <th>Опи<br>сание</th>
-                                    <th>Дейст<br>вия</th>
+                                    <th>Дата и время</th>
+                                    <th>Пользователь</th>
+                                    <th>№ Заявки</th>
+                                    <th>Важность</th>
+                                    <th>Статус</th>
+                                    <th>Серийный номер</th>
+                                    <th>Изделие</th>
+                                    <th>Тип техники</th>
+                                    <th>Расположение</th>
+                                    <th>Описание</th>
+                                    <th>Действия</th>
                                 </tr>
                             </thead>
                             <tbody id="recordsTableBody">
@@ -1682,7 +1696,7 @@
                         <div class="form-group" style="grid-column: 1 / -1;"><label for="deviceNotes">📝
                                 Примечание</label><textarea id="deviceNotes" placeholder="Примечание"
                                 rows="2"></textarea></div>
-                        <button type="submit" class="submit-btn">➕ Добавить устройство</button>
+                        <button type="submit" class="submit-btn">Добавить устройство</button>
                     </form>
                     <h2 style="margin-top: 2rem;">Список устройств</h2>
                     <div class="filter-bar" id="devicesFilterBar" style="justify-content: center;">
@@ -1698,11 +1712,8 @@
                         <input type="text" id="filterDevLSIRequisites" placeholder="📑 Поиск по реквизитам ЛСИ...">
                         <button id="resetDevFiltersBtn" class="reset-filters-btn">🔄 Сбросить</button>
                         <button id="exportDevicesBtn" class="export-btn">📥 Экспорт CSV</button>
-                        <button id="importDevicesBtn" class="export-btn"
-                            style="border-color: var(--warning); color: var(--warning);">📥 Импорт CSV</button>
-                        <input type="file" id="importFileInput" accept=".csv" style="display:none;">
-                        <button id="printActBtn" class="export-btn"
-                            style="border-color: var(--accent); color: var(--accent);">📋 Акт</button>
+                        <button id="importDevicesBtn" class="export-btn import-btn">📥 Импорт CSV</button>
+                        <button id="printActBtn" class="export-btn act-btn">📋 Акт</button>
                     </div>
                     <div class="table-container">
                         <table id="devicesTable">
@@ -1739,7 +1750,7 @@
                     <p class="subtitle">Анализ данных по всем изделиям системы</p>
                     <div class="stats-grid" id="statsGrid">
                         <div class="stat-card">
-                            <h3>📦 Всего изделий</h3>
+                            <h3>📦 Всего устройств</h3>
                             <div class="stat-value" id="statTotalDevices">0</div>
                         </div>
                         <div class="stat-card">

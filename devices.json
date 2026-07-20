@@ -4,12 +4,40 @@
     "device": "Ноутбук",
     "serialNumber": "qwerty",
     "supplyBasis": "23321",
-    "spRequisites": "СП-791",
-    "lsiRequisites": "ЛСИ-458",
+    "spRequisites": "qqew",
+    "lsiRequisites": "aqsda",
     "location": "",
     "specs": "",
     "notes": "",
     "id": "dev_1784544441696",
     "createdAt": "2026-07-20T10:47:21.696Z"
+  },
+  {
+    "product": "n",
+    "device": "Коммутатор",
+    "serialNumber": "KY-2023-011",
+    "supplyBasis": "Договор №47",
+    "spRequisites": "12321",
+    "lsiRequisites": "ЛСИ-458",
+    "location": "432",
+    "specs": "A4, 40ppm, duplex",
+    "notes": "asd",
+    "warranty": "",
+    "id": "dev_1784546285046",
+    "createdAt": "2026-07-20T11:18:05.046Z"
+  },
+  {
+    "product": "d",
+    "device": "ECOSYS P2040dw",
+    "serialNumber": "asdfg",
+    "supplyBasis": "23321",
+    "spRequisites": "СП-791",
+    "lsiRequisites": "ЛСИ-458",
+    "location": "Кабинет 301",
+    "specs": "kmkmcwc",
+    "notes": "fdsf",
+    "warranty": "",
+    "id": "dev_1784546318482",
+    "createdAt": "2026-07-20T11:18:38.482Z"
   }
 ]

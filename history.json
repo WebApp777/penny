@@ -62,5 +62,32 @@
     "serialNumber": "qwerty",
     "id": "hist_1784544447339",
     "timestamp": "2026-07-20T10:47:27.339Z"
+  },
+  {
+    "action": "create_device",
+    "serialNumber": "KY-2023-011",
+    "product": "n",
+    "device": "Коммутатор",
+    "id": "hist_1784546285046",
+    "timestamp": "2026-07-20T11:18:05.046Z"
+  },
+  {
+    "action": "create_device",
+    "serialNumber": "asdfg",
+    "product": "d",
+    "device": "ECOSYS P2040dw",
+    "id": "hist_1784546318483",
+    "timestamp": "2026-07-20T11:18:38.483Z"
+  },
+  {
+    "action": "update_device",
+    "serialNumber": "qwerty",
+    "changes": {
+      "serialNumber": "qwerty",
+      "spRequisites": "qqew",
+      "lsiRequisites": "aqsda"
+    },
+    "id": "hist_1784546458379",
+    "timestamp": "2026-07-20T11:20:58.379Z"
   }
 ]

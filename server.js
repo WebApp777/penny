@@ -56,27 +56,40 @@ function addHistoryEntry(entry) {
         entry.timestamp = new Date().toISOString();
         history.push(entry);
         fs.writeFileSync(HISTORY_FILE, JSON.stringify(history, null, 2));
-    } catch (e) {}
+    } catch (e) { }
 }
 
 // Функция резервного копирования
 function createBackup() {
     const date = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
+    const backupFolder = path.join(BACKUP_DIR, date);
+
+    // Создаём папку для этого бэкапа
+    if (!fs.existsSync(backupFolder)) {
+        fs.mkdirSync(backupFolder, { recursive: true });
+    }
+
+    // Копируем основные JSON-файлы
     const files = ['users.json', 'records.json', 'devices.json', 'navigation.json', 'history.json'];
     files.forEach(file => {
         const src = path.join(__dirname, file);
         if (fs.existsSync(src)) {
-            fs.copyFileSync(src, path.join(BACKUP_DIR, `${date}_${file}`));
+            fs.copyFileSync(src, path.join(backupFolder, file));
         }
     });
+
+    // Копируем пользовательские разделы
     if (fs.existsSync(SECTIONS_DIR)) {
-        const backupSectionsDir = path.join(BACKUP_DIR, `${date}_sections`);
-        if (!fs.existsSync(backupSectionsDir)) fs.mkdirSync(backupSectionsDir);
+        const backupSectionsDir = path.join(backupFolder, 'sections');
+        if (!fs.existsSync(backupSectionsDir)) {
+            fs.mkdirSync(backupSectionsDir);
+        }
         fs.readdirSync(SECTIONS_DIR).forEach(file => {
             fs.copyFileSync(path.join(SECTIONS_DIR, file), path.join(backupSectionsDir, file));
         });
     }
-    // Удаляем старые бэкапы
+
+    // Удаляем старые бэкапы (старше 30 дней)
     const thirtyDaysAgo = Date.now() - 30 * 24 * 60 * 60 * 1000;
     if (fs.existsSync(BACKUP_DIR)) {
         fs.readdirSync(BACKUP_DIR).forEach(item => {
@@ -84,10 +97,9 @@ function createBackup() {
             try {
                 const stats = fs.statSync(itemPath);
                 if (stats.mtimeMs < thirtyDaysAgo) {
-                    if (stats.isDirectory()) fs.rmSync(itemPath, { recursive: true, force: true });
-                    else fs.unlinkSync(itemPath);
+                    fs.rmSync(itemPath, { recursive: true, force: true });
                 }
-            } catch (e) {}
+            } catch (e) { }
         });
     }
 }
@@ -392,7 +404,7 @@ const server = http.createServer((req, res) => {
         const sectionFile = path.join(SECTIONS_DIR, sectionId + '.json');
 
         if (req.method === 'DELETE' && req.url.includes('?deleteFile=true')) {
-            try { if (fs.existsSync(sectionFile)) fs.unlinkSync(sectionFile); } catch (e) {}
+            try { if (fs.existsSync(sectionFile)) fs.unlinkSync(sectionFile); } catch (e) { }
             res.writeHead(200, { 'Content-Type': 'application/json' });
             res.end(JSON.stringify({ success: true }));
             return;
