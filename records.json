@@ -18,5 +18,43 @@
     "id": "rec_1784544474418",
     "createdAt": "2026-07-20T10:47:54.418Z",
     "completedAt": "2026-07-20T11:20:58.381Z"
+  },
+  {
+    "username": "admin",
+    "requestNumber": "2",
+    "importance": "2",
+    "status": "move",
+    "serialNumber": "qwerty",
+    "newSerialNumber": "",
+    "product": "n",
+    "techType": "Ноутбук",
+    "newTechType": "",
+    "location": "",
+    "newLocation": "4354",
+    "description": "",
+    "newSPRequisites": "",
+    "newLSIRequisites": "",
+    "completed": false,
+    "id": "rec_1784551479175",
+    "createdAt": "2026-07-20T12:44:39.175Z"
+  },
+  {
+    "username": "admin",
+    "requestNumber": "3",
+    "importance": "2",
+    "status": "",
+    "serialNumber": "qwerty",
+    "newSerialNumber": "",
+    "product": "n",
+    "techType": "Ноутбук",
+    "newTechType": "",
+    "location": "4354",
+    "newLocation": "",
+    "description": "",
+    "newSPRequisites": "",
+    "newLSIRequisites": "",
+    "completed": false,
+    "id": "rec_1784551491291",
+    "createdAt": "2026-07-20T12:44:51.291Z"
   }
 ]

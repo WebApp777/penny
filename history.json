@@ -89,5 +89,23 @@
     },
     "id": "hist_1784546458379",
     "timestamp": "2026-07-20T11:20:58.379Z"
+  },
+  {
+    "action": "create_device",
+    "serialNumber": "asdfg",
+    "product": "n",
+    "device": "Коммутатор",
+    "id": "hist_1784547842925",
+    "timestamp": "2026-07-20T11:44:02.925Z"
+  },
+  {
+    "action": "update_device",
+    "serialNumber": "qwerty",
+    "changes": {
+      "serialNumber": "qwerty",
+      "location": "4354"
+    },
+    "id": "hist_1784551479173",
+    "timestamp": "2026-07-20T12:44:39.173Z"
   }
 ]
