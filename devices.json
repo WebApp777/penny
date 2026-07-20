@@ -1,0 +1,16 @@
+[
+  {
+    "product": "n",
+    "device": "Ноутбук",
+    "serialNumber": "qwerty",
+    "supplyBasis": "23321",
+    "spRequisites": "СП-791",
+    "lsiRequisites": "ЛСИ-458",
+    "location": "",
+    "specs": "",
+    "notes": "",
+    "warranty": "",
+    "id": "dev_1782657371394",
+    "createdAt": "2026-06-28T14:36:11.394Z"
+  }
+]

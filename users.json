@@ -1,0 +1,12 @@
+{
+  "admin": {
+    "password": "admin123",
+    "role": "admin",
+    "createdAt": "2026-06-21T11:13:21.144Z"
+  },
+  "user": {
+    "password": "user123",
+    "role": "user",
+    "createdAt": "2026-06-21T11:13:21.164Z"
+  }
+}
