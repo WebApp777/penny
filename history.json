@@ -20,5 +20,47 @@
     "device": "Ноутбук",
     "id": "hist_1782657371395",
     "timestamp": "2026-06-28T14:36:11.395Z"
+  },
+  {
+    "action": "create_device",
+    "serialNumber": "qwerty",
+    "product": "n",
+    "device": "Ноутбук",
+    "id": "hist_1784544298945",
+    "timestamp": "2026-07-20T10:44:58.945Z"
+  },
+  {
+    "action": "delete_device",
+    "serialNumber": "qwerty",
+    "id": "hist_1784544311339",
+    "timestamp": "2026-07-20T10:45:11.339Z"
+  },
+  {
+    "action": "create_device",
+    "serialNumber": "qwerty",
+    "product": "n",
+    "device": "Ноутбук",
+    "id": "hist_1784544323387",
+    "timestamp": "2026-07-20T10:45:23.387Z"
+  },
+  {
+    "action": "create_device",
+    "serialNumber": "qwerty",
+    "product": "n",
+    "device": "Ноутбук",
+    "id": "hist_1784544441697",
+    "timestamp": "2026-07-20T10:47:21.697Z"
+  },
+  {
+    "action": "delete_device",
+    "serialNumber": "qwerty",
+    "id": "hist_1784544445689",
+    "timestamp": "2026-07-20T10:47:25.689Z"
+  },
+  {
+    "action": "delete_device",
+    "serialNumber": "qwerty",
+    "id": "hist_1784544447339",
+    "timestamp": "2026-07-20T10:47:27.339Z"
   }
 ]

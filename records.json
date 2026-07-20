@@ -1,1 +1,21 @@
-[]
+[
+  {
+    "username": "admin",
+    "requestNumber": "1",
+    "importance": "2",
+    "status": "repair",
+    "serialNumber": "qwerty",
+    "newSerialNumber": "",
+    "product": "n",
+    "techType": "Ноутбук",
+    "newTechType": "",
+    "location": "632",
+    "newLocation": "",
+    "description": "asd",
+    "newSPRequisites": "qqew",
+    "newLSIRequisites": "aqsda",
+    "completed": false,
+    "id": "rec_1784544474418",
+    "createdAt": "2026-07-20T10:47:54.418Z"
+  }
+]

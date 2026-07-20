@@ -2348,7 +2348,17 @@
                 document.getElementById('createSectionModal')?.addEventListener('click', function (e) { if (e.target === this) closeCreateSectionModal(); });
                 document.getElementById('createSectionForm')?.addEventListener('submit', createCustomSection);
                 document.querySelectorAll('.constructor-tab').forEach(t => t.addEventListener('click', function () { switchConstructorTab(this.dataset.tab); }));
-                document.getElementById('addColumnBtn')?.addEventListener('click', () => { tempSectionConfig.tableColumns.push({ id: 'col_' + Date.now(), label: 'Новая колонка', inForm: true, inFilter: false }); renderTableColumnsList(); });
+
+                // Клонируем кнопку добавления колонки, чтобы сбросить старые обработчики
+                const addColumnBtn = document.getElementById('addColumnBtn');
+                if (addColumnBtn) {
+                    const newBtn = addColumnBtn.cloneNode(true);
+                    addColumnBtn.parentNode.replaceChild(newBtn, addColumnBtn);
+                    newBtn.addEventListener('click', () => {
+                        tempSectionConfig.tableColumns.push({ id: 'col_' + Date.now(), label: 'Новая колонка', inForm: true, inFilter: false });
+                        renderTableColumnsList();
+                    });
+                }
             }
 
             function renderCustomSection(section) {
@@ -2592,30 +2602,57 @@
             }
 
             function initExportButtons() {
-                document.getElementById('exportRecordsBtn')?.addEventListener('click', () => {
-                    const f = getFilteredRecords();
-                    exportToCSV(f.map(r => ({ ...r, createdAt: new Date(r.createdAt).toLocaleString('ru-RU'), importance: IMPORTANCE_LABELS[r.importance] || r.importance, status: STATUS_LABELS[r.status] || r.status })), [{ id: 'createdAt', label: 'Дата и время' }, { id: 'username', label: 'Пользователь' }, { id: 'requestNumber', label: '№ Заявки' }, { id: 'importance', label: 'Важность' }, { id: 'status', label: 'Статус' }, { id: 'serialNumber', label: 'Серийный номер' }, { id: 'product', label: 'Изделие' }, { id: 'techType', label: 'Тип техники' }, { id: 'location', label: 'Расположение' }, { id: 'description', label: 'Описание' }], 'records_' + new Date().toISOString().slice(0, 10));
-                });
-                document.getElementById('exportDevicesBtn')?.addEventListener('click', () => {
-                    const f = getFilteredDevices();
-                    exportToCSV(f.map(d => ({ ...d, createdAt: new Date(d.createdAt).toLocaleDateString('ru-RU') })), [{ id: 'product', label: 'Изделие' }, { id: 'device', label: 'Устройство' }, { id: 'serialNumber', label: 'Серийный номер' }, { id: 'supplyBasis', label: 'Основание поставки' }, { id: 'spRequisites', label: 'Реквизиты СП' }, { id: 'lsiRequisites', label: 'Реквизиты ЛСИ' }, { id: 'location', label: 'Расположение' }, { id: 'specs', label: 'Характеристики' }, { id: 'notes', label: 'Примечание' }, { id: 'createdAt', label: 'Дата добавления' }], 'devices_' + new Date().toISOString().slice(0, 10));
-                });
-                document.getElementById('printActBtn')?.addEventListener('click', () => {
-                    const devs = getFilteredDevices();
-                    if (!devs.length) { alert('Нет устройств'); return; }
-                    const now = new Date().toLocaleString('ru-RU');
-                    let h = `<html><head><meta charset="utf-8"><title>Акт</title><style>body{font-family:Arial;padding:40px}h1{text-align:center;font-size:18px}h2{text-align:center;font-size:14px}table{width:100%;border-collapse:collapse;margin-top:20px;font-size:12px}th,td{border:1px solid #000;padding:6px 8px}th{background:#f0f0f0}.footer{margin-top:40px;display:flex;justify-content:space-between}.sign{width:200px;border-top:1px solid #000;text-align:center;padding-top:5px}</style></head><body><h1>АКТ ПРИЁМА-ПЕРЕДАЧИ</h1><h2>от ${now}</h2><table><tr><th>№</th><th>Изделие</th><th>Устройство</th><th>Серийный №</th><th>Основание</th><th>Расположение</th></tr>`;
-                    devs.forEach((d, i) => { h += `<tr><td>${i + 1}</td><td>${d.product}</td><td>${d.device}</td><td>${d.serialNumber}</td><td>${d.supplyBasis || '-'}</td><td>${d.location || '-'}</td></tr>`; });
-                    h += `</table><div class="footer"><div class="sign">Сдал</div><div class="sign">Принял</div></div></body></html>`;
-                    const pw = window.open('', '_blank'); pw.document.write(h); pw.document.close(); pw.print();
-                });
+                // Кнопка экспорта записей
+                const exportRecordsBtn = document.getElementById('exportRecordsBtn');
+                if (exportRecordsBtn) {
+                    const newBtn = exportRecordsBtn.cloneNode(true);
+                    exportRecordsBtn.parentNode.replaceChild(newBtn, exportRecordsBtn);
+                    newBtn.addEventListener('click', () => {
+                        const f = getFilteredRecords();
+                        exportToCSV(f.map(r => ({ ...r, createdAt: new Date(r.createdAt).toLocaleString('ru-RU'), importance: IMPORTANCE_LABELS[r.importance] || r.importance, status: STATUS_LABELS[r.status] || r.status })), [{ id: 'createdAt', label: 'Дата и время' }, { id: 'username', label: 'Пользователь' }, { id: 'requestNumber', label: '№ Заявки' }, { id: 'importance', label: 'Важность' }, { id: 'status', label: 'Статус' }, { id: 'serialNumber', label: 'Серийный номер' }, { id: 'product', label: 'Изделие' }, { id: 'techType', label: 'Тип техники' }, { id: 'location', label: 'Расположение' }, { id: 'description', label: 'Описание' }], 'records_' + new Date().toISOString().slice(0, 10));
+                    });
+                }
+
+                // Кнопка экспорта устройств
+                const exportDevicesBtn = document.getElementById('exportDevicesBtn');
+                if (exportDevicesBtn) {
+                    const newBtn = exportDevicesBtn.cloneNode(true);
+                    exportDevicesBtn.parentNode.replaceChild(newBtn, exportDevicesBtn);
+                    newBtn.addEventListener('click', () => {
+                        const f = getFilteredDevices();
+                        exportToCSV(f.map(d => ({ ...d, createdAt: new Date(d.createdAt).toLocaleDateString('ru-RU') })), [{ id: 'product', label: 'Изделие' }, { id: 'device', label: 'Устройство' }, { id: 'serialNumber', label: 'Серийный номер' }, { id: 'supplyBasis', label: 'Основание поставки' }, { id: 'spRequisites', label: 'Реквизиты СП' }, { id: 'lsiRequisites', label: 'Реквизиты ЛСИ' }, { id: 'location', label: 'Расположение' }, { id: 'specs', label: 'Характеристики' }, { id: 'notes', label: 'Примечание' }, { id: 'createdAt', label: 'Дата добавления' }], 'devices_' + new Date().toISOString().slice(0, 10));
+                    });
+                }
+
+                // Кнопка печати акта
+                const printActBtn = document.getElementById('printActBtn');
+                if (printActBtn) {
+                    const newBtn = printActBtn.cloneNode(true);
+                    printActBtn.parentNode.replaceChild(newBtn, printActBtn);
+                    newBtn.addEventListener('click', () => {
+                        const devs = getFilteredDevices();
+                        if (!devs.length) { alert('Нет устройств'); return; }
+                        const now = new Date().toLocaleString('ru-RU');
+                        let h = `<html><head><meta charset="utf-8"><title>Акт</title><style>body{font-family:Arial;padding:40px}h1{text-align:center;font-size:18px}h2{text-align:center;font-size:14px}table{width:100%;border-collapse:collapse;margin-top:20px;font-size:12px}th,td{border:1px solid #000;padding:6px 8px}th{background:#f0f0f0}.footer{margin-top:40px;display:flex;justify-content:space-between}.sign{width:200px;border-top:1px solid #000;text-align:center;padding-top:5px}</style></head><body><h1>АКТ ПРИЁМА-ПЕРЕДАЧИ</h1><h2>от ${now}</h2><table><tr><th>№</th><th>Изделие</th><th>Устройство</th><th>Серийный №</th><th>Основание</th><th>Расположение</th></tr>`;
+                        devs.forEach((d, i) => { h += `<tr><td>${i + 1}</td><td>${d.product}</td><td>${d.device}</td><td>${d.serialNumber}</td><td>${d.supplyBasis || '-'}</td><td>${d.location || '-'}</td></tr>`; });
+                        h += `</table><div class="footer"><div class="sign">Сдал</div><div class="sign">Принял</div></div></body></html>`;
+                        const pw = window.open('', '_blank'); pw.document.write(h); pw.document.close(); pw.print();
+                    });
+                }
             }
 
             function initImportButtons() {
                 const btn = document.getElementById('importDevicesBtn'), inp = document.getElementById('importFileInput');
                 if (!btn || !inp) return;
-                btn.addEventListener('click', () => inp.click());
-                inp.addEventListener('change', async (e) => {
+
+                // Удаляем старые обработчики, заменяя оба элемента
+                const newBtn = btn.cloneNode(true);
+                btn.parentNode.replaceChild(newBtn, btn);
+                const newInp = inp.cloneNode(true);
+                inp.parentNode.replaceChild(newInp, inp);
+
+                newBtn.addEventListener('click', () => newInp.click());
+                newInp.addEventListener('change', async (e) => {
                     const file = e.target.files[0]; if (!file) return;
                     const reader = new FileReader();
                     reader.onload = async function (ev) {
