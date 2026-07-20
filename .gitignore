@@ -39,3 +39,7 @@ Thumbs.db
 
 # Prettier ignore (сам файл можно коммитить, но на всякий случай)
 # .prettierignore
+.prettierignore
+.prettierrc.json
+package-lock.json
+package.json

@@ -137,5 +137,24 @@
     "completed": false,
     "id": "rec_1784551787783",
     "createdAt": "2026-07-20T12:49:47.783Z"
+  },
+  {
+    "username": "admin",
+    "requestNumber": "8",
+    "importance": "2",
+    "status": "",
+    "serialNumber": "HON-2023-901",
+    "newSerialNumber": "",
+    "product": "Изделие К",
+    "techType": "Сканер штрих-кодов Honeywell 1950g",
+    "newTechType": "",
+    "location": "Склад, зона приёмки",
+    "newLocation": "",
+    "description": "",
+    "newSPRequisites": "",
+    "newLSIRequisites": "",
+    "completed": false,
+    "id": "rec_1784578763742",
+    "createdAt": "2026-07-20T20:19:23.742Z"
   }
 ]
