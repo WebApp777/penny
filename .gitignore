@@ -1,0 +1,41 @@
+# Зависимости (самое важное!)
+node_modules/
+
+# Артефакты сборки
+dist/
+build/
+out/
+
+# Файлы логов
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Временные файлы редактора
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db
+
+# Минифицированные и кэш-файлы
+*.min.js
+*.map
+.cache/
+
+# Конфигурации окружения (если будут)
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Prettier ignore (сам файл можно коммитить, но на всякий случай)
+# .prettierignore
