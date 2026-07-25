@@ -539,10 +539,10 @@
 
       .badge {
         display: inline-block;
-        padding: 0.2rem 0.6rem;
+        padding: 0.15rem 0.5rem;
         background: var(--badge-bg);
         color: var(--accent-hover);
-        border-radius: 16px;
+        border-radius: 12px;
         font-size: 0.75rem;
         font-weight: 500;
         margin-bottom: 0.5rem;
@@ -772,7 +772,7 @@
         border-radius: 10px;
         overflow-x: auto;
         overflow-y: auto;
-        max-height: 70vh;
+        max-height: calc(100vh - 220px);
         flex: 1;
         border: 1px solid var(--glass-border);
       }
@@ -871,7 +871,19 @@
       td:nth-child(6),
       td:nth-child(10) {
         white-space: normal;
+        word-break: break-word;
         max-width: 150px;
+        text-align: center;
+        vertical-align: middle;
+        max-height: 2.8em;
+        overflow: hidden;
+      }
+
+      td:nth-child(9) {
+        max-width: 120px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
       }
 
       .action-buttons {
@@ -1305,6 +1317,7 @@
         gap: 1rem;
         margin-bottom: 1rem;
       }
+
       .stat-card {
         background: rgba(124, 92, 252, 0.1);
         border: 1px solid var(--glass-border);
@@ -1662,7 +1675,6 @@
         <div class="page-content active" id="homePage">
           <div class="content-card">
             <span class="badge">🚀 Система учета</span>
-            <h1>Форма записи данных</h1>
             <div
               style="
                 display: flex;
@@ -1682,7 +1694,6 @@
                 📥 Экспорт CSV
               </button>
             </div>
-            <h2>Таблица записей</h2>
             <div class="filter-bar" id="recordsFilterBar">
               <select id="filterImportance">
                 <option value="">⚠️ Все важности</option>
@@ -1752,7 +1763,6 @@
         <div class="page-content" id="allDevicesPage">
           <div class="content-card">
             <span class="badge">⚙️ Администрирование</span>
-            <h1>Вся техника</h1>
             <div
               style="
                 display: flex;
@@ -1784,7 +1794,6 @@
                 📋 Акт
               </button>
             </div>
-            <h2>Список устройств</h2>
             <div
               class="filter-bar"
               id="devicesFilterBar"
@@ -2013,7 +2022,6 @@
       </main>
     </div>
 
-    <!-- Модальное окно добавления записи -->
     <div class="modal-overlay" id="addRecordModalOverlay">
       <div class="modal-content" style="max-width: 900px">
         <div class="modal-header">
@@ -2023,9 +2031,10 @@
           </button>
         </div>
         <form class="modal-form" id="addRecordForm">
-          <input type="hidden" id="recordDateTime" />
-          <input type="hidden" id="recordUser" />
-          <input type="hidden" id="recordRequest" />
+          <input type="hidden" id="recordDateTime" /><input
+            type="hidden"
+            id="recordUser"
+          /><input type="hidden" id="recordRequest" />
           <div class="form-group">
             <label for="recordImportance">⚠️ Важность</label
             ><select id="recordImportance">
@@ -2145,7 +2154,6 @@
       </div>
     </div>
 
-    <!-- Модальное окно добавления устройства -->
     <div class="modal-overlay" id="addDeviceModalOverlay">
       <div class="modal-content" style="max-width: 900px">
         <div class="modal-header">
@@ -2248,7 +2256,6 @@
       </div>
     </div>
 
-    <!-- Модальное окно редактирования записи -->
     <div class="modal-overlay" id="editModalOverlay">
       <div class="modal-content">
         <div class="modal-header">
@@ -2337,7 +2344,6 @@
       </div>
     </div>
 
-    <!-- Модальное окно редактирования устройства -->
     <div class="modal-overlay" id="editDeviceModalOverlay">
       <div class="modal-content">
         <div class="modal-header">
@@ -2400,7 +2406,6 @@
       </div>
     </div>
 
-    <!-- Модальное окно конструктора таблиц -->
     <div class="modal-overlay" id="createSectionModal">
       <div class="modal-content" style="max-width: 1000px; max-height: 90vh">
         <div class="modal-header">
@@ -2529,6 +2534,7 @@
         </div>
       </div>
     </div>
+
     <script>
       (function () {
         'use strict';
@@ -3354,7 +3360,7 @@
           let th = '';
           tc.forEach(c => (th += `<th>${c.label}</th>`));
           th += '<th>Действ.</th>';
-          div.innerHTML = `<div class="content-card"><span class="badge">📋 ${escapeHtml(section.createdBy)}</span><h1>${escapeHtml(section.label)}</h1>${flds.length ? `<form class="record-form custom-record-form">${fh}<button type="submit" class="submit-btn">Добавить</button></form>` : ''}${tc.length ? `<h2>Таблица</h2>${flts.length ? `<div class="filter-bar custom-filter-bar">${flh}</div>` : ''}<div class="table-container"><div class="table-scroll"><table><thead><tr>${th}</tr></thead><tbody class="custom-table-body" id="tbody_${section.id}"><tr><td colspan="${tc.length + 1}" class="no-records">Нет записей</td></tr></tbody></table></div></div>` : ''}</div>`;
+          div.innerHTML = `<div class="content-card"><span class="badge">📋 ${escapeHtml(section.createdBy)}</span><h1>${escapeHtml(section.label)}</h1>${flds.length ? `<form class="record-form custom-record-form">${fh}<button type="submit" class="submit-btn">Добавить</button></form>` : ''}${tc.length ? `<h2>Таблица</h2>${flts.length ? `<div class="filter-bar custom-filter-bar">${flh}</div>` : ''}<div class="table-container"><table><thead><tr>${th}</tr></thead><tbody class="custom-table-body" id="tbody_${section.id}"><tr><td colspan="${tc.length + 1}" class="no-records">Нет записей</td></tr></tbody></table></div>` : ''}</div>`;
           document.querySelector('.main-content').appendChild(div);
           const form = div.querySelector('.custom-record-form');
           if (form)
@@ -3505,30 +3511,40 @@
             if (this.value.trim()) this.dispatchEvent(new Event('input'));
           });
         }
-        setupSuggestions('recordSerial', 'serialSuggestions', d => {
-          document.getElementById('recordSerial').value = d.serialNumber;
-          document.getElementById('recordProduct').value = d.product;
-          document.getElementById('recordType').value = d.device;
-          document.getElementById('recordLocation').value = d.location || '';
-        });
-        setupSuggestions('recordNewSerial', 'newSerialSuggestions', d => {
-          document.getElementById('recordNewSerial').value = d.serialNumber;
-          document.getElementById('recordNewType').value = d.device;
-        });
 
-        const statusSelect = document.getElementById('recordStatus');
-        const nsf = document.getElementById('newSerialField'),
-          nlf = document.getElementById('newLocationField'),
-          ntf = document.getElementById('newTypeField'),
-          nspf = document.getElementById('newSPField'),
-          nlsif = document.getElementById('newLSIField');
-        statusSelect.addEventListener('change', function () {
-          nsf.classList.toggle('visible', this.value === 'replace');
-          nlf.classList.toggle('visible', this.value === 'move');
-          ntf.classList.toggle('visible', this.value === 'replace');
-          if (nspf) nspf.classList.toggle('visible', this.value === 'repair');
-          if (nlsif) nlsif.classList.toggle('visible', this.value === 'repair');
-        });
+        function setupAllSuggestions() {
+          setupSuggestions('recordSerial', 'serialSuggestions', d => {
+            document.getElementById('recordSerial').value = d.serialNumber;
+            document.getElementById('recordProduct').value = d.product;
+            document.getElementById('recordType').value = d.device;
+            document.getElementById('recordLocation').value = d.location || '';
+          });
+          setupSuggestions('recordNewSerial', 'newSerialSuggestions', d => {
+            document.getElementById('recordNewSerial').value = d.serialNumber;
+            document.getElementById('recordNewType').value = d.device;
+          });
+        }
+
+        function setupStatusChange() {
+          const statusSelect = document.getElementById('recordStatus');
+          if (!statusSelect) return;
+          statusSelect.addEventListener('change', function () {
+            const nsf = document.getElementById('newSerialField'),
+              nlf = document.getElementById('newLocationField'),
+              ntf = document.getElementById('newTypeField'),
+              nspf = document.getElementById('newSPField'),
+              nlsif = document.getElementById('newLSIField');
+            if (nsf) nsf.classList.toggle('visible', this.value === 'replace');
+            if (nlf) nlf.classList.toggle('visible', this.value === 'move');
+            if (ntf) ntf.classList.toggle('visible', this.value === 'replace');
+            if (nspf) nspf.classList.toggle('visible', this.value === 'repair');
+            if (nlsif)
+              nlsif.classList.toggle('visible', this.value === 'repair');
+          });
+        }
+
+        setupAllSuggestions();
+        setupStatusChange();
 
         function getSerialDisplay(r) {
           let d = escapeHtml(r.serialNumber);
@@ -3610,7 +3626,7 @@
           f.forEach(r => {
             const tr = document.createElement('tr');
             if (r.completed) tr.classList.add('completed');
-            tr.innerHTML = `<td>${new Date(r.createdAt).toLocaleDateString('ru-RU')}<br>${new Date(r.createdAt).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}</td><td>${escapeHtml(r.username)}</td><td>${escapeHtml(r.requestNumber || '-')}</td><td>${IMPORTANCE_LABELS[r.importance] || '2-Средняя'}</td><td>${STATUS_LABELS[r.status] || r.status || '-'}</td><td>${getSerialDisplay(r)}</td><td>${escapeHtml(r.product || '-')}</td><td>${getTypeDisplay(r)}</td><td>${getLocationDisplay(r)}</td><td style="max-width:150px;overflow:hidden;text-overflow:ellipsis" title="${escapeHtml(r.description || '')}">${escapeHtml(r.description || '-')}</td><td class="action-buttons">${r.completed ? `<span class="completed-time">✅ ${new Date(r.completedAt).toLocaleDateString('ru-RU')}<br>${new Date(r.completedAt).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}</span>` : `<button class="complete-btn" title="Выполнено">✅</button><button class="edit-btn" title="Редактировать">✏️</button><button class="delete-btn" title="Удалить">🗑️</button>`}</td>`;
+            tr.innerHTML = `<td>${new Date(r.createdAt).toLocaleDateString('ru-RU')}<br>${new Date(r.createdAt).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}</td><td>${escapeHtml(r.username)}</td><td>${escapeHtml(r.requestNumber || '-')}</td><td>${IMPORTANCE_LABELS[r.importance] || '2-Средняя'}</td><td>${STATUS_LABELS[r.status] || r.status || '-'}</td><td>${getSerialDisplay(r)}</td><td>${escapeHtml(r.product || '-')}</td><td>${getTypeDisplay(r)}</td><td>${getLocationDisplay(r)}</td><td title="${escapeHtml(r.description || '')}"><div style="max-width:150px;max-height:2.8em;overflow:hidden;text-align:center;margin:0 auto;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;">${escapeHtml(r.description || '-')}</div></td><td><div class="action-buttons">${r.completed ? `<span class="completed-time">✅ ${new Date(r.completedAt).toLocaleDateString('ru-RU')}<br>${new Date(r.completedAt).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}</span>` : `<button class="complete-btn" title="Выполнено">✅</button><button class="edit-btn" title="Редактировать">✏️</button><button class="delete-btn" title="Удалить">🗑️</button>`}</div></td>`;
             if (!r.completed) {
               tr.querySelector('.complete-btn')?.addEventListener('click', () =>
                 completeRecord(r.id)
@@ -3708,9 +3724,12 @@
         }
 
         function initAddRecordModal() {
-          document
-            .getElementById('openAddRecordModal')
-            ?.addEventListener('click', openAddRecordModal);
+          const openBtn = document.getElementById('openAddRecordModal');
+          if (openBtn) {
+            const newBtn = openBtn.cloneNode(true);
+            openBtn.parentNode.replaceChild(newBtn, openBtn);
+            newBtn.addEventListener('click', openAddRecordModal);
+          }
           document
             .getElementById('closeAddRecordModal')
             ?.addEventListener('click', closeAddRecordModal);
@@ -3722,14 +3741,17 @@
             ?.addEventListener('click', function (e) {
               if (e.target === this) closeAddRecordModal();
             });
-          document
-            .getElementById('addRecordForm')
-            ?.addEventListener('submit', async e => {
+
+          const form = document.getElementById('addRecordForm');
+          if (form) {
+            const newForm = form.cloneNode(true);
+            form.parentNode.replaceChild(newForm, form);
+            newForm.addEventListener('submit', async e => {
               e.preventDefault();
               const sn = document.getElementById('recordSerial').value.trim(),
                 pr = document.getElementById('recordProduct').value,
                 tt = document.getElementById('recordType').value.trim(),
-                st = statusSelect.value;
+                st = document.getElementById('recordStatus').value;
               const nsn =
                   st === 'replace'
                     ? document.getElementById('recordNewSerial').value.trim()
@@ -3835,11 +3857,16 @@
                   document.getElementById('recordNewSP').value = '';
                 if (document.getElementById('recordNewLSI'))
                   document.getElementById('recordNewLSI').value = '';
-                statusSelect.value = '';
+                document.getElementById('recordStatus').value = '';
                 document.getElementById('recordImportance').value = '2';
-                nsf.classList.remove('visible');
-                nlf.classList.remove('visible');
-                ntf.classList.remove('visible');
+                const nsf = document.getElementById('newSerialField'),
+                  nlf = document.getElementById('newLocationField'),
+                  ntf = document.getElementById('newTypeField'),
+                  nspf = document.getElementById('newSPField'),
+                  nlsif = document.getElementById('newLSIField');
+                if (nsf) nsf.classList.remove('visible');
+                if (nlf) nlf.classList.remove('visible');
+                if (ntf) ntf.classList.remove('visible');
                 if (nspf) nspf.classList.remove('visible');
                 if (nlsif) nlsif.classList.remove('visible');
                 updateDateTime();
@@ -3847,6 +3874,9 @@
                 closeAddRecordModal();
               }
             });
+            setupAllSuggestions();
+            setupStatusChange();
+          }
         }
 
         function openAddRecordModal() {
@@ -3867,9 +3897,12 @@
         }
 
         function initAddDeviceModal() {
-          document
-            .getElementById('openAddDeviceModal')
-            ?.addEventListener('click', openAddDeviceModal);
+          const openBtn = document.getElementById('openAddDeviceModal');
+          if (openBtn) {
+            const newBtn = openBtn.cloneNode(true);
+            openBtn.parentNode.replaceChild(newBtn, openBtn);
+            newBtn.addEventListener('click', openAddDeviceModal);
+          }
           document
             .getElementById('closeAddDeviceModal')
             ?.addEventListener('click', closeAddDeviceModal);
@@ -3881,9 +3914,12 @@
             ?.addEventListener('click', function (e) {
               if (e.target === this) closeAddDeviceModal();
             });
-          document
-            .getElementById('addDeviceForm')
-            ?.addEventListener('submit', async e => {
+
+          const form = document.getElementById('addDeviceForm');
+          if (form) {
+            const newForm = form.cloneNode(true);
+            form.parentNode.replaceChild(newForm, form);
+            newForm.addEventListener('submit', async e => {
               e.preventDefault();
               const p = document.getElementById('deviceProduct').value.trim(),
                 d = document.getElementById('deviceName').value.trim(),
@@ -3932,6 +3968,7 @@
                 closeAddDeviceModal();
               }
             });
+          }
         }
 
         function openAddDeviceModal() {
@@ -4322,7 +4359,7 @@
           }
           f.forEach(d => {
             const tr = document.createElement('tr');
-            tr.innerHTML = `<td>${escapeHtml(d.product)}</td><td>${escapeHtml(d.device)}</td><td>${escapeHtml(d.serialNumber)}</td><td>${escapeHtml(d.supplyBasis || '-')}</td><td>${escapeHtml(d.spRequisites || '-')}</td><td>${escapeHtml(d.lsiRequisites || '-')}</td><td>${escapeHtml(d.location || '-')}</td><td style="max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${escapeHtml(d.specs || '')}">${escapeHtml(d.specs || '-')}</td><td style="max-width:150px;overflow:hidden;text-overflow:ellipsis" title="${escapeHtml(d.notes || '')}">${escapeHtml(d.notes || '-')}</td><td>${new Date(d.createdAt).toLocaleDateString('ru-RU')}</td><td class="action-buttons"><button class="edit-btn" title="Редактировать">✏️</button><button class="delete-btn" title="Удалить">🗑️</button></td>`;
+            tr.innerHTML = `<td>${escapeHtml(d.product)}</td><td>${escapeHtml(d.device)}</td><td>${escapeHtml(d.serialNumber)}</td><td>${escapeHtml(d.supplyBasis || '-')}</td><td>${escapeHtml(d.spRequisites || '-')}</td><td>${escapeHtml(d.lsiRequisites || '-')}</td><td>${escapeHtml(d.location || '-')}</td><td style="max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${escapeHtml(d.specs || '')}">${escapeHtml(d.specs || '-')}</td><td style="max-width:150px;overflow:hidden;text-overflow:ellipsis" title="${escapeHtml(d.notes || '')}">${escapeHtml(d.notes || '-')}</td><td>${new Date(d.createdAt).toLocaleDateString('ru-RU')}</td><td><div class="action-buttons"><button class="edit-btn" title="Редактировать">✏️</button><button class="delete-btn" title="Удалить">🗑️</button></div></td>`;
             tr.querySelector('.delete-btn')?.addEventListener('click', () =>
               deleteDevice(d.id)
             );

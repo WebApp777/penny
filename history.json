@@ -107,5 +107,45 @@
     },
     "id": "hist_1784551479173",
     "timestamp": "2026-07-20T12:44:39.173Z"
+  },
+  {
+    "action": "create_device",
+    "serialNumber": "KY-2023-011",
+    "product": "n",
+    "device": "ECOSYS P2040dw",
+    "id": "hist_1784962073167",
+    "timestamp": "2026-07-25T06:47:53.167Z"
+  },
+  {
+    "action": "create_device",
+    "serialNumber": "KY-2023-011",
+    "product": "n",
+    "device": "ECOSYS P2040dw",
+    "id": "hist_1784962073169",
+    "timestamp": "2026-07-25T06:47:53.169Z"
+  },
+  {
+    "action": "create_device",
+    "serialNumber": "qwerty",
+    "product": "n",
+    "device": "Коммутатор",
+    "id": "hist_1784962104909",
+    "timestamp": "2026-07-25T06:48:24.909Z"
+  },
+  {
+    "action": "create_device",
+    "serialNumber": "qwerty",
+    "product": "n",
+    "device": "Коммутатор",
+    "id": "hist_1784962104911",
+    "timestamp": "2026-07-25T06:48:24.911Z"
+  },
+  {
+    "action": "create_device",
+    "serialNumber": "asdfg",
+    "product": "n",
+    "device": "Коммутатор",
+    "id": "hist_1784965628387",
+    "timestamp": "2026-07-25T07:47:08.387Z"
   }
 ]
