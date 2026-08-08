@@ -1020,36 +1020,24 @@
       }
 
       .modal-content {
-        background: rgba(15, 15, 35, 0.95);
+        background: var(--bg-secondary);
         border: 1px solid var(--glass-border);
         border-radius: 12px;
-        padding: 1.2rem;
-        width: 90%;
-        max-width: 750px;
-        max-height: 85vh;
+        padding: 1.5rem;
+        width: 95%;
+        max-width: 1200px;
+        max-height: 90vh;
         overflow-y: auto;
         box-shadow: var(--shadow);
         animation: modalSlideIn 0.3s ease;
       }
 
-      @supports (backdrop-filter: blur(20px)) {
-        .modal-content {
-          background: rgba(15, 15, 35, 0.7);
-          backdrop-filter: blur(20px);
-          -webkit-backdrop-filter: blur(20px);
-        }
+      [data-theme='dark'] .modal-content {
+        background: #1a1a2e;
       }
 
       [data-theme='light'] .modal-content {
-        background: rgba(255, 255, 255, 0.95);
-      }
-
-      @supports (backdrop-filter: blur(20px)) {
-        [data-theme='light'] .modal-content {
-          background: rgba(255, 255, 255, 0.7);
-          backdrop-filter: blur(20px);
-          -webkit-backdrop-filter: blur(20px);
-        }
+        background: #ffffff;
       }
 
       @keyframes modalSlideIn {
@@ -1067,26 +1055,30 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: 1.5rem;
+        margin-bottom: 1.2rem;
+        padding-bottom: 0.8rem;
+        border-bottom: 1px solid var(--glass-border);
       }
 
       .modal-header h2 {
         margin: 0;
         font-size: 1.2rem;
+        font-weight: 600;
       }
 
       .modal-close-btn {
-        width: 28px;
-        height: 28px;
+        width: 32px;
+        height: 32px;
         border: 1px solid var(--glass-border);
         background: var(--btn-bg);
-        border-radius: 6px;
+        border-radius: 8px;
         cursor: pointer;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 1rem;
+        font-size: 1.2rem;
         color: var(--text-secondary);
+        transition: all 0.2s;
       }
 
       .modal-close-btn:hover {
@@ -1097,27 +1089,107 @@
 
       .modal-form {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-        grid-gap: 0.6rem;
-        gap: 0.6rem;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 0.8rem;
+      }
+
+      .modal-form .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+      }
+
+      .modal-form label {
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: var(--text-secondary);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+
+      .modal-form input,
+      .modal-form textarea {
+        padding: 0.6rem 0.8rem;
+        background: var(--bg-input);
+        border: 1px solid var(--input-border);
+        border-radius: 8px;
+        color: var(--text-primary);
+        font-size: 0.85rem;
+        font-family: inherit;
+        transition: all 0.2s;
+      }
+
+      .modal-form select {
+        padding: 0.6rem 0.8rem;
+        background: var(--bg-input);
+        border: 1px solid var(--input-border);
+        border-radius: 8px;
+        color: var(--text-primary);
+        font-size: 0.85rem;
+        font-family: inherit;
+        transition: all 0.2s;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23a0a0b8' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 10px center;
+        padding-right: 30px;
+        cursor: pointer;
+      }
+
+      [data-theme='light'] .modal-form select {
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%235a5a7a' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+      }
+
+      .modal-form input:focus,
+      .modal-form select:focus,
+      .modal-form textarea:focus {
+        border-color: var(--accent);
+        box-shadow: 0 0 0 3px rgba(124, 92, 252, 0.1);
+        outline: none;
+      }
+
+      .modal-form input[readonly] {
+        opacity: 0.6;
+        cursor: not-allowed;
+      }
+
+      .modal-form .conditional-field {
+        display: none;
+      }
+
+      .modal-form .conditional-field.visible {
+        display: flex;
+      }
+
+      .modal-form input.error,
+      .modal-form select.error,
+      .modal-form textarea.error {
+        border-color: var(--danger) !important;
+        box-shadow: 0 0 0 3px rgba(255, 71, 87, 0.15) !important;
       }
 
       .modal-actions {
         grid-column: 1 / -1;
         display: flex;
-        gap: 0.6rem;
+        gap: 0.8rem;
         justify-content: flex-end;
-        margin-top: 0.6rem;
+        margin-top: 1rem;
+        padding-top: 0.8rem;
+        border-top: 1px solid var(--glass-border);
       }
 
       .modal-cancel-btn {
-        padding: 0.5rem 1rem;
+        padding: 0.6rem 1.2rem;
         background: var(--btn-bg);
         border: 1px solid var(--glass-border);
         color: var(--text-secondary);
-        border-radius: 6px;
+        border-radius: 8px;
         cursor: pointer;
-        font-size: 0.82rem;
+        font-size: 0.85rem;
+        font-weight: 500;
+        transition: all 0.2s;
       }
 
       .modal-cancel-btn:hover {
@@ -1126,19 +1198,21 @@
       }
 
       .modal-save-btn {
-        padding: 0.5rem 1rem;
+        padding: 0.6rem 1.5rem;
         background: var(--accent);
         color: white;
         border: none;
-        border-radius: 6px;
+        border-radius: 8px;
         cursor: pointer;
-        font-size: 0.82rem;
+        font-size: 0.85rem;
         font-weight: 600;
+        transition: all 0.2s;
       }
 
       .modal-save-btn:hover {
         background: var(--accent-hover);
         transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(124, 92, 252, 0.3);
       }
 
       .auth-container {
@@ -1706,10 +1780,9 @@
               </select>
               <select id="filterStatus">
                 <option value="">📌 Все статусы</option>
-                <option value="repair">Ремонт</option>
-                <option value="replace">Замена</option>
+                <option value="malfunction">Неисправность</option>
+                <option value="info">Информация</option>
                 <option value="move">Перемещение</option>
-                <option value="archive">Архив</option>
               </select>
               <select id="filterUser">
                 <option value="">👤 Все пользователи</option>
@@ -1887,8 +1960,8 @@
                 <div class="stat-value" id="statInProgress">0</div>
               </div>
               <div class="stat-card">
-                <h3>🔄 Замен</h3>
-                <div class="stat-value" id="statReplacements">0</div>
+                <h3>🔧 Неисправностей</h3>
+                <div class="stat-value" id="statMalfunctions">0</div>
               </div>
               <div class="stat-card">
                 <h3>📍 Перемещений</h3>
@@ -1905,17 +1978,14 @@
                     <th>Изделие</th>
                     <th>Кол-во</th>
                     <th>Заявок</th>
-                    <th>Замен</th>
+                    <th>Неисправностей</th>
                     <th>Перемещений</th>
-                    <th>Ремонтов</th>
-                    <th>В архиве</th>
-                    <th>Время ремонта</th>
-                    <th>% работоспособности</th>
+                    <th>Информации</th>
                   </tr>
                 </thead>
                 <tbody id="statsTableBody">
                   <tr>
-                    <td colspan="9" class="no-records">Нет данных</td>
+                    <td colspan="6" class="no-records">Нет данных</td>
                   </tr>
                 </tbody>
               </table>
@@ -1931,12 +2001,11 @@
                     <th>Заявок</th>
                     <th>Выполнено</th>
                     <th>В работе</th>
-                    <th>Среднее время</th>
                   </tr>
                 </thead>
                 <tbody id="statusStatsTableBody">
                   <tr>
-                    <td colspan="5" class="no-records">Нет данных</td>
+                    <td colspan="4" class="no-records">Нет данных</td>
                   </tr>
                 </tbody>
               </table>
@@ -1953,15 +2022,14 @@
                     <th>Выполнено</th>
                     <th>В работе</th>
                     <th>%</th>
-                    <th>Замен</th>
+                    <th>Неисправностей</th>
                     <th>Перемещений</th>
-                    <th>Ремонтов</th>
-                    <th>Архивов</th>
+                    <th>Информации</th>
                   </tr>
                 </thead>
                 <tbody id="userStatsTableBody">
                   <tr>
-                    <td colspan="9" class="no-records">Нет данных</td>
+                    <td colspan="8" class="no-records">Нет данных</td>
                   </tr>
                 </tbody>
               </table>
@@ -2023,7 +2091,7 @@
     </div>
 
     <div class="modal-overlay" id="addRecordModalOverlay">
-      <div class="modal-content" style="max-width: 900px">
+      <div class="modal-content" style="max-width: 1200px">
         <div class="modal-header">
           <h2>Добавить запись</h2>
           <button class="modal-close-btn" id="closeAddRecordModal">
@@ -2047,10 +2115,9 @@
             <label for="recordStatus">📌 Статус</label
             ><select id="recordStatus">
               <option value="">Выберите статус...</option>
-              <option value="repair">Ремонт</option>
-              <option value="replace">Замена</option>
+              <option value="malfunction">Неисправность</option>
+              <option value="info">Информация</option>
               <option value="move">Перемещение</option>
-              <option value="archive">Архив</option>
             </select>
           </div>
           <div class="form-group" style="position: relative">
@@ -2062,20 +2129,6 @@
               autocomplete="off"
             />
             <div class="suggestions-container" id="serialSuggestions"></div>
-          </div>
-          <div
-            class="form-group conditional-field"
-            id="newSerialField"
-            style="position: relative"
-          >
-            <label for="recordNewSerial">🆕 Новый серийный номер *</label
-            ><input
-              type="text"
-              id="recordNewSerial"
-              placeholder="Введите новый серийный номер"
-              autocomplete="off"
-            />
-            <div class="suggestions-container" id="newSerialSuggestions"></div>
           </div>
           <div class="form-group">
             <label for="recordProduct">📦 Изделие *</label
@@ -2089,14 +2142,6 @@
               type="text"
               id="recordType"
               placeholder="Введите тип техники"
-            />
-          </div>
-          <div class="form-group conditional-field" id="newTypeField">
-            <label for="recordNewType">🆕 Новый тип техники *</label
-            ><input
-              type="text"
-              id="recordNewType"
-              placeholder="Введите новый тип техники"
             />
           </div>
           <div class="form-group">
@@ -2113,6 +2158,73 @@
               type="text"
               id="recordNewLocation"
               placeholder="Введите новое расположение"
+            />
+          </div>
+          <div class="form-group conditional-field" id="malfunctionDateField">
+            <label for="recordMalfunctionDate"
+              >📅 Дата и время обнаружения *</label
+            ><input type="datetime-local" id="recordMalfunctionDate" />
+          </div>
+          <div class="form-group conditional-field" id="brokenLocationField">
+            <label for="recordBrokenLocation">🔧 Куда отнесли сломанное</label
+            ><input
+              type="text"
+              id="recordBrokenLocation"
+              placeholder="Куда отнесли"
+            />
+          </div>
+          <div class="form-group conditional-field" id="recoveryDateField">
+            <label for="recordRecoveryDate"
+              >📅 Дата и время оперативного восстановления</label
+            ><input type="datetime-local" id="recordRecoveryDate" />
+          </div>
+          <div
+            class="form-group conditional-field"
+            id="replaceTitleField"
+            style="grid-column: 1/-1; display: none"
+          >
+            <h3 style="margin: 0.5rem 0; color: var(--accent)">
+              🔄 Выдано на подмену
+            </h3>
+          </div>
+          <div
+            class="form-group conditional-field"
+            id="replaceSerialField"
+            style="position: relative"
+          >
+            <label for="recordReplaceSerial">🔢 Серийный номер</label
+            ><input
+              type="text"
+              id="recordReplaceSerial"
+              placeholder="Серийный номер подменного"
+              autocomplete="off"
+            />
+            <div
+              class="suggestions-container"
+              id="replaceSerialSuggestions"
+            ></div>
+          </div>
+          <div class="form-group conditional-field" id="replaceProductField">
+            <label for="recordReplaceProduct">📦 Изделие</label
+            ><select id="recordReplaceProduct">
+              <option value="">Выберите изделие...</option>
+            </select>
+          </div>
+          <div class="form-group conditional-field" id="replaceTypeField">
+            <label for="recordReplaceType">⚙️ Тип техники</label
+            ><input
+              type="text"
+              id="recordReplaceType"
+              placeholder="Тип техники подменного"
+            />
+          </div>
+          <div class="form-group conditional-field" id="replaceLocationField">
+            <label for="recordReplaceLocation"
+              >📍 Куда поставили на подмену</label
+            ><input
+              type="text"
+              id="recordReplaceLocation"
+              placeholder="Куда поставили"
             />
           </div>
           <div class="form-group conditional-field" id="newSPField">
@@ -2132,7 +2244,7 @@
             />
           </div>
           <div class="form-group" style="grid-column: 1/-1">
-            <label for="recordDescription">📝 Описание</label
+            <label for="recordDescription">📝 Описание *</label
             ><textarea
               id="recordDescription"
               placeholder="Введите описание"
@@ -2279,19 +2391,14 @@
             <label for="editStatus">📌 Статус</label
             ><select id="editStatus">
               <option value="">Выберите...</option>
-              <option value="repair">Ремонт</option>
-              <option value="replace">Замена</option>
+              <option value="malfunction">Неисправность</option>
+              <option value="info">Информация</option>
               <option value="move">Перемещение</option>
-              <option value="archive">Архив</option>
             </select>
           </div>
           <div class="form-group">
             <label for="editSerialNumber">🔢 Серийный номер</label
             ><input type="text" id="editSerialNumber" />
-          </div>
-          <div class="form-group" id="editNewSerialGroup" style="display: none">
-            <label for="editNewSerialNumber">🆕 Новый серийный номер</label
-            ><input type="text" id="editNewSerialNumber" />
           </div>
           <div class="form-group">
             <label for="editProduct">📦 Изделие</label
@@ -2300,14 +2407,6 @@
           <div class="form-group">
             <label for="editTechType">⚙️ Тип техники</label
             ><input type="text" id="editTechType" />
-          </div>
-          <div
-            class="form-group"
-            id="editNewTechTypeGroup"
-            style="display: none"
-          >
-            <label for="editNewTechType">🆕 Новый тип техники</label
-            ><input type="text" id="editNewTechType" />
           </div>
           <div class="form-group">
             <label for="editLocation">📍 Расположение</label
@@ -2320,6 +2419,46 @@
           >
             <label for="editNewLocation">🔄 Новое расположение</label
             ><input type="text" id="editNewLocation" />
+          </div>
+          <div
+            class="form-group"
+            id="editMalfunctionGroup"
+            style="display: none; flex-direction: column; gap: 0.6rem"
+          >
+            <div class="form-group">
+              <label for="editMalfunctionDate"
+                >📅 Дата и время обнаружения</label
+              ><input type="datetime-local" id="editMalfunctionDate" />
+            </div>
+            <div class="form-group">
+              <label for="editBrokenLocation">🔧 Куда отнесли сломанное</label
+              ><input type="text" id="editBrokenLocation" />
+            </div>
+            <div class="form-group">
+              <label for="editRecoveryDate"
+                >📅 Дата и время оперативного восстановления</label
+              ><input type="datetime-local" id="editRecoveryDate" />
+            </div>
+            <div style="grid-column: 1/-1; margin-top: 0.5rem">
+              <h3 style="margin-bottom: 0.5rem">🔄 Выдано на подмену</h3>
+            </div>
+            <div class="form-group">
+              <label for="editReplaceSerial">🔢 Серийный номер</label
+              ><input type="text" id="editReplaceSerial" />
+            </div>
+            <div class="form-group">
+              <label for="editReplaceProduct">📦 Изделие</label
+              ><input type="text" id="editReplaceProduct" />
+            </div>
+            <div class="form-group">
+              <label for="editReplaceType">⚙️ Тип техники</label
+              ><input type="text" id="editReplaceType" />
+            </div>
+            <div class="form-group">
+              <label for="editReplaceLocation"
+                >📍 Куда поставили на подмену</label
+              ><input type="text" id="editReplaceLocation" />
+            </div>
           </div>
           <div class="form-group" id="editNewSPGroup" style="display: none">
             <label for="editNewSP">📄 Новые реквизиты СП</label
@@ -2549,10 +2688,9 @@
         };
 
         const STATUS_LABELS = {
-          repair: 'Ремонт',
-          replace: 'Замена',
+          malfunction: 'Неисправность',
+          info: 'Информация',
           move: 'Перемещение',
-          archive: 'Архив',
         };
         const IMPORTANCE_LABELS = {
           1: '1 - Низкая',
@@ -2738,6 +2876,18 @@
               select.appendChild(o);
             });
             select.value = cv;
+          }
+          const rp = document.getElementById('recordReplaceProduct');
+          if (rp) {
+            const cv = rp.value;
+            rp.innerHTML = '<option value="">Выберите изделие...</option>';
+            [...new Set(devices.map(d => d.product))].sort().forEach(p => {
+              const o = document.createElement('option');
+              o.value = p;
+              o.textContent = p;
+              rp.appendChild(o);
+            });
+            rp.value = cv;
           }
           const fp = document.getElementById('filterProduct');
           if (fp) {
@@ -3519,27 +3669,66 @@
             document.getElementById('recordType').value = d.device;
             document.getElementById('recordLocation').value = d.location || '';
           });
-          setupSuggestions('recordNewSerial', 'newSerialSuggestions', d => {
-            document.getElementById('recordNewSerial').value = d.serialNumber;
-            document.getElementById('recordNewType').value = d.device;
-          });
+          setupSuggestions(
+            'recordReplaceSerial',
+            'replaceSerialSuggestions',
+            d => {
+              document.getElementById('recordReplaceSerial').value =
+                d.serialNumber;
+              document.getElementById('recordReplaceProduct').value = d.product;
+              document.getElementById('recordReplaceType').value = d.device;
+            }
+          );
         }
 
         function setupStatusChange() {
           const statusSelect = document.getElementById('recordStatus');
           if (!statusSelect) return;
+
+          const allConditionalFields = [
+            'newLocationField',
+            'newSPField',
+            'newLSIField',
+            'malfunctionDateField',
+            'brokenLocationField',
+            'recoveryDateField',
+            'replaceSerialField',
+            'replaceProductField',
+            'replaceTypeField',
+            'replaceLocationField',
+          ];
+
           statusSelect.addEventListener('change', function () {
-            const nsf = document.getElementById('newSerialField'),
-              nlf = document.getElementById('newLocationField'),
-              ntf = document.getElementById('newTypeField'),
-              nspf = document.getElementById('newSPField'),
-              nlsif = document.getElementById('newLSIField');
-            if (nsf) nsf.classList.toggle('visible', this.value === 'replace');
-            if (nlf) nlf.classList.toggle('visible', this.value === 'move');
-            if (ntf) ntf.classList.toggle('visible', this.value === 'replace');
-            if (nspf) nspf.classList.toggle('visible', this.value === 'repair');
-            if (nlsif)
-              nlsif.classList.toggle('visible', this.value === 'repair');
+            const st = this.value;
+
+            allConditionalFields.forEach(id => {
+              const el = document.getElementById(id);
+              if (el) el.classList.remove('visible');
+            });
+            const replaceTitle = document.getElementById('replaceTitleField');
+            if (replaceTitle) replaceTitle.style.display = 'none';
+
+            if (st === 'move') {
+              document
+                .getElementById('newLocationField')
+                ?.classList.add('visible');
+            }
+            if (st === 'malfunction') {
+              [
+                'newSPField',
+                'newLSIField',
+                'malfunctionDateField',
+                'brokenLocationField',
+                'recoveryDateField',
+                'replaceSerialField',
+                'replaceProductField',
+                'replaceTypeField',
+                'replaceLocationField',
+              ].forEach(id => {
+                document.getElementById(id)?.classList.add('visible');
+              });
+              if (replaceTitle) replaceTitle.style.display = 'block';
+            }
           });
         }
 
@@ -3547,16 +3736,10 @@
         setupStatusChange();
 
         function getSerialDisplay(r) {
-          let d = escapeHtml(r.serialNumber);
-          if (r.status === 'replace' && r.newSerialNumber)
-            d += ` → <span style="color:var(--accent);">${escapeHtml(r.newSerialNumber)}</span>`;
-          return d;
+          return escapeHtml(r.serialNumber);
         }
         function getTypeDisplay(r) {
-          let d = escapeHtml(r.techType || '-');
-          if (r.status === 'replace' && r.newTechType)
-            d += ` → <span style="color:var(--accent);">${escapeHtml(r.newTechType)}</span>`;
-          return d;
+          return escapeHtml(r.techType || '-');
         }
         function getLocationDisplay(r) {
           let d = escapeHtml(r.location || '-');
@@ -3625,19 +3808,22 @@
           }
           f.forEach(r => {
             const tr = document.createElement('tr');
-            if (r.completed) tr.classList.add('completed');
-            tr.innerHTML = `<td>${new Date(r.createdAt).toLocaleDateString('ru-RU')}<br>${new Date(r.createdAt).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}</td><td>${escapeHtml(r.username)}</td><td>${escapeHtml(r.requestNumber || '-')}</td><td>${IMPORTANCE_LABELS[r.importance] || '2-Средняя'}</td><td>${STATUS_LABELS[r.status] || r.status || '-'}</td><td>${getSerialDisplay(r)}</td><td>${escapeHtml(r.product || '-')}</td><td>${getTypeDisplay(r)}</td><td>${getLocationDisplay(r)}</td><td title="${escapeHtml(r.description || '')}"><div style="max-width:150px;max-height:2.8em;overflow:hidden;text-align:center;margin:0 auto;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;">${escapeHtml(r.description || '-')}</div></td><td><div class="action-buttons">${r.completed ? `<span class="completed-time">✅ ${new Date(r.completedAt).toLocaleDateString('ru-RU')}<br>${new Date(r.completedAt).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}</span>` : `<button class="complete-btn" title="Выполнено">✅</button><button class="edit-btn" title="Редактировать">✏️</button><button class="delete-btn" title="Удалить">🗑️</button>`}</div></td>`;
+            if (r.completed || r.status === 'info' || r.status === 'move')
+              tr.classList.add('completed');
+            if (r.status === 'malfunction' && !r.completed)
+              tr.style.background = 'rgba(255,71,87,0.08)';
+            tr.innerHTML = `<td>${new Date(r.createdAt).toLocaleDateString('ru-RU')}<br>${new Date(r.createdAt).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}</td><td>${escapeHtml(r.username)}</td><td>${escapeHtml(r.requestNumber || '-')}</td><td>${IMPORTANCE_LABELS[r.importance] || '2-Средняя'}</td><td>${STATUS_LABELS[r.status] || r.status || '-'}</td><td>${getSerialDisplay(r)}</td><td>${escapeHtml(r.product || '-')}</td><td>${getTypeDisplay(r)}</td><td>${getLocationDisplay(r)}</td><td title="${escapeHtml(r.description || '')}"><div style="max-width:150px;max-height:2.8em;overflow:hidden;text-align:center;margin:0 auto;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;">${escapeHtml(r.description || '-')}</div></td><td><div class="action-buttons">${r.completed ? `<span class="completed-time">✅ ${new Date(r.completedAt || r.createdAt).toLocaleDateString('ru-RU')}<br>${new Date(r.completedAt || r.createdAt).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}</span>` : `<button class="complete-btn" title="Выполнено">✅</button>`}<button class="edit-btn" title="Редактировать">✏️</button><button class="delete-btn" title="Удалить">🗑️</button></div></td>`;
             if (!r.completed) {
               tr.querySelector('.complete-btn')?.addEventListener('click', () =>
                 completeRecord(r.id)
               );
-              tr.querySelector('.edit-btn')?.addEventListener('click', () =>
-                openEditModal(r.id)
-              );
-              tr.querySelector('.delete-btn')?.addEventListener('click', () =>
-                deleteRecord(r.id)
-              );
             }
+            tr.querySelector('.edit-btn')?.addEventListener('click', () =>
+              openEditModal(r.id)
+            );
+            tr.querySelector('.delete-btn')?.addEventListener('click', () =>
+              deleteRecord(r.id)
+            );
             tb.appendChild(tr);
           });
           updateUserFilter();
@@ -3668,13 +3854,9 @@
         async function completeRecord(id) {
           const rec = records.find(r => r.id === id);
           if (!rec) return;
-          if (rec.status === 'repair') {
+          if (rec.status === 'malfunction') {
             const hasSP = rec.newSPRequisites?.trim(),
               hasLSI = rec.newLSIRequisites?.trim();
-            if (!hasSP || !hasLSI) {
-              if (!confirm('Не заполнены реквизиты.\nВсё равно выполнить?'))
-                return;
-            }
             if (hasSP || hasLSI) {
               const dev = devices.find(
                 d => d.serialNumber === rec.serialNumber
@@ -3720,7 +3902,6 @@
           } catch (e) {}
           renderRecordsTable();
           renderStatistics();
-          if (rec.status === 'repair') renderDevicesTable();
         }
 
         function initAddRecordModal() {
@@ -3748,67 +3929,210 @@
             form.parentNode.replaceChild(newForm, form);
             newForm.addEventListener('submit', async e => {
               e.preventDefault();
-              const sn = document.getElementById('recordSerial').value.trim(),
-                pr = document.getElementById('recordProduct').value,
-                tt = document.getElementById('recordType').value.trim(),
-                st = document.getElementById('recordStatus').value;
-              const nsn =
-                  st === 'replace'
-                    ? document.getElementById('recordNewSerial').value.trim()
-                    : '',
-                nl =
-                  st === 'move'
-                    ? document.getElementById('recordNewLocation').value.trim()
-                    : '';
-              if (!sn || !pr || !tt) {
-                alert('Заполните обязательные поля');
+
+              // Снимаем подсветку со всех полей
+              newForm
+                .querySelectorAll('.error')
+                .forEach(el => el.classList.remove('error'));
+
+              const st = document.getElementById('recordStatus').value;
+              const sn = document.getElementById('recordSerial').value.trim();
+              const pr = document.getElementById('recordProduct').value;
+              const tt = document.getElementById('recordType').value.trim();
+              const loc = document
+                .getElementById('recordLocation')
+                .value.trim();
+              const nl =
+                st === 'move'
+                  ? document.getElementById('recordNewLocation').value.trim()
+                  : '';
+              const desc = document
+                .getElementById('recordDescription')
+                .value.trim();
+              const sp =
+                st === 'malfunction'
+                  ? document.getElementById('recordNewSP')?.value.trim() || ''
+                  : '';
+              const lsi =
+                st === 'malfunction'
+                  ? document.getElementById('recordNewLSI')?.value.trim() || ''
+                  : '';
+              const mDate =
+                st === 'malfunction'
+                  ? document.getElementById('recordMalfunctionDate')?.value ||
+                    ''
+                  : '';
+              const brokenLoc =
+                st === 'malfunction'
+                  ? document
+                      .getElementById('recordBrokenLocation')
+                      ?.value.trim() || ''
+                  : '';
+              const recDate =
+                st === 'malfunction'
+                  ? document.getElementById('recordRecoveryDate')?.value || ''
+                  : '';
+              const repSN =
+                st === 'malfunction'
+                  ? document
+                      .getElementById('recordReplaceSerial')
+                      ?.value.trim() || ''
+                  : '';
+              const repPr =
+                st === 'malfunction'
+                  ? document.getElementById('recordReplaceProduct')?.value || ''
+                  : '';
+              const repTT =
+                st === 'malfunction'
+                  ? document
+                      .getElementById('recordReplaceType')
+                      ?.value.trim() || ''
+                  : '';
+              const repLoc =
+                st === 'malfunction'
+                  ? document
+                      .getElementById('recordReplaceLocation')
+                      ?.value.trim() || ''
+                  : '';
+
+              if (!st) {
+                alert('Выберите статус');
                 return;
               }
-              if (st === 'replace' && !nsn) {
-                alert('Укажите новый серийный номер');
-                return;
+
+              // Проверка обязательных полей
+              let hasError = false;
+
+              if (st === 'move') {
+                if (!sn) {
+                  document
+                    .getElementById('recordSerial')
+                    .classList.add('error');
+                  hasError = true;
+                }
+                if (!pr) {
+                  document
+                    .getElementById('recordProduct')
+                    .classList.add('error');
+                  hasError = true;
+                }
+                if (!tt) {
+                  document.getElementById('recordType').classList.add('error');
+                  hasError = true;
+                }
+                if (!nl) {
+                  document
+                    .getElementById('recordNewLocation')
+                    .classList.add('error');
+                  hasError = true;
+                }
+                if (hasError) {
+                  alert('Заполните обязательные поля (выделены красным)');
+                  return;
+                }
+                if (!devices.some(d => d.serialNumber === sn)) {
+                  alert(`Серийный номер "${sn}" не найден в базе!`);
+                  return;
+                }
+                const di = devices.findIndex(d => d.serialNumber === sn);
+                if (di >= 0) {
+                  try {
+                    const r = await fetch(API.devices, {
+                      method: 'PUT',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ serialNumber: sn, location: nl }),
+                    });
+                    if (r.ok) {
+                      const result = await r.json();
+                      devices[di] = result.device;
+                    }
+                  } catch (e) {}
+                }
               }
-              if (
-                st === 'replace' &&
-                !document.getElementById('recordNewType').value.trim()
-              ) {
-                alert('Укажите новый тип техники');
-                return;
-              }
-              if (st === 'move' && !nl) {
-                alert('Укажите новое расположение');
-                return;
-              }
-              const di = devices.findIndex(d => d.serialNumber === sn);
-              if (di === -1) {
-                alert(`Серийный номер "${sn}" не найден в базе!`);
-                return;
-              }
-              if (
-                st === 'replace' &&
-                nsn &&
-                !devices.some(d => d.serialNumber === nsn)
-              ) {
-                alert(`Новый серийный номер "${nsn}" не найден в базе!`);
-                return;
-              }
-              if (st === 'move' && nl) {
-                try {
-                  const du = devices[di];
-                  const r = await fetch(API.devices, {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                      serialNumber: du.serialNumber,
-                      location: nl,
-                    }),
-                  });
-                  if (r.ok) {
-                    const result = await r.json();
-                    devices[di] = result.device;
+
+              if (st === 'malfunction') {
+                if (!mDate) {
+                  document
+                    .getElementById('recordMalfunctionDate')
+                    .classList.add('error');
+                  hasError = true;
+                }
+                if (!sn) {
+                  document
+                    .getElementById('recordSerial')
+                    .classList.add('error');
+                  hasError = true;
+                }
+                if (!pr) {
+                  document
+                    .getElementById('recordProduct')
+                    .classList.add('error');
+                  hasError = true;
+                }
+                if (!tt) {
+                  document.getElementById('recordType').classList.add('error');
+                  hasError = true;
+                }
+                if (!desc) {
+                  document
+                    .getElementById('recordDescription')
+                    .classList.add('error');
+                  hasError = true;
+                }
+                if (hasError) {
+                  alert('Заполните обязательные поля (выделены красным)');
+                  return;
+                }
+                if (!devices.some(d => d.serialNumber === sn)) {
+                  alert(`Серийный номер "${sn}" не найден в базе!`);
+                  return;
+                }
+                if (brokenLoc) {
+                  const di = devices.findIndex(d => d.serialNumber === sn);
+                  if (di >= 0) {
+                    try {
+                      const r = await fetch(API.devices, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                          serialNumber: sn,
+                          location: brokenLoc,
+                        }),
+                      });
+                      if (r.ok) {
+                        const result = await r.json();
+                        devices[di] = result.device;
+                      }
+                    } catch (e) {}
                   }
-                } catch (e) {}
+                }
+                if (repSN && repLoc) {
+                  if (!devices.some(d => d.serialNumber === repSN)) {
+                    alert(
+                      `Серийный номер подменного устройства "${repSN}" не найден в базе!`
+                    );
+                    return;
+                  }
+                  const rdi = devices.findIndex(d => d.serialNumber === repSN);
+                  if (rdi >= 0) {
+                    try {
+                      const r = await fetch(API.devices, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                          serialNumber: repSN,
+                          location: repLoc,
+                        }),
+                      });
+                      if (r.ok) {
+                        const result = await r.json();
+                        devices[rdi] = result.device;
+                      }
+                    } catch (e) {}
+                  }
+                }
               }
+
               const data = {
                 username: currentUser,
                 requestNumber: document
@@ -3817,60 +4141,74 @@
                 importance: document.getElementById('recordImportance').value,
                 status: st,
                 serialNumber: sn,
-                newSerialNumber: nsn,
+                newSerialNumber: '',
                 product: pr,
                 techType: tt,
-                newTechType:
-                  st === 'replace'
-                    ? document.getElementById('recordNewType').value.trim()
-                    : '',
-                location: document
-                  .getElementById('recordLocation')
-                  .value.trim(),
+                newTechType: '',
+                location: loc,
                 newLocation: nl,
-                description: document
-                  .getElementById('recordDescription')
-                  .value.trim(),
-                newSPRequisites:
-                  st === 'repair'
-                    ? document.getElementById('recordNewSP')?.value.trim() || ''
-                    : '',
-                newLSIRequisites:
-                  st === 'repair'
-                    ? document.getElementById('recordNewLSI')?.value.trim() ||
-                      ''
-                    : '',
-                completed: false,
+                description: desc,
+                newSPRequisites: sp,
+                newLSIRequisites: lsi,
+                malfunctionDate: mDate,
+                brokenLocation: brokenLoc,
+                recoveryDate: recDate,
+                replaceSerial: repSN,
+                replaceProduct: repPr,
+                replaceType: repTT,
+                replaceLocation: repLoc,
+                completed: st === 'info' || st === 'move',
               };
+
               if (await addRecord(data)) {
                 document.getElementById('recordSerial').value = '';
-                document.getElementById('recordNewSerial').value = '';
                 document.getElementById('recordProduct').value = '';
                 document.getElementById('recordType').value = '';
-                document.getElementById('recordNewType').value = '';
                 document.getElementById('recordLocation').value = '';
                 document.getElementById('recordNewLocation').value = '';
+                document.getElementById('recordDescription').value = '';
                 document.getElementById('recordRequest').value =
                   getNextRequestNumber();
-                document.getElementById('recordDescription').value = '';
+                document.getElementById('recordStatus').value = '';
+                document.getElementById('recordImportance').value = '2';
                 if (document.getElementById('recordNewSP'))
                   document.getElementById('recordNewSP').value = '';
                 if (document.getElementById('recordNewLSI'))
                   document.getElementById('recordNewLSI').value = '';
-                document.getElementById('recordStatus').value = '';
-                document.getElementById('recordImportance').value = '2';
-                const nsf = document.getElementById('newSerialField'),
-                  nlf = document.getElementById('newLocationField'),
-                  ntf = document.getElementById('newTypeField'),
-                  nspf = document.getElementById('newSPField'),
-                  nlsif = document.getElementById('newLSIField');
-                if (nsf) nsf.classList.remove('visible');
-                if (nlf) nlf.classList.remove('visible');
-                if (ntf) ntf.classList.remove('visible');
-                if (nspf) nspf.classList.remove('visible');
-                if (nlsif) nlsif.classList.remove('visible');
+                if (document.getElementById('recordMalfunctionDate'))
+                  document.getElementById('recordMalfunctionDate').value = '';
+                if (document.getElementById('recordBrokenLocation'))
+                  document.getElementById('recordBrokenLocation').value = '';
+                if (document.getElementById('recordRecoveryDate'))
+                  document.getElementById('recordRecoveryDate').value = '';
+                if (document.getElementById('recordReplaceSerial'))
+                  document.getElementById('recordReplaceSerial').value = '';
+                if (document.getElementById('recordReplaceProduct'))
+                  document.getElementById('recordReplaceProduct').value = '';
+                if (document.getElementById('recordReplaceType'))
+                  document.getElementById('recordReplaceType').value = '';
+                if (document.getElementById('recordReplaceLocation'))
+                  document.getElementById('recordReplaceLocation').value = '';
+                [
+                  'newLocationField',
+                  'newSPField',
+                  'newLSIField',
+                  'malfunctionDateField',
+                  'brokenLocationField',
+                  'recoveryDateField',
+                  'replaceSerialField',
+                  'replaceProductField',
+                  'replaceTypeField',
+                  'replaceLocationField',
+                ].forEach(id => {
+                  const el = document.getElementById(id);
+                  if (el) el.classList.remove('visible');
+                });
+                const replaceTitle =
+                  document.getElementById('replaceTitleField');
+                if (replaceTitle) replaceTitle.style.display = 'none';
                 updateDateTime();
-                if (st === 'move') renderDevicesTable();
+                if (st === 'move' || st === 'malfunction') renderDevicesTable();
                 closeAddRecordModal();
               }
             });
@@ -4022,23 +4360,28 @@
           const rec = records.find(r => r.id === id);
           if (!rec) return;
           editingRecordId = id;
-          const sv = (id, v) => {
-            const el = document.getElementById(id);
-            if (el) el.value = v;
+          const sv = (elId, v) => {
+            const el = document.getElementById(elId);
+            if (el) el.value = v || '';
           };
           sv('editRequestNumber', rec.requestNumber || '');
           sv('editImportance', rec.importance || '2');
           sv('editStatus', rec.status || '');
           sv('editSerialNumber', rec.serialNumber || '');
-          sv('editNewSerialNumber', rec.newSerialNumber || '');
           sv('editProduct', rec.product || '');
           sv('editTechType', rec.techType || '');
-          sv('editNewTechType', rec.newTechType || '');
           sv('editLocation', rec.location || '');
           sv('editNewLocation', rec.newLocation || '');
           sv('editDescription', rec.description || '');
           sv('editNewSP', rec.newSPRequisites || '');
           sv('editNewLSI', rec.newLSIRequisites || '');
+          sv('editMalfunctionDate', rec.malfunctionDate || '');
+          sv('editBrokenLocation', rec.brokenLocation || '');
+          sv('editRecoveryDate', rec.recoveryDate || '');
+          sv('editReplaceSerial', rec.replaceSerial || '');
+          sv('editReplaceProduct', rec.replaceProduct || '');
+          sv('editReplaceType', rec.replaceType || '');
+          sv('editReplaceLocation', rec.replaceLocation || '');
           updateEditModalConditionalFields();
           document.getElementById('editModalOverlay').classList.add('active');
         }
@@ -4050,29 +4393,20 @@
         }
         function updateEditModalConditionalFields() {
           const s = document.getElementById('editStatus').value;
-          document.getElementById('editNewSerialGroup').style.display =
-            s === 'replace' ? 'block' : 'none';
-          document.getElementById('editNewTechTypeGroup').style.display =
-            s === 'replace' ? 'block' : 'none';
           document.getElementById('editNewLocationGroup').style.display =
             s === 'move' ? 'block' : 'none';
+          document.getElementById('editMalfunctionGroup').style.display =
+            s === 'malfunction' ? 'flex' : 'none';
           document.getElementById('editNewSPGroup').style.display =
-            s === 'repair' ? 'block' : 'none';
+            s === 'malfunction' ? 'block' : 'none';
           document.getElementById('editNewLSIGroup').style.display =
-            s === 'repair' ? 'block' : 'none';
+            s === 'malfunction' ? 'block' : 'none';
         }
         async function saveEditRecord(e) {
           e.preventDefault();
           if (!editingRecordId) return;
           const s = document.getElementById('editStatus').value,
             sn = document.getElementById('editSerialNumber').value.trim();
-          if (
-            s === 'replace' &&
-            !document.getElementById('editNewSerialNumber').value.trim()
-          ) {
-            alert('Укажите новый серийный номер');
-            return;
-          }
           if (
             s === 'move' &&
             !document.getElementById('editNewLocation').value.trim()
@@ -4092,16 +4426,10 @@
             importance: document.getElementById('editImportance').value,
             status: s,
             serialNumber: sn,
-            newSerialNumber:
-              s === 'replace'
-                ? document.getElementById('editNewSerialNumber').value.trim()
-                : '',
+            newSerialNumber: '',
             product: document.getElementById('editProduct').value.trim(),
             techType: document.getElementById('editTechType').value.trim(),
-            newTechType:
-              s === 'replace'
-                ? document.getElementById('editNewTechType').value.trim()
-                : '',
+            newTechType: '',
             location: document.getElementById('editLocation').value.trim(),
             newLocation:
               s === 'move'
@@ -4111,9 +4439,46 @@
               .getElementById('editDescription')
               .value.trim(),
             newSPRequisites:
-              document.getElementById('editNewSP')?.value.trim() || '',
+              s === 'malfunction'
+                ? document.getElementById('editNewSP')?.value.trim() || ''
+                : '',
             newLSIRequisites:
-              document.getElementById('editNewLSI')?.value.trim() || '',
+              s === 'malfunction'
+                ? document.getElementById('editNewLSI')?.value.trim() || ''
+                : '',
+            malfunctionDate:
+              s === 'malfunction'
+                ? document.getElementById('editMalfunctionDate')?.value || ''
+                : '',
+            brokenLocation:
+              s === 'malfunction'
+                ? document.getElementById('editBrokenLocation')?.value.trim() ||
+                  ''
+                : '',
+            recoveryDate:
+              s === 'malfunction'
+                ? document.getElementById('editRecoveryDate')?.value || ''
+                : '',
+            replaceSerial:
+              s === 'malfunction'
+                ? document.getElementById('editReplaceSerial')?.value.trim() ||
+                  ''
+                : '',
+            replaceProduct:
+              s === 'malfunction'
+                ? document.getElementById('editReplaceProduct')?.value.trim() ||
+                  ''
+                : '',
+            replaceType:
+              s === 'malfunction'
+                ? document.getElementById('editReplaceType')?.value.trim() || ''
+                : '',
+            replaceLocation:
+              s === 'malfunction'
+                ? document
+                    .getElementById('editReplaceLocation')
+                    ?.value.trim() || ''
+                : '',
           };
           try {
             await apiPut(API.records, data);
@@ -4617,8 +4982,8 @@
           ).length;
           document.getElementById('statInProgress').textContent =
             records.filter(r => !r.completed).length;
-          document.getElementById('statReplacements').textContent =
-            records.filter(r => r.status === 'replace').length;
+          document.getElementById('statMalfunctions').textContent =
+            records.filter(r => r.status === 'malfunction').length;
           document.getElementById('statMoves').textContent = records.filter(
             r => r.status === 'move'
           ).length;
@@ -4629,28 +4994,18 @@
               ps[d.product] = {
                 count: 0,
                 records: 0,
-                replacements: 0,
+                malfunctions: 0,
                 moves: 0,
-                repairs: 0,
-                archives: 0,
-                totalDownTimeHours: 0,
+                infos: 0,
               };
             ps[d.product].count++;
           });
           records.forEach(r => {
             if (r.product && ps[r.product]) {
               ps[r.product].records++;
-              if (r.status === 'replace') ps[r.product].replacements++;
+              if (r.status === 'malfunction') ps[r.product].malfunctions++;
               if (r.status === 'move') ps[r.product].moves++;
-              if (r.status === 'repair') {
-                ps[r.product].repairs++;
-                if (r.completed && r.completedAt) {
-                  const d =
-                    (new Date(r.completedAt) - new Date(r.createdAt)) / 3600000;
-                  if (d > 0) ps[r.product].totalDownTimeHours += d;
-                }
-              }
-              if (r.status === 'archive') ps[r.product].archives++;
+              if (r.status === 'info') ps[r.product].infos++;
             }
           });
           const stb = document.getElementById('statsTableBody');
@@ -4658,66 +5013,30 @@
           const sp = Object.entries(ps).sort((a, b) => b[1].count - a[1].count);
           if (!sp.length)
             stb.innerHTML =
-              '<tr><td colspan="9" class="no-records">Нет данных</td></tr>';
+              '<tr><td colspan="6" class="no-records">Нет данных</td></tr>';
           else
             sp.forEach(([p, s]) => {
-              let dt = '-',
-                dp = '100%';
-              if (s.totalDownTimeHours > 0) {
-                dt =
-                  (Math.floor(s.totalDownTimeHours / 24) > 0
-                    ? Math.floor(s.totalDownTimeHours / 24) + 'д '
-                    : '') +
-                  Math.round(s.totalDownTimeHours % 24) +
-                  'ч';
-                dp =
-                  (
-                    100 -
-                    (s.totalDownTimeHours / (s.count * 8760)) * 100
-                  ).toFixed(2) + '%';
-              }
               const tr = document.createElement('tr');
-              tr.innerHTML = `<td>${escapeHtml(p)}</td><td>${s.count}</td><td>${s.records}</td><td>${s.replacements}</td><td>${s.moves}</td><td>${s.repairs}</td><td>${s.archives}</td><td>${dt}</td><td>${dp}</td>`;
+              tr.innerHTML = `<td>${escapeHtml(p)}</td><td>${s.count}</td><td>${s.records}</td><td>${s.malfunctions}</td><td>${s.moves}</td><td>${s.infos}</td>`;
               stb.appendChild(tr);
             });
 
           const ss = {
-            repair: { label: 'Ремонт', total: 0, completed: 0, totalHours: 0 },
-            replace: { label: 'Замена', total: 0, completed: 0, totalHours: 0 },
-            move: {
-              label: 'Перемещение',
-              total: 0,
-              completed: 0,
-              totalHours: 0,
-            },
-            archive: { label: 'Архив', total: 0, completed: 0, totalHours: 0 },
+            malfunction: { label: 'Неисправность', total: 0, completed: 0 },
+            info: { label: 'Информация', total: 0, completed: 0 },
+            move: { label: 'Перемещение', total: 0, completed: 0 },
           };
           records.forEach(r => {
             if (r.status && ss[r.status]) {
               ss[r.status].total++;
-              if (r.completed) {
-                ss[r.status].completed++;
-                if (r.completedAt) {
-                  const d =
-                    (new Date(r.completedAt) - new Date(r.createdAt)) / 3600000;
-                  if (d > 0) ss[r.status].totalHours += d;
-                }
-              }
+              if (r.completed) ss[r.status].completed++;
             }
           });
           const sstb = document.getElementById('statusStatsTableBody');
           sstb.innerHTML = '';
           Object.values(ss).forEach(s => {
-            let at = '-';
-            if (s.completed > 0 && s.totalHours > 0) {
-              const a = s.totalHours / s.completed;
-              at =
-                a >= 24
-                  ? Math.floor(a / 24) + 'д ' + Math.round(a % 24) + 'ч'
-                  : Math.round(a) + 'ч';
-            }
             const tr = document.createElement('tr');
-            tr.innerHTML = `<td>${s.label}</td><td>${s.total}</td><td>${s.completed}</td><td>${s.total - s.completed}</td><td>${at}</td>`;
+            tr.innerHTML = `<td>${s.label}</td><td>${s.total}</td><td>${s.completed}</td><td>${s.total - s.completed}</td>`;
             sstb.appendChild(tr);
           });
 
@@ -4729,18 +5048,16 @@
                 total: 0,
                 completed: 0,
                 inProgress: 0,
-                replacements: 0,
+                malfunctions: 0,
                 moves: 0,
-                repairs: 0,
-                archives: 0,
+                infos: 0,
               };
             us[r.username].total++;
             if (r.completed) us[r.username].completed++;
             else us[r.username].inProgress++;
-            if (r.status === 'replace') us[r.username].replacements++;
+            if (r.status === 'malfunction') us[r.username].malfunctions++;
             if (r.status === 'move') us[r.username].moves++;
-            if (r.status === 'repair') us[r.username].repairs++;
-            if (r.status === 'archive') us[r.username].archives++;
+            if (r.status === 'info') us[r.username].infos++;
           });
           const ustb = document.getElementById('userStatsTableBody');
           if (ustb) {
@@ -4750,7 +5067,7 @@
             );
             if (!su.length)
               ustb.innerHTML =
-                '<tr><td colspan="9" class="no-records">Нет данных</td></tr>';
+                '<tr><td colspan="8" class="no-records">Нет данных</td></tr>';
             else
               su.forEach(([un, s]) => {
                 const pt =
@@ -4758,7 +5075,7 @@
                     ? ((s.total / records.length) * 100).toFixed(1) + '%'
                     : '0%';
                 const tr = document.createElement('tr');
-                tr.innerHTML = `<td><strong>${escapeHtml(un)}</strong></td><td>${s.total} (${pt})</td><td>${s.completed}</td><td>${s.inProgress}</td><td>${pt}</td><td>${s.replacements}</td><td>${s.moves}</td><td>${s.repairs}</td><td>${s.archives}</td>`;
+                tr.innerHTML = `<td><strong>${escapeHtml(un)}</strong></td><td>${s.total} (${pt})</td><td>${s.completed}</td><td>${s.inProgress}</td><td>${pt}</td><td>${s.malfunctions}</td><td>${s.moves}</td><td>${s.infos}</td>`;
                 ustb.appendChild(tr);
               });
           }
@@ -4794,9 +5111,9 @@
         }
 
         const instructionsContent = {
-          user_guide: `<div class="instructions-content"><h1>📖 Руководство пользователя</h1><h2>🔐 Вход в систему</h2><p>Откройте браузер и перейдите по адресу <strong>http://localhost:3000</strong>.</p><p>Введите логин и пароль, затем нажмите «Войти». Учётные данные по умолчанию:</p><ul><li><strong>Администратор:</strong> admin / admin123</li><li><strong>Пользователь:</strong> user / user123</li></ul><p>Если у вас нет учётной записи, перейдите на вкладку «Регистрация», придумайте логин (от 3 символов) и пароль (от 4 символов).</p><h2>🧭 Навигация</h2><p>Слева расположена боковая панель с разделами. Чтобы развернуть/свернуть панель, нажмите кнопку ✕ в верхней части панели.</p><h2>📝 Добавление записи</h2><p>Нажмите кнопку <strong>«Добавить запись»</strong> на главной странице. Откроется форма с полями:</p><ul><li><strong>⚠️ Важность</strong> — 1 (низкая), 2 (средняя), 3 (высокая).</li><li><strong>📌 Статус</strong> — ремонт, замена, перемещение, архив. От статуса зависят дополнительные поля.</li><li><strong>🔢 Серийный номер *</strong> — начните вводить, система предложит варианты из базы. При выборе подсказки заполнятся «Изделие», «Тип техники» и «Расположение».</li><li><strong>📦 Изделие *</strong> — выберите из списка.</li><li><strong>⚙️ Тип техники *</strong> — заполняется автоматически при выборе серийного номера.</li><li><strong>📍 Расположение</strong> — заполняется автоматически.</li><li><strong>📝 Описание</strong> — дополнительные сведения.</li></ul><h3>Условные поля:</h3><ul><li><strong>Ремонт</strong> — «Новые реквизиты СП» и «Новые реквизиты ЛСИ».</li><li><strong>Замена</strong> — «Новый серийный номер» и «Новый тип техники» (обязательные).</li><li><strong>Перемещение</strong> — «Новое расположение» (обязательное).</li><li><strong>Архив</strong> — дополнительных полей нет.</li></ul><h2>📊 Таблица записей</h2><p>Новые записи — сверху. Фильтры: важность, изделие, статус, пользователь, тип техники, расположение, серийный номер.</p><p>Кнопка <strong>🔄 Сбросить</strong> очищает фильтры. Кнопка <strong>📥 Экспорт CSV</strong> сохраняет записи в файл.</p><h3>Действия:</h3><ul><li><strong>✅</strong> — отметить запись выполненной.</li><li><strong>✏️</strong> — редактировать запись.</li><li><strong>🗑️</strong> — удалить запись.</li></ul><p>Выполненные записи выделяются зелёным фоном.</p><h2>🌓 Тема</h2><p>Кнопка с иконкой солнца/луны внизу панели переключает тему.</p></div>`,
-          admin_guide: `<div class="instructions-content"><h1>🔧 Руководство администратора</h1><p>Администратор имеет доступ ко всем разделам: управление устройствами, статистика и конструктор таблиц.</p><h2>⚙️ Вся техника</h2><p>Доступен <strong>только администратору</strong>.</p><h3>Добавление устройства:</h3><p>Нажмите <strong>«Добавить устройство»</strong>. Обязательные поля: изделие, устройство, серийный номер, основание поставки, реквизиты СП и ЛСИ.</p><h3>Действия:</h3><ul><li><strong>✏️</strong> — редактировать устройство.</li><li><strong>🗑️</strong> — удалить устройство.</li></ul><h3>Импорт/Экспорт CSV и Акт:</h3><p>Кнопки в панели фильтров: импорт из файла, экспорт в файл, печать акта приёма-передачи.</p><h2>📊 Статистика</h2><ul><li>Общие показатели (устройства, заявки, выполнено, в работе).</li><li>Статистика по изделиям (количество, заявки, замены, перемещения, ремонты, время простоя, % работоспособности).</li><li>Статистика по статусам и пользователям.</li><li><strong>⚠️ Контроль сроков</strong> — устройства с истекающей (≤30 дней) или истекшей гарантией.</li></ul><h2>🏗️ Конструктор таблиц</h2><p>Кнопка <strong>«+ Создать таблицу»</strong> в боковой панели. Настройка: название, колонки, поля формы, фильтры.</p><h2>👥 Пользователи</h2><p>Регистрация — на экране входа. Смена роли — редактировать <code>users.json</code>.</p></div>`,
-          dev_guide: `<div class="instructions-content"><h1>💻 Руководство разработчика</h1><h2>🏗️ Архитектура</h2><p>«Толстый клиент»: ванильный JS (SPA) + Node.js (без фреймворков). Данные в JSON-файлах.</p><h2>🗂️ Файлы</h2><ul><li><code>index.html</code> — SPA (~2500 строк).</li><li><code>server.js</code> — HTTP-сервер (~350 строк).</li><li><code>users.json</code>, <code>records.json</code>, <code>devices.json</code>, <code>navigation.json</code>, <code>history.json</code> — данные.</li><li><code>sections/</code> — пользовательские разделы.</li><li><code>backups/</code> — бэкапы (автоочистка > 30 дней).</li></ul><h2>🚀 Запуск</h2><pre><code>node server.js</code></pre><p>Сервер: <strong>http://localhost:3000</strong></p><h2>📡 API (/penny/)</h2><p><strong>Пользователи:</strong> GET/POST /penny/users</p><p><strong>Записи:</strong> GET/POST/PUT/DELETE /penny/records</p><p><strong>Устройства:</strong> GET/POST/PUT/DELETE /penny/devices</p><p><strong>Навигация:</strong> GET/POST /penny/navigation</p><p><strong>Разделы:</strong> GET/POST/DELETE /penny/sections/:id</p><p><strong>История:</strong> GET /penny/history</p><p><strong>Бэкапы:</strong> GET/POST /penny/backup</p><h2>🔐 Роли</h2><p>В <code>users.json</code> поле <code>role</code>: <code>"admin"</code> или <code>"user"</code>.</p><h2>💾 Хранение</h2><p>JSON-файлы, автосоздание при старте. Автобэкап — раз в сутки.</p></div>`,
+          user_guide: `<div class="instructions-content"><h1>📖 Руководство пользователя</h1><h2>🔐 Вход в систему</h2><p>Откройте браузер и перейдите по адресу <strong>http://localhost:3000</strong>.</p><p>Введите логин и пароль, затем нажмите «Войти». Учётные данные по умолчанию:</p><ul><li><strong>Администратор:</strong> admin / admin123</li><li><strong>Пользователь:</strong> user / user123</li></ul><p>Если у вас нет учётной записи, перейдите на вкладку «Регистрация», придумайте логин (от 3 символов) и пароль (от 4 символов).</p><h2>🧭 Навигация</h2><p>Слева расположена боковая панель с разделами. Чтобы развернуть/свернуть панель, нажмите кнопку ✕ в верхней части панели.</p><h2>📝 Добавление записи</h2><p>Нажмите кнопку <strong>«Добавить запись»</strong>. Выберите статус:</p><ul><li><strong>Информация</strong> — все поля необязательные, подтягиваются по серийному номеру. Заявка сразу выполнена.</li><li><strong>Перемещение</strong> — обязательные: серийный номер, изделие, тип техники, новое расположение. Заявка сразу выполнена.</li><li><strong>Неисправность</strong> — обязательные: дата обнаружения, серийный номер, изделие, тип техники, описание. Можно указать новые реквизиты СП и ЛСИ, куда отнесли сломанное, дату восстановления и данные подменного устройства. Заявка создаётся в работе.</li></ul><h2>📊 Таблица записей</h2><p>Фильтры и экспорт CSV. Действия: ✏️ редактировать, 🗑️ удалить, ✅ отметить неисправность выполненной.</p></div>`,
+          admin_guide: `<div class="instructions-content"><h1>🔧 Руководство администратора</h1><h2>⚙️ Вся техника</h2><p>Добавление, редактирование, удаление устройств. Импорт/экспорт CSV, печать акта.</p><h2>📊 Статистика</h2><p>По изделиям, статусам, пользователям. Контроль гарантийных сроков.</p><h2>🏗️ Конструктор таблиц</h2><p>Создание пользовательских разделов с настраиваемыми полями.</p></div>`,
+          dev_guide: `<div class="instructions-content"><h1>💻 Руководство разработчика</h1><p>Стек: ванильный JS (SPA) + Node.js. Данные в JSON-файлах. Запуск: <code>node server.js</code> → http://localhost:3000</p></div>`,
         };
         function switchInstructionTab(id) {
           if (

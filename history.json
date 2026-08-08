@@ -147,5 +147,55 @@
     "device": "Коммутатор",
     "id": "hist_1784965628387",
     "timestamp": "2026-07-25T07:47:08.387Z"
+  },
+  {
+    "action": "update_device",
+    "serialNumber": "asdfg",
+    "changes": {
+      "serialNumber": "asdfg",
+      "location": "534"
+    },
+    "id": "hist_1786197056290",
+    "timestamp": "2026-08-08T13:50:56.290Z"
+  },
+  {
+    "action": "update_device",
+    "serialNumber": "HON-2023-903",
+    "changes": {
+      "serialNumber": "HON-2023-903",
+      "location": "1"
+    },
+    "id": "hist_1786201114554",
+    "timestamp": "2026-08-08T14:58:34.554Z"
+  },
+  {
+    "action": "update_device",
+    "serialNumber": "HON-2023-904",
+    "changes": {
+      "serialNumber": "HON-2023-904",
+      "location": "2"
+    },
+    "id": "hist_1786201114559",
+    "timestamp": "2026-08-08T14:58:34.559Z"
+  },
+  {
+    "action": "update_device",
+    "serialNumber": "asdfg",
+    "changes": {
+      "serialNumber": "asdfg",
+      "location": "4354"
+    },
+    "id": "hist_1786201189738",
+    "timestamp": "2026-08-08T14:59:49.738Z"
+  },
+  {
+    "action": "update_device",
+    "serialNumber": "HPDL-2023-301",
+    "changes": {
+      "serialNumber": "HPDL-2023-301",
+      "location": "4354"
+    },
+    "id": "hist_1786210797342",
+    "timestamp": "2026-08-08T17:39:57.342Z"
   }
 ]
