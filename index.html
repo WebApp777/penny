@@ -186,6 +186,16 @@
         height: 30px;
         min-width: 30px;
         border-radius: 6px;
+        animation: logoSpin 12s linear infinite;
+      }
+
+      @keyframes logoSpin {
+        from {
+          transform: rotate(0deg);
+        }
+        to {
+          transform: rotate(360deg);
+        }
       }
 
       .side-panel:not(.expanded) .logo span {
@@ -1035,6 +1045,8 @@
         overflow-y: auto;
         box-shadow: var(--shadow);
         animation: modalSlideIn 0.3s ease;
+        scrollbar-width: thin;
+        scrollbar-color: var(--glass-border) transparent;
       }
 
       [data-theme='dark'] .modal-content {
@@ -1629,29 +1641,26 @@
         vertical-align: top;
       }
 
-      #deviceInfoContent table {
-        width: 100%;
-        border-collapse: collapse;
-        font-size: 0.8rem;
-      }
-
-      #deviceInfoContent th {
-        padding: 0.4rem 0.5rem;
-        text-align: left;
-        background: var(--glass-bg);
-        color: var(--accent);
-        font-size: 0.7rem;
-        text-transform: uppercase;
-      }
-
-      #deviceInfoContent td {
-        padding: 0.35rem 0.5rem;
-        border-bottom: 1px solid var(--glass-border);
-        font-size: 0.78rem;
-      }
-
       #deviceInfoModalOverlay .modal-content {
         max-height: 95vh;
+        overflow-y: auto;
+      }
+
+      .modal-content::-webkit-scrollbar {
+        width: 6px;
+      }
+
+      .modal-content::-webkit-scrollbar-track {
+        background: transparent;
+      }
+
+      .modal-content::-webkit-scrollbar-thumb {
+        background: var(--glass-border);
+        border-radius: 3px;
+      }
+
+      .modal-content::-webkit-scrollbar-thumb:hover {
+        background: var(--accent);
       }
 
       .timeline {
@@ -1674,7 +1683,9 @@
         position: relative;
         margin-bottom: 0;
       }
-
+      .timeline-item .timeline-btn {
+        margin-bottom: 0.3rem;
+      }
       .timeline-btn {
         display: flex;
         flex-direction: column;
