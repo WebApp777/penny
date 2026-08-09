@@ -159,7 +159,7 @@
     "supplyBasis": "Договор №156/23 от 15.05.2023",
     "spRequisites": "СП-878",
     "lsiRequisites": "ЛСИ-541",
-    "location": "4354",
+    "location": "123",
     "specs": "2x Xeon Silver 4410Y, 128 ГБ, 4x 2.4 ТБ SAS, iLO 6, 2x 800W БП",
     "notes": "Основной сервер бухгалтерии",
     "warranty": "2028-05-15",

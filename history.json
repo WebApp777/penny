@@ -197,5 +197,15 @@
     },
     "id": "hist_1786210797342",
     "timestamp": "2026-08-08T17:39:57.342Z"
+  },
+  {
+    "action": "update_device",
+    "serialNumber": "HPDL-2023-301",
+    "changes": {
+      "serialNumber": "HPDL-2023-301",
+      "location": "123"
+    },
+    "id": "hist_1786254036347",
+    "timestamp": "2026-08-09T05:40:36.348Z"
   }
 ]
