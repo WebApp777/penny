@@ -598,5 +598,31 @@
     "completed": true,
     "id": "rec_1786254984054",
     "createdAt": "2026-08-09T05:56:24.054Z"
+  },
+  {
+    "username": "admin",
+    "requestNumber": "27",
+    "importance": "2",
+    "status": "info",
+    "serialNumber": "лщзьь",
+    "newSerialNumber": "",
+    "product": "",
+    "techType": "",
+    "newTechType": "",
+    "location": "",
+    "newLocation": "",
+    "description": "",
+    "newSPRequisites": "",
+    "newLSIRequisites": "",
+    "malfunctionDate": "",
+    "brokenLocation": "",
+    "recoveryDate": "",
+    "replaceSerial": "",
+    "replaceProduct": "",
+    "replaceType": "",
+    "replaceLocation": "",
+    "completed": true,
+    "id": "rec_1786271456476",
+    "createdAt": "2026-08-09T10:30:56.476Z"
   }
 ]
