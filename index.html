@@ -198,10 +198,6 @@
         }
       }
 
-      .side-panel:not(.expanded) .logo span {
-        display: none;
-      }
-
       .toggle-panel-btn {
         width: 26px;
         height: 26px;
@@ -431,10 +427,6 @@
         gap: 0.2rem;
       }
 
-      .side-panel:not(.expanded) .panel-actions {
-        flex-direction: column;
-      }
-
       .theme-toggle,
       .logout-btn,
       .backup-btn {
@@ -478,11 +470,6 @@
 
       .logout-btn.visible {
         display: flex;
-      }
-
-      /* Когда панель свёрнута и 3 кнопки — делаем их компактнее */
-      .side-panel:not(.expanded) .panel-actions {
-        gap: 0.1rem;
       }
 
       .main-content {
@@ -561,14 +548,6 @@
         font-size: 0.75rem;
         font-weight: 500;
         margin-bottom: 0.5rem;
-      }
-
-      .record-form {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        grid-gap: 0.6rem;
-        gap: 0.6rem;
-        margin-bottom: 0.6rem;
       }
 
       .form-group {
@@ -688,7 +667,6 @@
       }
 
       .submit-btn {
-        grid-column: 1 / -1;
         padding: 0.6rem 1.2rem;
         background: var(--accent);
         color: white;
@@ -976,14 +954,6 @@
         padding: 3rem 2rem;
       }
 
-      .devices-form {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        grid-gap: 0.6rem;
-        gap: 0.6rem;
-        margin-bottom: 1rem;
-      }
-
       .instructions-tabs {
         display: flex;
         gap: 0;
@@ -1062,7 +1032,6 @@
           opacity: 0;
           transform: translateY(-30px);
         }
-
         to {
           opacity: 1;
           transform: translateY(0);
@@ -1286,7 +1255,6 @@
           opacity: 0;
           transform: translateY(30px);
         }
-
         to {
           opacity: 1;
           transform: translateY(0);
@@ -1613,6 +1581,10 @@
         color: white;
       }
 
+      .admin-only-btn.hidden {
+        display: none;
+      }
+
       #deviceInfoContent table {
         width: 100%;
         border-collapse: collapse;
@@ -1683,9 +1655,11 @@
         position: relative;
         margin-bottom: 0;
       }
+
       .timeline-item .timeline-btn {
         margin-bottom: 0.3rem;
       }
+
       .timeline-btn {
         display: flex;
         flex-direction: column;
@@ -1793,8 +1767,53 @@
         color: rgba(255, 255, 255, 0.8);
       }
 
-      .admin-only-btn.hidden {
-        display: none;
+      .toast {
+        position: fixed;
+        bottom: 2rem;
+        right: 2rem;
+        background: #7c5cfcba;
+        color: white;
+        padding: 0.8rem 1.5rem;
+        border-radius: 10px;
+        font-size: 0.9rem;
+        font-weight: 600;
+        z-index: 99999;
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+        animation:
+          toastIn 0.3s ease,
+          toastOut 0.3s ease 2.7s;
+        opacity: 0;
+        transform: translateY(20px);
+      }
+
+      .toast.show {
+        opacity: 1;
+        transform: translateY(0);
+      }
+
+      @keyframes toastIn {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      @keyframes toastOut {
+        from {
+          opacity: 1;
+          transform: translateY(0);
+        }
+        to {
+          opacity: 0;
+          transform: translateY(20px);
+        }
       }
     </style>
   </head>
@@ -2324,7 +2343,7 @@
             </select>
           </div>
           <div class="form-group" style="position: relative">
-            <label for="recordSerial">🔢 Серийный номер *</label
+            <label for="recordSerial">🔢 Серийный номер</label
             ><input
               type="text"
               id="recordSerial"
@@ -2334,13 +2353,13 @@
             <div class="suggestions-container" id="serialSuggestions"></div>
           </div>
           <div class="form-group">
-            <label for="recordProduct">📦 Изделие *</label
+            <label for="recordProduct">📦 Изделие</label
             ><select id="recordProduct">
               <option value="">Выберите изделие...</option>
             </select>
           </div>
           <div class="form-group">
-            <label for="recordType">⚙️ Тип техники *</label
+            <label for="recordType">⚙️ Тип техники</label
             ><input
               type="text"
               id="recordType"
@@ -2447,7 +2466,7 @@
             />
           </div>
           <div class="form-group" style="grid-column: 1/-1">
-            <label for="recordDescription">📝 Описание *</label
+            <label for="recordDescription">📝 Описание</label
             ><textarea
               id="recordDescription"
               placeholder="Введите описание"
@@ -2757,17 +2776,11 @@
           </button>
         </div>
         <div id="deviceInfoContent" style="display: flex; gap: 2rem">
-          <!-- Левая колонка: данные устройства -->
-          <div id="deviceDataColumn" style="flex: 0 0 350px">
-            <!-- Заполняется динамически -->
-          </div>
-          <!-- Правая колонка: timeline -->
+          <div id="deviceDataColumn" style="flex: 0 0 350px"></div>
           <div
             id="deviceTimelineColumn"
             style="flex: 1; overflow-y: auto; max-height: 60vh"
-          >
-            <!-- Заполняется динамически -->
-          </div>
+          ></div>
         </div>
       </div>
     </div>
@@ -2948,6 +2961,19 @@
           editingRecordId = null,
           dateTimeInterval = null;
 
+        // Пагинация
+        let recordsTotal = 0,
+          devicesTotal = 0;
+        let recordsPage = 1,
+          devicesPage = 1;
+        let recordsLoading = false,
+          devicesLoading = false;
+        let recordsAllLoaded = false,
+          devicesAllLoaded = false;
+        const PAGE_SIZE = 100;
+        let deviceSearchCache = {};
+        let deviceSearchTimeout = null;
+
         async function apiGet(url) {
           const r = await fetch(url);
           if (!r.ok) throw new Error('Ошибка');
@@ -2992,17 +3018,180 @@
           } catch (e) {
             navItems = [];
           }
+          await loadRecordsPage(1, true);
+          await loadDevicesPage(1, true);
+        }
+
+        async function loadRecordsPage(page, reset = false) {
+          if (recordsLoading) return;
+          if (!reset && recordsAllLoaded) return;
+          recordsLoading = true;
           try {
-            records = await apiGet(API.records);
+            const params = new URLSearchParams();
+            params.set('page', page);
+            params.set('limit', PAGE_SIZE);
+            params.set('sort', 'createdAt');
+            params.set('order', 'desc');
+            const fs = document.getElementById('filterStatus')?.value;
+            const fi = document.getElementById('filterImportance')?.value;
+            const fp = document.getElementById('filterProduct')?.value;
+            const fu = document.getElementById('filterUser')?.value;
+            const fsn = document.getElementById('filterSerial')?.value?.trim();
+            const ftt = document
+              .getElementById('filterTechType')
+              ?.value?.trim();
+            const fl = document.getElementById('filterLocation')?.value?.trim();
+            if (fs) params.set('status', fs);
+            if (fi) params.set('importance', fi);
+            if (fp) params.set('product', fp);
+            if (fu) params.set('username', fu);
+            if (fsn) params.set('serialNumber', fsn);
+            if (ftt) params.set('search', ftt);
+            if (fl) {
+              const s = params.get('search') || '';
+              params.set('search', s + ' ' + fl);
+            }
+            const result = await apiGet(API.records + '?' + params.toString());
+            if (reset) {
+              records = result.data;
+              recordsPage = 1;
+            } else {
+              records = [...records, ...result.data];
+              recordsPage = page;
+            }
+            recordsTotal = result.total;
+            recordsAllLoaded = records.length >= recordsTotal;
+            recordsLoading = false;
+            if (reset) {
+              renderRecordsTable();
+              updateUserFilter();
+            } else appendRecordsTable(result.data);
           } catch (e) {
-            records = [];
-          }
-          try {
-            devices = await apiGet(API.devices);
-          } catch (e) {
-            devices = [];
+            recordsLoading = false;
           }
         }
+
+        async function loadDevicesPage(page, reset = false) {
+          if (devicesLoading) return;
+          if (!reset && devicesAllLoaded) return;
+          devicesLoading = true;
+          try {
+            const params = new URLSearchParams();
+            params.set('page', page);
+            params.set('limit', PAGE_SIZE);
+            params.set('sort', 'createdAt');
+            params.set('order', 'desc');
+            const fp = document.getElementById('filterDevProduct')?.value;
+            const fd = document
+              .getElementById('filterDevDevice')
+              ?.value?.trim();
+            const fs = document
+              .getElementById('filterDevSerial')
+              ?.value?.trim();
+            const fl = document
+              .getElementById('filterDevLocation')
+              ?.value?.trim();
+            if (fp) params.set('product', fp);
+            if (fd) params.set('search', fd);
+            if (fs) params.set('search', fs);
+            if (fl) params.set('search', fl);
+            const result = await apiGet(API.devices + '?' + params.toString());
+            if (reset) {
+              devices = result.data;
+              devicesPage = 1;
+            } else {
+              devices = [...devices, ...result.data];
+              devicesPage = page;
+            }
+            devicesTotal = result.total;
+            devicesAllLoaded = devices.length >= devicesTotal;
+            devicesLoading = false;
+            if (reset) {
+              renderDevicesTable();
+              updateProductSelect();
+              updateDeviceFilterSelects();
+            } else appendDevicesTable(result.data);
+          } catch (e) {
+            devicesLoading = false;
+          }
+        }
+
+        async function searchDevices(query) {
+          if (deviceSearchCache[query]) return deviceSearchCache[query];
+          try {
+            const result = await apiGet(
+              API.devices + '/search?q=' + encodeURIComponent(query)
+            );
+            deviceSearchCache[query] = result;
+            setTimeout(() => {
+              delete deviceSearchCache[query];
+            }, 30000);
+            return result;
+          } catch (e) {
+            return [];
+          }
+        }
+
+        function setupSuggestions(inpId, sugId, cb) {
+          const inp = document.getElementById(inpId),
+            sug = document.getElementById(sugId);
+          if (!inp || !sug) return;
+          inp.addEventListener('input', function () {
+            const v = this.value.trim();
+            sug.innerHTML = '';
+            if (!v) {
+              sug.classList.remove('visible');
+              return;
+            }
+            clearTimeout(deviceSearchTimeout);
+            deviceSearchTimeout = setTimeout(async () => {
+              const results = await searchDevices(v);
+              if (!results.length) {
+                sug.classList.remove('visible');
+                return;
+              }
+              sug.innerHTML = '';
+              results.forEach(d => {
+                const div = document.createElement('div');
+                div.className = 'suggestion-item';
+                div.innerHTML = `<strong>${escapeHtml(d.serialNumber)}</strong> — ${escapeHtml(d.product)} / ${escapeHtml(d.device)}`;
+                div.addEventListener('mousedown', function (e) {
+                  e.preventDefault();
+                  cb(d);
+                  sug.classList.remove('visible');
+                });
+                sug.appendChild(div);
+              });
+              sug.classList.add('visible');
+            }, 300);
+          });
+          inp.addEventListener('blur', () =>
+            setTimeout(() => sug.classList.remove('visible'), 200)
+          );
+          inp.addEventListener('focus', function () {
+            if (this.value.trim()) this.dispatchEvent(new Event('input'));
+          });
+        }
+
+        function setupAllSuggestions() {
+          setupSuggestions('recordSerial', 'serialSuggestions', d => {
+            document.getElementById('recordSerial').value = d.serialNumber;
+            document.getElementById('recordProduct').value = d.product;
+            document.getElementById('recordType').value = d.device;
+            document.getElementById('recordLocation').value = d.location || '';
+          });
+          setupSuggestions(
+            'recordReplaceSerial',
+            'replaceSerialSuggestions',
+            d => {
+              document.getElementById('recordReplaceSerial').value =
+                d.serialNumber;
+              document.getElementById('recordReplaceProduct').value = d.product;
+              document.getElementById('recordReplaceType').value = d.device;
+            }
+          );
+        }
+
         async function saveNavigation() {
           try {
             await apiPost(API.navigation, navItems);
@@ -3158,6 +3347,11 @@
           isPanelExpanded = true;
           updateToggleButton();
           addNavSection.style.display = 'block';
+          document
+            .querySelectorAll('.admin-only-btn')
+            .forEach(btn =>
+              btn.classList.toggle('hidden', currentUserRole !== 'admin')
+            );
           updateInstructionsTabs();
           renderNavMenu();
           updateProductSelect();
@@ -3165,8 +3359,6 @@
           initEditModal();
           initInstructionTabs();
           initDevicesFilters();
-          renderRecordsTable();
-          renderDevicesTable();
           initCreateSectionModal();
           initExportButtons();
           initImportButtons();
@@ -3178,9 +3370,6 @@
           document.getElementById('homePage').classList.add('active');
           if (dateTimeInterval) clearInterval(dateTimeInterval);
           dateTimeInterval = setInterval(updateDateTime, 1000);
-          document.querySelectorAll('.admin-only-btn').forEach(btn => {
-            btn.classList.toggle('hidden', currentUserRole !== 'admin');
-          });
         }
 
         function logout() {
@@ -3193,13 +3382,13 @@
           updateToggleButton();
           mainInterface.classList.remove('visible');
           authContainer.classList.remove('hidden');
+          document
+            .querySelectorAll('.admin-only-btn')
+            .forEach(btn => btn.classList.add('hidden'));
           if (dateTimeInterval) {
             clearInterval(dateTimeInterval);
             dateTimeInterval = null;
           }
-          document.querySelectorAll('.admin-only-btn').forEach(btn => {
-            btn.classList.add('hidden');
-          });
         }
 
         document.getElementById('loginForm').addEventListener('submit', e => {
@@ -3373,7 +3562,7 @@
                 document
                   .getElementById('statisticsPage')
                   .classList.add('active');
-                renderStatistics();
+                loadStatistics();
               } else if (item.id === 'instructions') {
                 document
                   .getElementById('instructionsPage')
@@ -3430,7 +3619,6 @@
             document.getElementById('homePage').classList.add('active');
           }
         }
-
         let tempSectionConfig = { tableColumns: [], fields: [], filters: [] };
         function openCreateSectionModal() {
           document.getElementById('createSectionModal').classList.add('active');
@@ -3858,64 +4046,6 @@
           tb.appendChild(tr);
         }
 
-        function setupSuggestions(inpId, sugId, cb) {
-          const inp = document.getElementById(inpId),
-            sug = document.getElementById(sugId);
-          if (!inp || !sug) return;
-          inp.addEventListener('input', function () {
-            const v = this.value.toLowerCase().trim();
-            sug.innerHTML = '';
-            if (!v) {
-              sug.classList.remove('visible');
-              return;
-            }
-            const f = devices.filter(d =>
-              d.serialNumber.toLowerCase().includes(v)
-            );
-            if (!f.length) {
-              sug.classList.remove('visible');
-              return;
-            }
-            f.forEach(d => {
-              const div = document.createElement('div');
-              div.className = 'suggestion-item';
-              div.innerHTML = `<strong>${escapeHtml(d.serialNumber)}</strong> — ${escapeHtml(d.product)} / ${escapeHtml(d.device)}`;
-              div.addEventListener('mousedown', function (e) {
-                e.preventDefault();
-                cb(d);
-                sug.classList.remove('visible');
-              });
-              sug.appendChild(div);
-            });
-            sug.classList.add('visible');
-          });
-          inp.addEventListener('blur', () =>
-            setTimeout(() => sug.classList.remove('visible'), 200)
-          );
-          inp.addEventListener('focus', function () {
-            if (this.value.trim()) this.dispatchEvent(new Event('input'));
-          });
-        }
-
-        function setupAllSuggestions() {
-          setupSuggestions('recordSerial', 'serialSuggestions', d => {
-            document.getElementById('recordSerial').value = d.serialNumber;
-            document.getElementById('recordProduct').value = d.product;
-            document.getElementById('recordType').value = d.device;
-            document.getElementById('recordLocation').value = d.location || '';
-          });
-          setupSuggestions(
-            'recordReplaceSerial',
-            'replaceSerialSuggestions',
-            d => {
-              document.getElementById('recordReplaceSerial').value =
-                d.serialNumber;
-              document.getElementById('recordReplaceProduct').value = d.product;
-              document.getElementById('recordReplaceType').value = d.device;
-            }
-          );
-        }
-
         function setupStatusChange() {
           const statusSelect = document.getElementById('recordStatus');
           if (!statusSelect) return;
@@ -3979,107 +4109,76 @@
           return d;
         }
 
-        function getFilteredRecords() {
-          const fi = document.getElementById('filterImportance')?.value || '',
-            fp = document.getElementById('filterProduct')?.value || '',
-            fs = document.getElementById('filterStatus')?.value || '',
-            fu = document.getElementById('filterUser')?.value || '';
-          const ftt =
-              document
-                .getElementById('filterTechType')
-                ?.value?.toLowerCase()
-                .trim() || '',
-            fl =
-              document
-                .getElementById('filterLocation')
-                ?.value?.toLowerCase()
-                .trim() || '',
-            fsn =
-              document
-                .getElementById('filterSerial')
-                ?.value?.toLowerCase()
-                .trim() || '';
-          let f = [...records];
-          if (fi) f = f.filter(r => r.importance === fi);
-          if (fp) f = f.filter(r => r.product === fp);
-          if (fs) f = f.filter(r => r.status === fs);
-          if (fu) f = f.filter(r => r.username === fu);
-          if (ftt)
-            f = f.filter(
-              r =>
-                (r.techType || '').toLowerCase().includes(ftt) ||
-                (r.newTechType || '').toLowerCase().includes(ftt)
-            );
-          if (fl)
-            f = f.filter(
-              r =>
-                (r.location || '').toLowerCase().includes(fl) ||
-                (r.newLocation || '').toLowerCase().includes(fl)
-            );
-          if (fsn)
-            f = f.filter(
-              r =>
-                (r.serialNumber || '').toLowerCase().includes(fsn) ||
-                (r.newSerialNumber || '').toLowerCase().includes(fsn)
-            );
-          return f;
-        }
-
         function renderRecordsTable() {
           const tb = document.getElementById('recordsTableBody');
           if (!tb) return;
           tb.innerHTML = '';
-          const f = getFilteredRecords();
-          f.reverse();
-          if (!f.length) {
+          if (!records.length) {
             tb.innerHTML =
               '<tr><td colspan="11" class="no-records">Нет записей</td></tr>';
-            updateUserFilter();
             return;
           }
-          f.forEach(r => {
+          records.forEach(r => renderRecordRow(r, tb));
+          if (!recordsAllLoaded) {
             const tr = document.createElement('tr');
-            if (r.completed || r.status === 'info' || r.status === 'move')
-              tr.classList.add('completed');
-            if (r.status === 'malfunction' && !r.completed)
-              tr.style.background = 'rgba(255,71,87,0.08)';
-            tr.innerHTML = `<td>${new Date(r.createdAt).toLocaleDateString('ru-RU')}<br>${new Date(r.createdAt).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}</td><td>${escapeHtml(r.username)}</td><td>${escapeHtml(r.requestNumber || '-')}</td><td>${IMPORTANCE_LABELS[r.importance] || '2-Средняя'}</td><td>${STATUS_LABELS[r.status] || r.status || '-'}</td><td><a href="javascript:void(0)" onclick="openDeviceInfoModal('${escapeHtml(r.serialNumber)}')" style="color:var(--accent);text-decoration:underline;cursor:pointer;">${getSerialDisplay(r)}</a></td><td>${escapeHtml(r.product || '-')}</td><td>${getTypeDisplay(r)}</td><td>${getLocationDisplay(r)}</td><td title="${escapeHtml(r.description || '')}"><div style="max-width:150px;max-height:2.8em;overflow:hidden;text-align:center;margin:0 auto;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;">${escapeHtml(r.description || '-')}</div></td><td><div class="action-buttons">${r.completed ? `<span class="completed-time">✅ ${new Date(r.completedAt || r.createdAt).toLocaleDateString('ru-RU')}<br>${new Date(r.completedAt || r.createdAt).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}</span>` : `<button class="complete-btn" title="Выполнено">✅</button>`}<button class="edit-btn" title="Редактировать">✏️</button><button class="delete-btn" title="Удалить">🗑️</button></div></td>`;
-            if (!r.completed) {
-              tr.querySelector('.complete-btn')?.addEventListener('click', () =>
-                completeRecord(r.id)
-              );
-            }
-            tr.querySelector('.edit-btn')?.addEventListener('click', () =>
-              openEditModal(r.id)
-            );
-            tr.querySelector('.delete-btn')?.addEventListener('click', () =>
-              deleteRecord(r.id)
-            );
+            tr.id = 'recordsLoader';
+            tr.innerHTML =
+              '<td colspan="11" style="text-align:center;padding:1rem;color:var(--text-secondary);">Загрузка...</td>';
             tb.appendChild(tr);
-          });
-          updateUserFilter();
+          }
+        }
+
+        function renderRecordRow(r, tb) {
+          const tr = document.createElement('tr');
+          if (r.completed || r.status === 'info' || r.status === 'move')
+            tr.classList.add('completed');
+          if (r.status === 'malfunction' && !r.completed)
+            tr.style.background = 'rgba(255,71,87,0.08)';
+          tr.innerHTML = `<td>${new Date(r.createdAt).toLocaleDateString('ru-RU')}<br>${new Date(r.createdAt).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}</td><td>${escapeHtml(r.username)}</td><td>${escapeHtml(r.requestNumber || '-')}</td><td>${IMPORTANCE_LABELS[r.importance] || '2-Средняя'}</td><td>${STATUS_LABELS[r.status] || r.status || '-'}</td><td><a href="javascript:void(0)" onclick="openDeviceInfoModal('${escapeHtml(r.serialNumber)}')" style="color:var(--accent);text-decoration:underline;cursor:pointer;">${getSerialDisplay(r)}</a></td><td>${escapeHtml(r.product || '-')}</td><td>${getTypeDisplay(r)}</td><td>${getLocationDisplay(r)}</td><td title="${escapeHtml(r.description || '')}"><div style="max-width:150px;max-height:2.8em;overflow:hidden;text-align:center;margin:0 auto;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;">${escapeHtml(r.description || '-')}</div></td><td><div class="action-buttons">${r.completed ? `<span class="completed-time">✅ ${new Date(r.completedAt || r.createdAt).toLocaleDateString('ru-RU')}<br>${new Date(r.completedAt || r.createdAt).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}</span>` : `<button class="complete-btn" title="Выполнено">✅</button>`}<button class="edit-btn" title="Редактировать">✏️</button><button class="delete-btn" title="Удалить">🗑️</button></div></td>`;
+          if (!r.completed)
+            tr.querySelector('.complete-btn')?.addEventListener('click', () =>
+              completeRecord(r.id)
+            );
+          tr.querySelector('.edit-btn')?.addEventListener('click', () =>
+            openEditModal(r.id)
+          );
+          tr.querySelector('.delete-btn')?.addEventListener('click', () =>
+            deleteRecord(r.id)
+          );
+          tb.appendChild(tr);
+        }
+
+        function appendRecordsTable(newRecords) {
+          const tb = document.getElementById('recordsTableBody');
+          if (!tb) return;
+          const loader = document.getElementById('recordsLoader');
+          if (loader) loader.remove();
+          newRecords.forEach(r => renderRecordRow(r, tb));
+          if (!recordsAllLoaded) {
+            const tr = document.createElement('tr');
+            tr.id = 'recordsLoader';
+            tr.innerHTML =
+              '<td colspan="11" style="text-align:center;padding:1rem;color:var(--text-secondary);">Загрузка...</td>';
+            tb.appendChild(tr);
+          }
         }
 
         async function addRecord(data) {
           try {
             const r = await apiPost(API.records, data);
-            records.push(r.record);
-            renderRecordsTable();
-            renderStatistics();
+            await loadRecordsPage(1, true);
+            await loadStatistics();
             return true;
           } catch (e) {
             alert('Ошибка');
             return false;
           }
         }
+
         async function deleteRecord(id) {
           if (!confirm('Удалить?')) return;
           const rec = records.find(r => r.id === id);
-          if (!rec) return;
-
-          // Если это перемещение — откатываем расположение
-          if (rec.status === 'move' && rec.serialNumber) {
-            // Ищем последнюю запись перед этой, которая меняла расположение
+          if (rec && rec.status === 'move' && rec.serialNumber) {
             const prevRecords = records
               .filter(
                 r =>
@@ -4087,74 +4186,46 @@
                   r.createdAt < rec.createdAt
               )
               .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-
-            let prevLocation = '';
-
-            // Ищем последнее перемещение или неисправность с "Куда отнесли"
             const lastMove = prevRecords.find(
               r => r.status === 'move' && r.newLocation
             );
             const lastMalf = prevRecords.find(
               r => r.status === 'malfunction' && r.brokenLocation
             );
-
-            if (lastMove && lastMalf) {
+            let prevLocation = '';
+            if (lastMove && lastMalf)
               prevLocation =
                 new Date(lastMove.createdAt) > new Date(lastMalf.createdAt)
                   ? lastMove.newLocation
                   : lastMalf.brokenLocation;
-            } else if (lastMove) {
-              prevLocation = lastMove.newLocation;
-            } else if (lastMalf) {
-              prevLocation = lastMalf.brokenLocation;
-            } else {
-              // Если не было предыдущих перемещений — берём изначальное расположение из базы
-              const dev = devices.find(
-                d => d.serialNumber === rec.serialNumber
-              );
-              if (dev) {
-                // Ищем самую первую запись для этого устройства
-                const firstRecord = records
-                  .filter(r => r.serialNumber === rec.serialNumber)
-                  .sort(
-                    (a, b) => new Date(a.createdAt) - new Date(b.createdAt)
-                  )[0];
-                prevLocation = firstRecord
-                  ? firstRecord.location
-                  : dev.location || '';
-              }
+            else if (lastMove) prevLocation = lastMove.newLocation;
+            else if (lastMalf) prevLocation = lastMalf.brokenLocation;
+            else {
+              const firstRecord = records
+                .filter(r => r.serialNumber === rec.serialNumber)
+                .sort(
+                  (a, b) => new Date(a.createdAt) - new Date(b.createdAt)
+                )[0];
+              prevLocation = firstRecord ? firstRecord.location : '';
             }
-
             if (prevLocation) {
-              const di = devices.findIndex(
-                d => d.serialNumber === rec.serialNumber
-              );
-              if (di >= 0) {
-                try {
-                  const r = await fetch(API.devices, {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                      serialNumber: rec.serialNumber,
-                      location: prevLocation,
-                    }),
-                  });
-                  if (r.ok) {
-                    const result = await r.json();
-                    devices[di] = result.device;
-                  }
-                } catch (e) {}
-              }
+              try {
+                await fetch(API.devices, {
+                  method: 'PUT',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({
+                    serialNumber: rec.serialNumber,
+                    location: prevLocation,
+                  }),
+                });
+              } catch (e) {}
             }
           }
-
           try {
             await apiDelete(API.records, { id });
-            records = records.filter(r => r.id !== id);
-            renderRecordsTable();
-            renderStatistics();
-            if (rec.status === 'move' || rec.status === 'malfunction')
-              renderDevicesTable();
+            await loadRecordsPage(1, true);
+            await loadDevicesPage(1, true);
+            await loadStatistics();
           } catch (e) {}
         }
 
@@ -4165,50 +4236,32 @@
             const hasSP = rec.newSPRequisites?.trim(),
               hasLSI = rec.newLSIRequisites?.trim();
             if (hasSP || hasLSI) {
-              const dev = devices.find(
-                d => d.serialNumber === rec.serialNumber
-              );
-              if (dev) {
-                try {
-                  const ud = { serialNumber: dev.serialNumber };
-                  if (hasSP) ud.spRequisites = rec.newSPRequisites;
-                  if (hasLSI) ud.lsiRequisites = rec.newLSIRequisites;
-                  const r = await fetch(API.devices, {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(ud),
-                  });
-                  if (r.ok) {
-                    const result = await r.json();
-                    const di = devices.findIndex(
-                      d => d.serialNumber === dev.serialNumber
-                    );
-                    if (di >= 0) devices[di] = result.device;
-                  }
-                } catch (e) {}
-              }
+              try {
+                const ud = { serialNumber: rec.serialNumber };
+                if (hasSP) ud.spRequisites = rec.newSPRequisites;
+                if (hasLSI) ud.lsiRequisites = rec.newLSIRequisites;
+                await fetch(API.devices, {
+                  method: 'PUT',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify(ud),
+                });
+              } catch (e) {}
             }
           }
-          rec.completed = true;
-          rec.completedAt = new Date().toISOString();
           try {
-            const r = await fetch(API.records, {
+            await fetch(API.records, {
               method: 'PUT',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
                 id,
                 completed: true,
-                completedAt: rec.completedAt,
+                completedAt: new Date().toISOString(),
               }),
             });
-            if (r.ok) {
-              const result = await r.json();
-              const i = records.findIndex(x => x.id === id);
-              if (i >= 0 && result.record) records[i] = result.record;
-            }
+            showToast('Неисправность отмечена как выполненная');
+            await loadRecordsPage(1, true);
+            await loadStatistics();
           } catch (e) {}
-          renderRecordsTable();
-          renderStatistics();
         }
 
         function initAddRecordModal() {
@@ -4229,7 +4282,6 @@
             ?.addEventListener('click', function (e) {
               if (e.target === this) closeAddRecordModal();
             });
-
           const form = document.getElementById('addRecordForm');
           if (form) {
             const newForm = form.cloneNode(true);
@@ -4239,7 +4291,6 @@
               newForm
                 .querySelectorAll('.error')
                 .forEach(el => el.classList.remove('error'));
-
               const st = document.getElementById('recordStatus').value;
               const sn = document.getElementById('recordSerial').value.trim();
               const pr = document.getElementById('recordProduct').value;
@@ -4299,14 +4350,33 @@
                       .getElementById('recordReplaceLocation')
                       ?.value.trim() || ''
                   : '';
-
               if (!st) {
                 alert('Выберите статус');
                 return;
               }
-
+              if (sn && pr) {
+                const dev = devices.find(d => d.serialNumber === sn);
+                if (!dev && pr) {
+                  alert(`Серийный номер "${sn}" не найден в базе.`);
+                  document
+                    .getElementById('recordSerial')
+                    .classList.add('error');
+                  return;
+                }
+                if (dev && dev.product !== pr) {
+                  alert(
+                    `Серийный номер "${sn}" принадлежит изделию "${dev.product}", а не "${pr}".`
+                  );
+                  document
+                    .getElementById('recordSerial')
+                    .classList.add('error');
+                  document
+                    .getElementById('recordProduct')
+                    .classList.add('error');
+                  return;
+                }
+              }
               let hasError = false;
-
               if (st === 'move') {
                 if (!sn) {
                   document
@@ -4338,22 +4408,14 @@
                   alert(`Серийный номер "${sn}" не найден в базе!`);
                   return;
                 }
-                const di = devices.findIndex(d => d.serialNumber === sn);
-                if (di >= 0) {
-                  try {
-                    const r = await fetch(API.devices, {
-                      method: 'PUT',
-                      headers: { 'Content-Type': 'application/json' },
-                      body: JSON.stringify({ serialNumber: sn, location: nl }),
-                    });
-                    if (r.ok) {
-                      const result = await r.json();
-                      devices[di] = result.device;
-                    }
-                  } catch (e) {}
-                }
+                try {
+                  await fetch(API.devices, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ serialNumber: sn, location: nl }),
+                  });
+                } catch (e) {}
               }
-
               if (st === 'malfunction') {
                 if (!mDate) {
                   document
@@ -4392,51 +4454,34 @@
                   return;
                 }
                 if (brokenLoc) {
-                  const di = devices.findIndex(d => d.serialNumber === sn);
-                  if (di >= 0) {
-                    try {
-                      const r = await fetch(API.devices, {
-                        method: 'PUT',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                          serialNumber: sn,
-                          location: brokenLoc,
-                        }),
-                      });
-                      if (r.ok) {
-                        const result = await r.json();
-                        devices[di] = result.device;
-                      }
-                    } catch (e) {}
-                  }
+                  try {
+                    await fetch(API.devices, {
+                      method: 'PUT',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({
+                        serialNumber: sn,
+                        location: brokenLoc,
+                      }),
+                    });
+                  } catch (e) {}
                 }
                 if (repSN && repLoc) {
                   if (!devices.some(d => d.serialNumber === repSN)) {
-                    alert(
-                      `Серийный номер подменного устройства "${repSN}" не найден в базе!`
-                    );
+                    alert(`Подменный серийный номер "${repSN}" не найден!`);
                     return;
                   }
-                  const rdi = devices.findIndex(d => d.serialNumber === repSN);
-                  if (rdi >= 0) {
-                    try {
-                      const r = await fetch(API.devices, {
-                        method: 'PUT',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                          serialNumber: repSN,
-                          location: repLoc,
-                        }),
-                      });
-                      if (r.ok) {
-                        const result = await r.json();
-                        devices[rdi] = result.device;
-                      }
-                    } catch (e) {}
-                  }
+                  try {
+                    await fetch(API.devices, {
+                      method: 'PUT',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({
+                        serialNumber: repSN,
+                        location: repLoc,
+                      }),
+                    });
+                  } catch (e) {}
                 }
               }
-
               const data = {
                 username: currentUser,
                 requestNumber: document
@@ -4463,8 +4508,8 @@
                 replaceLocation: repLoc,
                 completed: st === 'info' || st === 'move',
               };
-
               if (await addRecord(data)) {
+                showToast('Запись успешно добавлена');
                 document.getElementById('recordSerial').value = '';
                 document.getElementById('recordProduct').value = '';
                 document.getElementById('recordType').value = '';
@@ -4512,17 +4557,15 @@
                   document.getElementById('replaceTitleField');
                 if (replaceTitle) replaceTitle.style.display = 'none';
                 updateDateTime();
-                if (st === 'move' || st === 'malfunction') renderDevicesTable();
                 closeAddRecordModal();
               }
             });
+            document
+              .getElementById('cancelAddRecordBtn')
+              ?.addEventListener('click', closeAddRecordModal);
             setupAllSuggestions();
             setupStatusChange();
           }
-          // Перепривязываем кнопку Отмена после клонирования формы
-          document
-            .getElementById('cancelAddRecordBtn')
-            ?.addEventListener('click', closeAddRecordModal);
         }
 
         function openAddRecordModal() {
@@ -4535,7 +4578,6 @@
             .getElementById('addRecordModalOverlay')
             .classList.add('active');
         }
-
         function closeAddRecordModal() {
           document
             .getElementById('addRecordModalOverlay')
@@ -4560,7 +4602,6 @@
             ?.addEventListener('click', function (e) {
               if (e.target === this) closeAddDeviceModal();
             });
-
           const form = document.getElementById('addDeviceForm');
           if (form) {
             const newForm = form.cloneNode(true);
@@ -4596,6 +4637,7 @@
                   warranty: w,
                 })
               ) {
+                showToast('Устройство успешно добавлено');
                 [
                   'deviceProduct',
                   'deviceName',
@@ -4619,7 +4661,6 @@
             .getElementById('cancelAddDeviceBtn')
             ?.addEventListener('click', closeAddDeviceModal);
         }
-
         function openAddDeviceModal() {
           document
             .getElementById('addDeviceModalOverlay')
@@ -4640,12 +4681,13 @@
           ].forEach(id =>
             document
               .getElementById(id)
-              ?.addEventListener('change', renderRecordsTable)
+              ?.addEventListener('change', () => loadRecordsPage(1, true))
           );
           ['filterTechType', 'filterLocation', 'filterSerial'].forEach(id =>
-            document
-              .getElementById(id)
-              ?.addEventListener('input', renderRecordsTable)
+            document.getElementById(id)?.addEventListener('input', function () {
+              clearTimeout(this._debounce);
+              this._debounce = setTimeout(() => loadRecordsPage(1, true), 500);
+            })
           );
           document
             .getElementById('resetFiltersBtn')
@@ -4662,7 +4704,7 @@
                 const el = document.getElementById(id);
                 if (el) el.value = '';
               });
-              renderRecordsTable();
+              loadRecordsPage(1, true);
             });
         }
 
@@ -4722,10 +4764,6 @@
             !document.getElementById('editNewLocation').value.trim()
           ) {
             alert('Укажите новое расположение');
-            return;
-          }
-          if (sn && !devices.some(d => d.serialNumber === sn)) {
-            alert(`Серийный номер "${sn}" не найден в базе!`);
             return;
           }
           const data = {
@@ -4792,10 +4830,9 @@
           };
           try {
             await apiPut(API.records, data);
-            const i = records.findIndex(r => r.id === editingRecordId);
-            if (i >= 0) records[i] = { ...records[i], ...data };
+            showToast('Изменения сохранены');
             closeEditModal();
-            renderRecordsTable();
+            await loadRecordsPage(1, true);
           } catch (ex) {
             alert('Не удалось сохранить');
           }
@@ -4869,8 +4906,6 @@
         async function saveDeviceEdit(e) {
           e.preventDefault();
           if (!editingDeviceId) return;
-          const dev = devices.find(d => d.id === editingDeviceId);
-          if (!dev) return;
           const newSerial = document
             .getElementById('editDeviceSerial')
             .value.trim();
@@ -4906,19 +4941,15 @@
             return;
           }
           try {
-            const r = await fetch(API.devices, {
+            await fetch(API.devices, {
               method: 'PUT',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify(data),
             });
-            if (r.ok) {
-              const result = await r.json();
-              const idx = devices.findIndex(d => d.id === editingDeviceId);
-              if (idx >= 0) devices[idx] = result.device;
-              closeDeviceEditModal();
-              renderDevicesTable();
-              updateProductSelect();
-            }
+            showToast('Изменения сохранены');
+            closeDeviceEditModal();
+            await loadDevicesPage(1, true);
+            updateProductSelect();
           } catch (e) {
             alert('Ошибка сохранения');
           }
@@ -4955,7 +4986,6 @@
             alert('Устройство не найдено');
             return;
           }
-
           const devRecords = records
             .filter(
               r =>
@@ -4964,26 +4994,8 @@
                 r.replaceSerial === serialNumber
             )
             .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-
-          // Левая колонка: данные устройства
           const dataCol = document.getElementById('deviceDataColumn');
-          dataCol.innerHTML = `
-        <h3 style="margin-bottom:0.8rem;">📦 ${escapeHtml(dev.device)}</h3>
-        <table>
-            <tr><th>Изделие</th><td>${escapeHtml(dev.product)}</td></tr>
-            <tr><th>Серийный номер</th><td>${escapeHtml(dev.serialNumber)}</td></tr>
-            <tr><th>Основание поставки</th><td>${escapeHtml(dev.supplyBasis || '-')}</td></tr>
-            <tr><th>Реквизиты СП</th><td>${escapeHtml(dev.spRequisites || '-')}</td></tr>
-            <tr><th>Реквизиты ЛСИ</th><td>${escapeHtml(dev.lsiRequisites || '-')}</td></tr>
-            <tr><th>Расположение</th><td>${escapeHtml(dev.location || '-')}</td></tr>
-            <tr><th>Характеристики</th><td>${escapeHtml(dev.specs || '-')}</td></tr>
-            <tr><th>Гарантия до</th><td>${dev.warranty ? new Date(dev.warranty).toLocaleDateString('ru-RU') : '-'}</td></tr>
-            <tr><th>Примечание</th><td>${escapeHtml(dev.notes || '-')}</td></tr>
-            <tr><th>Дата добавления</th><td>${new Date(dev.createdAt).toLocaleString('ru-RU')}</td></tr>
-        </table>
-    `;
-
-          // Правая колонка: timeline
+          dataCol.innerHTML = `<h3 style="margin-bottom:0.8rem;">📦 ${escapeHtml(dev.device)}</h3><table><tr><th>Изделие</th><td>${escapeHtml(dev.product)}</td></tr><tr><th>Серийный номер</th><td>${escapeHtml(dev.serialNumber)}</td></tr><tr><th>Основание поставки</th><td>${escapeHtml(dev.supplyBasis || '-')}</td></tr><tr><th>Реквизиты СП</th><td>${escapeHtml(dev.spRequisites || '-')}</td></tr><tr><th>Реквизиты ЛСИ</th><td>${escapeHtml(dev.lsiRequisites || '-')}</td></tr><tr><th>Расположение</th><td>${escapeHtml(dev.location || '-')}</td></tr><tr><th>Характеристики</th><td>${escapeHtml(dev.specs || '-')}</td></tr><tr><th>Гарантия до</th><td>${dev.warranty ? new Date(dev.warranty).toLocaleDateString('ru-RU') : '-'}</td></tr><tr><th>Примечание</th><td>${escapeHtml(dev.notes || '-')}</td></tr><tr><th>Дата добавления</th><td>${new Date(dev.createdAt).toLocaleString('ru-RU')}</td></tr></table>`;
           const timelineCol = document.getElementById('deviceTimelineColumn');
           if (!devRecords.length) {
             timelineCol.innerHTML =
@@ -4994,75 +5006,33 @@
               devRecords.length +
               ')</h3><div class="timeline">';
             devRecords.forEach((r, i) => {
-              html += `
-                <div class="timeline-item" style="margin-bottom:${i < devRecords.length - 1 ? '1.5rem' : '0'};">
-                    <button class="timeline-btn" onclick="toggleTimelineDetails(this, '${r.id}')">
-                        <span class="tl-status">${STATUS_LABELS[r.status] || r.status}</span>
-                        <span class="tl-date">${new Date(r.createdAt).toLocaleDateString('ru-RU')}<br>${new Date(r.createdAt).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })}</span>
-                    </button>
-                    <div class="timeline-details" id="details_${r.id}">
-                        <table>
-                            <tr><th>Пользователь</th><td>${escapeHtml(r.username)}</td></tr>
-                            <tr><th>№ Заявки</th><td>${escapeHtml(r.requestNumber || '-')}</td></tr>
-                            <tr><th>Важность</th><td>${IMPORTANCE_LABELS[r.importance] || r.importance}</td></tr>
-                            <tr><th>Статус</th><td>${STATUS_LABELS[r.status] || r.status}</td></tr>
-                            <tr><th>Серийный номер</th><td>${escapeHtml(r.serialNumber || '-')}</td></tr>
-                            <tr><th>Изделие</th><td>${escapeHtml(r.product || '-')}</td></tr>
-                            <tr><th>Тип техники</th><td>${escapeHtml(r.techType || '-')}</td></tr>
-                            <tr><th>Расположение</th><td>${escapeHtml(r.location || '-')}</td></tr>
-                            ${r.status === 'move' && r.newLocation ? `<tr><th>Новое расположение</th><td>${escapeHtml(r.newLocation)}</td></tr>` : ''}
-                            ${
-                              r.status === 'malfunction'
-                                ? `
-                                ${r.malfunctionDate ? `<tr><th>Дата обнаружения</th><td>${new Date(r.malfunctionDate).toLocaleString('ru-RU')}</td></tr>` : ''}
-                                ${r.brokenLocation ? `<tr><th>Куда отнесли</th><td>${escapeHtml(r.brokenLocation)}</td></tr>` : ''}
-                                ${r.recoveryDate ? `<tr><th>Дата восстановления</th><td>${new Date(r.recoveryDate).toLocaleString('ru-RU')}</td></tr>` : ''}
-                                ${r.newSPRequisites ? `<tr><th>Новые реквизиты СП</th><td>${escapeHtml(r.newSPRequisites)}</td></tr>` : ''}
-                                ${r.newLSIRequisites ? `<tr><th>Новые реквизиты ЛСИ</th><td>${escapeHtml(r.newLSIRequisites)}</td></tr>` : ''}
-                                ${r.replaceSerial ? `<tr><th>Подменный Сер№</th><td>${escapeHtml(r.replaceSerial)}</td></tr>` : ''}
-                                ${r.replaceProduct ? `<tr><th>Подменное изделие</th><td>${escapeHtml(r.replaceProduct)}</td></tr>` : ''}
-                                ${r.replaceType ? `<tr><th>Подменный тип</th><td>${escapeHtml(r.replaceType)}</td></tr>` : ''}
-                                ${r.replaceLocation ? `<tr><th>Куда поставили подмену</th><td>${escapeHtml(r.replaceLocation)}</td></tr>` : ''}
-                            `
-                                : ''
-                            }
-                            <tr><th>Описание</th><td>${escapeHtml(r.description || '-')}</td></tr>
-                            <tr><th>Выполнено</th><td>${r.completed ? '✅ Да' : '⏳ В работе'}</td></tr>
-                        </table>
-                    </div>
-                </div>
-            `;
+              html += `<div class="timeline-item" style="margin-bottom:${i < devRecords.length - 1 ? '1.5rem' : '0'};"><button class="timeline-btn" onclick="toggleTimelineDetails(this, '${r.id}')"><span class="tl-status">${STATUS_LABELS[r.status] || r.status}</span><span class="tl-date">${new Date(r.createdAt).toLocaleDateString('ru-RU')}<br>${new Date(r.createdAt).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })}</span></button><div class="timeline-details" id="details_${r.id}"><table><tr><th>Пользователь</th><td>${escapeHtml(r.username)}</td></tr><tr><th>№ Заявки</th><td>${escapeHtml(r.requestNumber || '-')}</td></tr><tr><th>Важность</th><td>${IMPORTANCE_LABELS[r.importance] || r.importance}</td></tr><tr><th>Статус</th><td>${STATUS_LABELS[r.status] || r.status}</td></tr><tr><th>Серийный номер</th><td>${escapeHtml(r.serialNumber || '-')}</td></tr><tr><th>Изделие</th><td>${escapeHtml(r.product || '-')}</td></tr><tr><th>Тип техники</th><td>${escapeHtml(r.techType || '-')}</td></tr><tr><th>Расположение</th><td>${escapeHtml(r.location || '-')}</td></tr>${r.status === 'move' && r.newLocation ? `<tr><th>Новое расположение</th><td>${escapeHtml(r.newLocation)}</td></tr>` : ''}${r.status === 'malfunction' ? `${r.malfunctionDate ? `<tr><th>Дата обнаружения</th><td>${new Date(r.malfunctionDate).toLocaleString('ru-RU')}</td></tr>` : ''}${r.brokenLocation ? `<tr><th>Куда отнесли</th><td>${escapeHtml(r.brokenLocation)}</td></tr>` : ''}${r.recoveryDate ? `<tr><th>Дата восстановления</th><td>${new Date(r.recoveryDate).toLocaleString('ru-RU')}</td></tr>` : ''}${r.newSPRequisites ? `<tr><th>Новые реквизиты СП</th><td>${escapeHtml(r.newSPRequisites)}</td></tr>` : ''}${r.newLSIRequisites ? `<tr><th>Новые реквизиты ЛСИ</th><td>${escapeHtml(r.newLSIRequisites)}</td></tr>` : ''}${r.replaceSerial ? `<tr><th>Подменный Сер№</th><td>${escapeHtml(r.replaceSerial)}</td></tr>` : ''}${r.replaceProduct ? `<tr><th>Подменное изделие</th><td>${escapeHtml(r.replaceProduct)}</td></tr>` : ''}${r.replaceType ? `<tr><th>Подменный тип</th><td>${escapeHtml(r.replaceType)}</td></tr>` : ''}${r.replaceLocation ? `<tr><th>Куда поставили подмену</th><td>${escapeHtml(r.replaceLocation)}</td></tr>` : ''}` : ''}<tr><th>Описание</th><td>${escapeHtml(r.description || '-')}</td></tr><tr><th>Выполнено</th><td>${r.completed ? '✅ Да' : '⏳ В работе'}</td></tr></table></div></div>`;
             });
             html += '</div>';
             timelineCol.innerHTML = html;
           }
-
           document
             .getElementById('deviceInfoModalOverlay')
             .classList.add('active');
         }
+        window.openDeviceInfoModal = openDeviceInfoModal;
 
         function toggleTimelineDetails(btn, recordId) {
           const details = document.getElementById('details_' + recordId);
           if (!details) return;
           const isOpen = details.classList.contains('open');
-
-          // Закрываем все открытые
           document
             .querySelectorAll('.timeline-details.open')
             .forEach(d => d.classList.remove('open'));
           document
             .querySelectorAll('.timeline-btn.active')
             .forEach(b => b.classList.remove('active'));
-
           if (!isOpen) {
             details.classList.add('open');
             btn.classList.add('active');
           }
         }
         window.toggleTimelineDetails = toggleTimelineDetails;
-
-        window.openDeviceInfoModal = openDeviceInfoModal;
 
         function closeDeviceInfoModal() {
           document
@@ -5092,8 +5062,7 @@
         async function addDevice(data) {
           try {
             const r = await apiPost(API.devices, data);
-            devices.push(r.device);
-            renderDevicesTable();
+            await loadDevicesPage(1, true);
             updateProductSelect();
             return true;
           } catch (e) {
@@ -5105,115 +5074,73 @@
           if (!confirm('Удалить?')) return;
           try {
             await apiDelete(API.devices, { id });
-            devices = devices.filter(d => d.id !== id);
-            renderDevicesTable();
+            await loadDevicesPage(1, true);
             updateProductSelect();
           } catch (e) {}
-        }
-
-        function getFilteredDevices() {
-          const fp = document.getElementById('filterDevProduct')?.value || '',
-            fd =
-              document
-                .getElementById('filterDevDevice')
-                ?.value?.toLowerCase()
-                .trim() || '',
-            fs =
-              document
-                .getElementById('filterDevSerial')
-                ?.value?.toLowerCase()
-                .trim() || '',
-            fl =
-              document
-                .getElementById('filterDevLocation')
-                ?.value?.toLowerCase()
-                .trim() || '',
-            fsb =
-              document
-                .getElementById('filterDevSupplyBasis')
-                ?.value?.toLowerCase()
-                .trim() || '',
-            fsp =
-              document
-                .getElementById('filterDevSPRequisites')
-                ?.value?.toLowerCase()
-                .trim() || '',
-            flsi =
-              document
-                .getElementById('filterDevLSIRequisites')
-                ?.value?.toLowerCase()
-                .trim() || '';
-          let f = [...devices];
-          if (fp) f = f.filter(d => d.product === fp);
-          if (fd) f = f.filter(d => d.device?.toLowerCase().includes(fd));
-          if (fs) f = f.filter(d => d.serialNumber?.toLowerCase().includes(fs));
-          if (fl) f = f.filter(d => d.location?.toLowerCase().includes(fl));
-          if (fsb)
-            f = f.filter(d => d.supplyBasis?.toLowerCase().includes(fsb));
-          if (fsp)
-            f = f.filter(d => d.spRequisites?.toLowerCase().includes(fsp));
-          if (flsi)
-            f = f.filter(d => d.lsiRequisites?.toLowerCase().includes(flsi));
-          return f;
         }
 
         function renderDevicesTable() {
           const tb = document.getElementById('devicesTableBody');
           if (!tb) return;
           tb.innerHTML = '';
-          const f = getFilteredDevices();
-          f.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-          if (!f.length) {
-            tb.innerHTML =
-              '<tr><td colspan="11" class="no-records">Нет устройств</td></tr>';
-            updateDeviceFilterSelects();
+          const isAdmin = currentUserRole === 'admin';
+          const colSpan = isAdmin ? 11 : 10;
+          if (!devices.length) {
+            tb.innerHTML = `<tr><td colspan="${colSpan}" class="no-records">Нет устройств</td></tr>`;
             return;
           }
-          f.forEach(d => {
+          const thead = document.querySelector('#devicesTable thead tr');
+          if (thead) {
+            thead.innerHTML =
+              '<th>Изделие</th><th>Устройство</th><th>Серийный номер</th><th>Основание поставки</th><th>Реквизиты СП</th><th>Реквизиты ЛСИ</th><th>Расположение</th><th>Характеристики</th><th>Примечание</th><th>Дата добавления</th>' +
+              (isAdmin ? '<th>Действия</th>' : '');
+          }
+          devices.forEach(d => {
             const tr = document.createElement('tr');
-            tb.innerHTML = '';
-            const f = getFilteredDevices();
-            f.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-            const isAdmin = currentUserRole === 'admin';
-            const colSpan = isAdmin ? 11 : 10;
-            if (!f.length) {
-              tb.innerHTML = `<tr><td colspan="${colSpan}" class="no-records">Нет устройств</td></tr>`;
-              updateDeviceFilterSelects();
-              return;
+            tr.innerHTML = `<td>${escapeHtml(d.product)}</td><td>${escapeHtml(d.device)}</td><td><a href="javascript:void(0)" onclick="openDeviceInfoModal('${escapeHtml(d.serialNumber)}')" style="color:var(--accent);text-decoration:underline;cursor:pointer;">${escapeHtml(d.serialNumber)}</a></td><td>${escapeHtml(d.supplyBasis || '-')}</td><td>${escapeHtml(d.spRequisites || '-')}</td><td>${escapeHtml(d.lsiRequisites || '-')}</td><td>${escapeHtml(d.location || '-')}</td><td style="max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${escapeHtml(d.specs || '')}">${escapeHtml(d.specs || '-')}</td><td style="max-width:150px;overflow:hidden;text-overflow:ellipsis" title="${escapeHtml(d.notes || '')}">${escapeHtml(d.notes || '-')}</td><td>${new Date(d.createdAt).toLocaleDateString('ru-RU')}</td>${isAdmin ? `<td><div class="action-buttons"><button class="edit-btn" title="Редактировать">✏️</button><button class="delete-btn" title="Удалить">🗑️</button></div></td>` : ''}`;
+            if (isAdmin) {
+              tr.querySelector('.delete-btn')?.addEventListener('click', () =>
+                deleteDevice(d.id)
+              );
+              tr.querySelector('.edit-btn')?.addEventListener('click', () =>
+                openDeviceEditModal(d.id)
+              );
             }
-
-            // Обновляем заголовки
-            const thead = document.querySelector('#devicesTable thead tr');
-            if (thead) {
-              thead.innerHTML =
-                '<th>Изделие</th><th>Устройство</th><th>Серийный номер</th><th>Основание поставки</th><th>Реквизиты СП</th><th>Реквизиты ЛСИ</th><th>Расположение</th><th>Характеристики</th><th>Примечание</th><th>Дата добавления</th>' +
-                (isAdmin ? '<th>Действия</th>' : '');
-            }
-
-            f.forEach(d => {
-              const tr = document.createElement('tr');
-              tr.innerHTML = `<td>${escapeHtml(d.product)}</td><td>${escapeHtml(d.device)}</td><td><a href="javascript:void(0)" onclick="openDeviceInfoModal('${escapeHtml(d.serialNumber)}')" style="color:var(--accent);text-decoration:underline;cursor:pointer;">${escapeHtml(d.serialNumber)}</a></td><td>${escapeHtml(d.supplyBasis || '-')}</td><td>${escapeHtml(d.spRequisites || '-')}</td><td>${escapeHtml(d.lsiRequisites || '-')}</td><td>${escapeHtml(d.location || '-')}</td><td style="max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${escapeHtml(d.specs || '')}">${escapeHtml(d.specs || '-')}</td><td style="max-width:150px;overflow:hidden;text-overflow:ellipsis" title="${escapeHtml(d.notes || '')}">${escapeHtml(d.notes || '-')}</td><td>${new Date(d.createdAt).toLocaleDateString('ru-RU')}</td>${isAdmin ? `<td><div class="action-buttons"><button class="edit-btn" title="Редактировать">✏️</button><button class="delete-btn" title="Удалить">🗑️</button></div></td>` : ''}`;
-
-              if (isAdmin) {
-                tr.querySelector('.delete-btn')?.addEventListener('click', () =>
-                  deleteDevice(d.id)
-                );
-                tr.querySelector('.edit-btn')?.addEventListener('click', () =>
-                  openDeviceEditModal(d.id)
-                );
-              }
-              tb.appendChild(tr);
-            });
-            updateDeviceFilterSelects();
-            tr.querySelector('.delete-btn')?.addEventListener('click', () =>
-              deleteDevice(d.id)
-            );
-            tr.querySelector('.edit-btn')?.addEventListener('click', () =>
-              openDeviceEditModal(d.id)
-            );
             tb.appendChild(tr);
           });
-          updateDeviceFilterSelects();
+          if (!devicesAllLoaded) {
+            const tr = document.createElement('tr');
+            tr.id = 'devicesLoader';
+            tr.innerHTML = `<td colspan="${colSpan}" style="text-align:center;padding:1rem;color:var(--text-secondary);">Загрузка...</td>`;
+            tb.appendChild(tr);
+          }
+        }
+        function appendDevicesTable(newDevices) {
+          const tb = document.getElementById('devicesTableBody');
+          if (!tb) return;
+          const loader = document.getElementById('devicesLoader');
+          if (loader) loader.remove();
+          const isAdmin = currentUserRole === 'admin';
+          newDevices.forEach(d => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `<td>${escapeHtml(d.product)}</td><td>${escapeHtml(d.device)}</td><td><a href="javascript:void(0)" onclick="openDeviceInfoModal('${escapeHtml(d.serialNumber)}')" style="color:var(--accent);text-decoration:underline;cursor:pointer;">${escapeHtml(d.serialNumber)}</a></td><td>${escapeHtml(d.supplyBasis || '-')}</td><td>${escapeHtml(d.spRequisites || '-')}</td><td>${escapeHtml(d.lsiRequisites || '-')}</td><td>${escapeHtml(d.location || '-')}</td><td style="max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${escapeHtml(d.specs || '')}">${escapeHtml(d.specs || '-')}</td><td style="max-width:150px;overflow:hidden;text-overflow:ellipsis" title="${escapeHtml(d.notes || '')}">${escapeHtml(d.notes || '-')}</td><td>${new Date(d.createdAt).toLocaleDateString('ru-RU')}</td>${isAdmin ? `<td><div class="action-buttons"><button class="edit-btn" title="Редактировать">✏️</button><button class="delete-btn" title="Удалить">🗑️</button></div></td>` : ''}`;
+            if (isAdmin) {
+              tr.querySelector('.delete-btn')?.addEventListener('click', () =>
+                deleteDevice(d.id)
+              );
+              tr.querySelector('.edit-btn')?.addEventListener('click', () =>
+                openDeviceEditModal(d.id)
+              );
+            }
+            tb.appendChild(tr);
+          });
+          if (!devicesAllLoaded) {
+            const colSpan = isAdmin ? 11 : 10;
+            const tr = document.createElement('tr');
+            tr.id = 'devicesLoader';
+            tr.innerHTML = `<td colspan="${colSpan}" style="text-align:center;padding:1rem;color:var(--text-secondary);">Загрузка...</td>`;
+            tb.appendChild(tr);
+          }
         }
 
         function updateDeviceFilterSelects() {
@@ -5236,7 +5163,7 @@
           ['filterDevProduct'].forEach(id =>
             document
               .getElementById(id)
-              ?.addEventListener('change', renderDevicesTable)
+              ?.addEventListener('change', () => loadDevicesPage(1, true))
           );
           [
             'filterDevDevice',
@@ -5246,9 +5173,10 @@
             'filterDevSPRequisites',
             'filterDevLSIRequisites',
           ].forEach(id =>
-            document
-              .getElementById(id)
-              ?.addEventListener('input', renderDevicesTable)
+            document.getElementById(id)?.addEventListener('input', function () {
+              clearTimeout(this._debounce);
+              this._debounce = setTimeout(() => loadDevicesPage(1, true), 500);
+            })
           );
           document
             .getElementById('resetDevFiltersBtn')
@@ -5265,9 +5193,8 @@
                 const el = document.getElementById(id);
                 if (el) el.value = '';
               });
-              renderDevicesTable();
+              loadDevicesPage(1, true);
             });
-          updateDeviceFilterSelects();
         }
 
         function exportToCSV(data, columns, filename) {
@@ -5308,7 +5235,7 @@
             const newBtn = exportRecordsBtn.cloneNode(true);
             exportRecordsBtn.parentNode.replaceChild(newBtn, exportRecordsBtn);
             newBtn.addEventListener('click', () => {
-              const f = getFilteredRecords();
+              const f = records;
               exportToCSV(
                 f.map(r => ({
                   ...r,
@@ -5337,7 +5264,7 @@
             const newBtn = exportDevicesBtn.cloneNode(true);
             exportDevicesBtn.parentNode.replaceChild(newBtn, exportDevicesBtn);
             newBtn.addEventListener('click', () => {
-              const f = getFilteredDevices();
+              const f = devices;
               exportToCSV(
                 f.map(d => ({
                   ...d,
@@ -5364,7 +5291,7 @@
             const newBtn = printActBtn.cloneNode(true);
             printActBtn.parentNode.replaceChild(newBtn, printActBtn);
             newBtn.addEventListener('click', () => {
-              const devs = getFilteredDevices();
+              const devs = devices;
               if (!devs.length) {
                 alert('Нет устройств');
                 return;
@@ -5439,56 +5366,40 @@
               }
               if (imported) {
                 alert(`Импортировано: ${imported}`);
-                await loadData();
-                renderDevicesTable();
+                await loadDevicesPage(1, true);
                 updateProductSelect();
-                renderStatistics();
+                await loadStatistics();
               } else alert('Не удалось импортировать');
             };
             reader.readAsText(file, 'UTF-8');
           });
         }
 
-        function renderStatistics() {
+        async function loadStatistics() {
+          try {
+            const stats = await apiGet('/penny/statistics');
+            renderStatisticsFromData(stats);
+          } catch (e) {}
+        }
+
+        function renderStatisticsFromData(stats) {
           if (!document.getElementById('statisticsPage')) return;
           document.getElementById('statTotalDevices').textContent =
-            devices.length;
+            stats.totalDevices;
           document.getElementById('statTotalRecords').textContent =
-            records.length;
-          document.getElementById('statCompleted').textContent = records.filter(
-            r => r.completed
-          ).length;
+            stats.totalRecords;
+          document.getElementById('statCompleted').textContent =
+            stats.completed;
           document.getElementById('statInProgress').textContent =
-            records.filter(r => !r.completed).length;
+            stats.inProgress;
           document.getElementById('statMalfunctions').textContent =
-            records.filter(r => r.status === 'malfunction').length;
-          document.getElementById('statMoves').textContent = records.filter(
-            r => r.status === 'move'
-          ).length;
-
-          const ps = {};
-          devices.forEach(d => {
-            if (!ps[d.product])
-              ps[d.product] = {
-                count: 0,
-                records: 0,
-                malfunctions: 0,
-                moves: 0,
-                infos: 0,
-              };
-            ps[d.product].count++;
-          });
-          records.forEach(r => {
-            if (r.product && ps[r.product]) {
-              ps[r.product].records++;
-              if (r.status === 'malfunction') ps[r.product].malfunctions++;
-              if (r.status === 'move') ps[r.product].moves++;
-              if (r.status === 'info') ps[r.product].infos++;
-            }
-          });
+            stats.malfunctions;
+          document.getElementById('statMoves').textContent = stats.moves;
           const stb = document.getElementById('statsTableBody');
           stb.innerHTML = '';
-          const sp = Object.entries(ps).sort((a, b) => b[1].count - a[1].count);
+          const sp = Object.entries(stats.byProduct).sort(
+            (a, b) => b[1].count - a[1].count
+          );
           if (!sp.length)
             stb.innerHTML =
               '<tr><td colspan="6" class="no-records">Нет данных</td></tr>';
@@ -5498,49 +5409,22 @@
               tr.innerHTML = `<td>${escapeHtml(p)}</td><td>${s.count}</td><td>${s.records}</td><td>${s.malfunctions}</td><td>${s.moves}</td><td>${s.infos}</td>`;
               stb.appendChild(tr);
             });
-
-          const ss = {
-            malfunction: { label: 'Неисправность', total: 0, completed: 0 },
-            info: { label: 'Информация', total: 0, completed: 0 },
-            move: { label: 'Перемещение', total: 0, completed: 0 },
-          };
-          records.forEach(r => {
-            if (r.status && ss[r.status]) {
-              ss[r.status].total++;
-              if (r.completed) ss[r.status].completed++;
-            }
-          });
           const sstb = document.getElementById('statusStatsTableBody');
           sstb.innerHTML = '';
-          Object.values(ss).forEach(s => {
+          Object.entries(stats.byStatus).forEach(([key, s]) => {
+            const labels = {
+              malfunction: 'Неисправность',
+              move: 'Перемещение',
+              info: 'Информация',
+            };
             const tr = document.createElement('tr');
-            tr.innerHTML = `<td>${s.label}</td><td>${s.total}</td><td>${s.completed}</td><td>${s.total - s.completed}</td>`;
+            tr.innerHTML = `<td>${labels[key]}</td><td>${s.total}</td><td>${s.completed}</td><td>${s.total - s.completed}</td>`;
             sstb.appendChild(tr);
-          });
-
-          const us = {};
-          records.forEach(r => {
-            if (!r.username) return;
-            if (!us[r.username])
-              us[r.username] = {
-                total: 0,
-                completed: 0,
-                inProgress: 0,
-                malfunctions: 0,
-                moves: 0,
-                infos: 0,
-              };
-            us[r.username].total++;
-            if (r.completed) us[r.username].completed++;
-            else us[r.username].inProgress++;
-            if (r.status === 'malfunction') us[r.username].malfunctions++;
-            if (r.status === 'move') us[r.username].moves++;
-            if (r.status === 'info') us[r.username].infos++;
           });
           const ustb = document.getElementById('userStatsTableBody');
           if (ustb) {
             ustb.innerHTML = '';
-            const su = Object.entries(us).sort(
+            const su = Object.entries(stats.byUser).sort(
               (a, b) => b[1].total - a[1].total
             );
             if (!su.length)
@@ -5549,42 +5433,34 @@
             else
               su.forEach(([un, s]) => {
                 const pt =
-                  records.length > 0
-                    ? ((s.total / records.length) * 100).toFixed(1) + '%'
+                  stats.totalRecords > 0
+                    ? ((s.total / stats.totalRecords) * 100).toFixed(1) + '%'
                     : '0%';
                 const tr = document.createElement('tr');
                 tr.innerHTML = `<td><strong>${escapeHtml(un)}</strong></td><td>${s.total} (${pt})</td><td>${s.completed}</td><td>${s.inProgress}</td><td>${pt}</td><td>${s.malfunctions}</td><td>${s.moves}</td><td>${s.infos}</td>`;
                 ustb.appendChild(tr);
               });
           }
-
           const wtb = document.getElementById('warrantyTableBody');
           if (wtb) {
             wtb.innerHTML = '';
-            const now = new Date(),
-              wd = new Date();
-            wd.setDate(wd.getDate() + 30);
-            const dw = devices.filter(d => d.warranty);
-            if (!dw.length)
+            if (!stats.warrantyAlerts.length)
               wtb.innerHTML =
                 '<tr><td colspan="4" class="no-records">Нет данных</td></tr>';
-            else {
-              dw.sort((a, b) => new Date(a.warranty) - new Date(b.warranty));
-              dw.forEach(d => {
-                const we = new Date(d.warranty);
+            else
+              stats.warrantyAlerts.forEach(d => {
                 const tr = document.createElement('tr');
                 let st = '✅ Действует';
-                if (we < now) {
+                if (d.status === 'expired') {
                   st = '❌ Истекла';
                   tr.style.background = 'rgba(255,71,87,0.1)';
-                } else if (we < wd) {
+                } else if (d.status === 'expiring') {
                   st = '⚠️ Истекает';
                   tr.style.background = 'rgba(255,165,2,0.1)';
                 }
-                tr.innerHTML = `<td>${escapeHtml(d.device)}</td><td>${escapeHtml(d.serialNumber)}</td><td>${we.toLocaleDateString('ru-RU')}</td><td>${st}</td>`;
+                tr.innerHTML = `<td>${escapeHtml(d.device)}</td><td>${escapeHtml(d.serialNumber)}</td><td>${new Date(d.warranty).toLocaleDateString('ru-RU')}</td><td>${st}</td>`;
                 wtb.appendChild(tr);
               });
-            }
           }
         }
 
@@ -5631,7 +5507,6 @@
         document
           .getElementById('addNavItemBtn')
           .addEventListener('click', openCreateSectionModal);
-
         document
           .getElementById('backupBtn')
           ?.addEventListener('click', async () => {
@@ -5644,15 +5519,38 @@
             }
           });
 
+        function setupInfiniteScroll(containerId, loadMoreFn) {
+          const container = document
+            .getElementById(containerId)
+            ?.closest('.table-container');
+          if (!container) return;
+          container.addEventListener('scroll', function () {
+            if (this.scrollTop + this.clientHeight >= this.scrollHeight - 200) {
+              loadMoreFn();
+            }
+          });
+        }
+
+        function showToast(message, type = 'success') {
+          const toast = document.createElement('div');
+          toast.className = 'toast';
+          toast.innerHTML = type === 'success' ? '✅ ' + message : message;
+          document.body.appendChild(toast);
+          requestAnimationFrame(() => toast.classList.add('show'));
+          setTimeout(() => {
+            toast.classList.remove('show');
+            setTimeout(() => toast.remove(), 300);
+          }, 3000);
+        }
+
         async function init() {
           await loadData();
+          await loadStatistics();
           applyTheme(localStorage.getItem('navipro_theme') || 'dark');
           updateUserUI();
           updateToggleButton();
           renderNavMenu();
           updateProductSelect();
-          renderRecordsTable();
-          renderDevicesTable();
           initInstructionTabs();
           initDevicesFilters();
           initCreateSectionModal();
@@ -5662,6 +5560,14 @@
           initAddRecordModal();
           initAddDeviceModal();
           initDeviceInfoModal();
+          setupInfiniteScroll('recordsTable', () => {
+            if (!recordsAllLoaded && !recordsLoading)
+              loadRecordsPage(recordsPage + 1);
+          });
+          setupInfiniteScroll('devicesTable', () => {
+            if (!devicesAllLoaded && !devicesLoading)
+              loadDevicesPage(devicesPage + 1);
+          });
           loadingScreen.classList.add('hidden');
           authContainer.classList.remove('hidden');
         }
