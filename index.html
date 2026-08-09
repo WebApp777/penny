@@ -1593,6 +1593,25 @@
         background: var(--accent);
         color: white;
       }
+
+      #deviceInfoContent table {
+    width:100%;
+    border-collapse:collapse;
+    font-size:0.8rem;
+}
+#deviceInfoContent th {
+    padding:0.5rem;
+    text-align:left;
+    background:var(--glass-bg);
+    color:var(--accent);
+    font-size:0.7rem;
+    text-transform:uppercase;
+}
+#deviceInfoContent td {
+    padding:0.4rem 0.5rem;
+    border-bottom:1px solid var(--glass-border);
+    font-size:0.8rem;
+}
     </style>
   </head>
 
@@ -2545,6 +2564,18 @@
       </div>
     </div>
 
+    <div class="modal-overlay" id="deviceInfoModalOverlay">
+    <div class="modal-content" style="max-width:800px;">
+        <div class="modal-header">
+            <h2>Информация об устройстве</h2>
+            <button class="modal-close-btn" id="closeDeviceInfoModal">&times;</button>
+        </div>
+        <div id="deviceInfoContent" style="display:flex;flex-direction:column;gap:1rem;">
+            <!-- Заполняется динамически -->
+        </div>
+    </div>
+</div>
+
     <div class="modal-overlay" id="createSectionModal">
       <div class="modal-content" style="max-width: 1000px; max-height: 90vh">
         <div class="modal-header">
@@ -2674,114 +2705,92 @@
       </div>
     </div>
 
-    <script>
-      (function () {
+ <script>
+    (function () {
         'use strict';
 
         const API = {
-          users: '/penny/users',
-          navigation: '/penny/navigation',
-          records: '/penny/records',
-          devices: '/penny/devices',
-          history: '/penny/history',
-          backup: '/penny/backup',
+            users: '/penny/users',
+            navigation: '/penny/navigation',
+            records: '/penny/records',
+            devices: '/penny/devices',
+            history: '/penny/history',
+            backup: '/penny/backup',
         };
 
         const STATUS_LABELS = {
-          malfunction: 'Неисправность',
-          info: 'Информация',
-          move: 'Перемещение',
+            malfunction: 'Неисправность',
+            info: 'Информация',
+            move: 'Перемещение',
         };
         const IMPORTANCE_LABELS = {
-          1: '1 - Низкая',
-          2: '2 - Средняя',
-          3: '3 - Высокая',
+            1: '1 - Низкая',
+            2: '2 - Средняя',
+            3: '3 - Высокая',
         };
 
         const icons = {
-          home: '<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>',
-          settings:
-            '<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>',
-          star: '<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>',
-          file: '<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>',
-          bookmark:
-            '<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg>',
+            home: '<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>',
+            settings: '<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>',
+            star: '<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>',
+            file: '<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>',
+            bookmark: '<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg>',
         };
 
         let navItems = [],
-          records = [],
-          devices = [],
-          currentUser = null,
-          currentUserRole = null,
-          users = {};
+            records = [],
+            devices = [],
+            currentUser = null,
+            currentUserRole = null,
+            users = {};
         let editingDeviceId = null;
         let currentTheme = 'dark',
-          activeNavId = 'home',
-          isPanelExpanded = false,
-          editingRecordId = null,
-          dateTimeInterval = null;
+            activeNavId = 'home',
+            isPanelExpanded = false,
+            editingRecordId = null,
+            dateTimeInterval = null;
 
         async function apiGet(url) {
-          const r = await fetch(url);
-          if (!r.ok) throw new Error('Ошибка');
-          return await r.json();
+            const r = await fetch(url);
+            if (!r.ok) throw new Error('Ошибка');
+            return await r.json();
         }
         async function apiPost(url, data) {
-          const r = await fetch(url, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(data),
-          });
-          const result = await r.json();
-          if (!r.ok) throw new Error(result.error || 'Ошибка');
-          return result;
+            const r = await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data),
+            });
+            const result = await r.json();
+            if (!r.ok) throw new Error(result.error || 'Ошибка');
+            return result;
         }
         async function apiPut(url, data) {
-          const r = await fetch(url, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(data),
-          });
-          const result = await r.json();
-          if (!r.ok) throw new Error(result.error || 'Ошибка');
-          return result;
+            const r = await fetch(url, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data),
+            });
+            const result = await r.json();
+            if (!r.ok) throw new Error(result.error || 'Ошибка');
+            return result;
         }
         async function apiDelete(url, data) {
-          await fetch(url, {
-            method: 'DELETE',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(data),
-          });
+            await fetch(url, {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data),
+            });
         }
 
         async function loadData() {
-          try {
-            users = await apiGet(API.users);
-          } catch (e) {
-            users = {};
-          }
-          try {
-            navItems = await apiGet(API.navigation);
-          } catch (e) {
-            navItems = [];
-          }
-          try {
-            records = await apiGet(API.records);
-          } catch (e) {
-            records = [];
-          }
-          try {
-            devices = await apiGet(API.devices);
-          } catch (e) {
-            devices = [];
-          }
+            try { users = await apiGet(API.users); } catch (e) { users = {}; }
+            try { navItems = await apiGet(API.navigation); } catch (e) { navItems = []; }
+            try { records = await apiGet(API.records); } catch (e) { records = []; }
+            try { devices = await apiGet(API.devices); } catch (e) { devices = []; }
         }
         async function saveNavigation() {
-          try {
-            await apiPost(API.navigation, navItems);
-          } catch (e) {
-            alert('Ошибка сохранения навигации');
-          }
+            try { await apiPost(API.navigation, navItems); } catch (e) { alert('Ошибка сохранения навигации'); }
         }
 
         const loadingScreen = document.getElementById('loadingScreen');
@@ -2799,2395 +2808,1018 @@
         const themeToggle = document.getElementById('themeToggle');
 
         function updateToggleButton() {
-          if (isPanelExpanded)
-            togglePanelIcon.innerHTML =
-              '<line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line>';
-          else
-            togglePanelIcon.innerHTML =
-              '<polyline points="9 18 15 12 9 6"></polyline>';
+            if (isPanelExpanded)
+                togglePanelIcon.innerHTML = '<line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line>';
+            else
+                togglePanelIcon.innerHTML = '<polyline points="9 18 15 12 9 6"></polyline>';
         }
         function togglePanel() {
-          isPanelExpanded = !isPanelExpanded;
-          sidePanel.classList.toggle('expanded', isPanelExpanded);
-          document.body.classList.toggle('panel-expanded', isPanelExpanded);
-          updateToggleButton();
-          addNavSection.style.display = isPanelExpanded ? 'block' : 'none';
+            isPanelExpanded = !isPanelExpanded;
+            sidePanel.classList.toggle('expanded', isPanelExpanded);
+            document.body.classList.toggle('panel-expanded', isPanelExpanded);
+            updateToggleButton();
+            addNavSection.style.display = isPanelExpanded ? 'block' : 'none';
         }
         togglePanelBtn.addEventListener('click', togglePanel);
 
         function applyTheme(theme) {
-          document.documentElement.setAttribute('data-theme', theme);
-          currentTheme = theme;
-          localStorage.setItem('navipro_theme', theme);
-          const icon = themeToggle.querySelector('svg');
-          if (theme === 'dark')
-            icon.innerHTML =
-              '<circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>';
-          else
-            icon.innerHTML =
-              '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>';
+            document.documentElement.setAttribute('data-theme', theme);
+            currentTheme = theme;
+            localStorage.setItem('navipro_theme', theme);
+            const icon = themeToggle.querySelector('svg');
+            if (theme === 'dark')
+                icon.innerHTML = '<circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>';
+            else
+                icon.innerHTML = '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>';
         }
 
         function updateUserUI() {
-          if (currentUser) {
-            userAvatar.textContent = currentUser.charAt(0).toUpperCase();
-            userNameDisplay.textContent = currentUser;
-            logoutBtn.classList.add('visible');
-            userRoleDisplay.textContent =
-              currentUserRole === 'admin' ? 'Админ' : 'Пользователь';
-            userRoleDisplay.className =
-              'user-role' + (currentUserRole === 'admin' ? ' admin' : '');
-            document.getElementById('recordUser').value = currentUser;
-            document.getElementById('recordRequest').value =
-              getNextRequestNumber();
-            updateDateTime();
-          } else {
-            userAvatar.textContent = 'G';
-            userNameDisplay.textContent = 'Гость';
-            logoutBtn.classList.remove('visible');
-            userRoleDisplay.textContent = '';
-            userRoleDisplay.className = 'user-role';
-          }
+            if (currentUser) {
+                userAvatar.textContent = currentUser.charAt(0).toUpperCase();
+                userNameDisplay.textContent = currentUser;
+                logoutBtn.classList.add('visible');
+                userRoleDisplay.textContent = currentUserRole === 'admin' ? 'Админ' : 'Пользователь';
+                userRoleDisplay.className = 'user-role' + (currentUserRole === 'admin' ? ' admin' : '');
+                document.getElementById('recordUser').value = currentUser;
+                document.getElementById('recordRequest').value = getNextRequestNumber();
+                updateDateTime();
+            } else {
+                userAvatar.textContent = 'G'; userNameDisplay.textContent = 'Гость';
+                logoutBtn.classList.remove('visible'); userRoleDisplay.textContent = '';
+                userRoleDisplay.className = 'user-role';
+            }
         }
 
         function updateDateTime() {
-          const now = new Date();
-          const el = document.getElementById('recordDateTime');
-          if (el)
-            el.value = now.toLocaleString('ru-RU', {
-              year: 'numeric',
-              month: '2-digit',
-              day: '2-digit',
-              hour: '2-digit',
-              minute: '2-digit',
-              second: '2-digit',
-            });
+            const now = new Date();
+            const el = document.getElementById('recordDateTime');
+            if (el) el.value = now.toLocaleString('ru-RU', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit' });
         }
 
         function updateProductSelect() {
-          const select = document.getElementById('recordProduct');
-          if (select) {
-            const cv = select.value;
-            select.innerHTML = '<option value="">Выберите изделие...</option>';
-            [...new Set(devices.map(d => d.product))].sort().forEach(p => {
-              const o = document.createElement('option');
-              o.value = p;
-              o.textContent = p;
-              select.appendChild(o);
-            });
-            select.value = cv;
-          }
-          const rp = document.getElementById('recordReplaceProduct');
-          if (rp) {
-            const cv = rp.value;
-            rp.innerHTML = '<option value="">Выберите изделие...</option>';
-            [...new Set(devices.map(d => d.product))].sort().forEach(p => {
-              const o = document.createElement('option');
-              o.value = p;
-              o.textContent = p;
-              rp.appendChild(o);
-            });
-            rp.value = cv;
-          }
-          const fp = document.getElementById('filterProduct');
-          if (fp) {
-            const cv = fp.value;
-            fp.innerHTML = '<option value="">Все изделия</option>';
-            [...new Set(devices.map(d => d.product))].sort().forEach(p => {
-              const o = document.createElement('option');
-              o.value = p;
-              o.textContent = p;
-              fp.appendChild(o);
-            });
-            fp.value = cv;
-          }
+            const select = document.getElementById('recordProduct');
+            if (select) {
+                const cv = select.value;
+                select.innerHTML = '<option value="">Выберите изделие...</option>';
+                [...new Set(devices.map(d => d.product))].sort().forEach(p => { const o = document.createElement('option'); o.value = p; o.textContent = p; select.appendChild(o); });
+                select.value = cv;
+            }
+            const rp = document.getElementById('recordReplaceProduct');
+            if (rp) {
+                const cv = rp.value;
+                rp.innerHTML = '<option value="">Выберите изделие...</option>';
+                [...new Set(devices.map(d => d.product))].sort().forEach(p => { const o = document.createElement('option'); o.value = p; o.textContent = p; rp.appendChild(o); });
+                rp.value = cv;
+            }
+            const fp = document.getElementById('filterProduct');
+            if (fp) {
+                const cv = fp.value;
+                fp.innerHTML = '<option value="">Все изделия</option>';
+                [...new Set(devices.map(d => d.product))].sort().forEach(p => { const o = document.createElement('option'); o.value = p; o.textContent = p; fp.appendChild(o); });
+                fp.value = cv;
+            }
         }
 
         function updateUserFilter() {
-          const fu = document.getElementById('filterUser');
-          if (!fu) return;
-          const cv = fu.value;
-          fu.innerHTML = '<option value="">Все пользователи</option>';
-          [...new Set(records.map(r => r.username).filter(Boolean))]
-            .sort()
-            .forEach(u => {
-              const o = document.createElement('option');
-              o.value = u;
-              o.textContent = u;
-              fu.appendChild(o);
-            });
-          fu.value = cv;
+            const fu = document.getElementById('filterUser');
+            if (!fu) return;
+            const cv = fu.value;
+            fu.innerHTML = '<option value="">Все пользователи</option>';
+            [...new Set(records.map(r => r.username).filter(Boolean))].sort().forEach(u => { const o = document.createElement('option'); o.value = u; o.textContent = u; fu.appendChild(o); });
+            fu.value = cv;
         }
 
         function login(username) {
-          const user = users[username];
-          currentUser = username;
-          currentUserRole = user ? user.role : 'user';
-          updateUserUI();
-          authContainer.classList.add('hidden');
-          mainInterface.classList.add('visible');
-          sidePanel.classList.add('expanded');
-          document.body.classList.add('panel-expanded');
-          isPanelExpanded = true;
-          updateToggleButton();
-          addNavSection.style.display = 'block';
-          updateInstructionsTabs();
-          renderNavMenu();
-          updateProductSelect();
-          initFilters();
-          initEditModal();
-          initInstructionTabs();
-          initDevicesFilters();
-          renderRecordsTable();
-          renderDevicesTable();
-          initCreateSectionModal();
-          initExportButtons();
-          initImportButtons();
-          initAddRecordModal();
-          initAddDeviceModal();
-          document.getElementById('recordRequest').value =
-            getNextRequestNumber();
-          document.getElementById('homePage').classList.add('active');
-          if (dateTimeInterval) clearInterval(dateTimeInterval);
-          dateTimeInterval = setInterval(updateDateTime, 1000);
+            const user = users[username];
+            currentUser = username;
+            currentUserRole = user ? user.role : 'user';
+            updateUserUI();
+            authContainer.classList.add('hidden');
+            mainInterface.classList.add('visible');
+            sidePanel.classList.add('expanded');
+            document.body.classList.add('panel-expanded');
+            isPanelExpanded = true;
+            updateToggleButton();
+            addNavSection.style.display = 'block';
+            updateInstructionsTabs();
+            renderNavMenu();
+            updateProductSelect();
+            initFilters();
+            initEditModal();
+            initInstructionTabs();
+            initDevicesFilters();
+            renderRecordsTable();
+            renderDevicesTable();
+            initCreateSectionModal();
+            initExportButtons();
+            initImportButtons();
+            initAddRecordModal();
+            initAddDeviceModal();
+            initDeviceInfoModal();
+            document.getElementById('recordRequest').value = getNextRequestNumber();
+            document.getElementById('homePage').classList.add('active');
+            if (dateTimeInterval) clearInterval(dateTimeInterval);
+            dateTimeInterval = setInterval(updateDateTime, 1000);
         }
 
         function logout() {
-          currentUser = null;
-          currentUserRole = null;
-          updateUserUI();
-          sidePanel.classList.remove('expanded');
-          document.body.classList.remove('panel-expanded');
-          isPanelExpanded = false;
-          updateToggleButton();
-          mainInterface.classList.remove('visible');
-          authContainer.classList.remove('hidden');
-          if (dateTimeInterval) {
-            clearInterval(dateTimeInterval);
-            dateTimeInterval = null;
-          }
+            currentUser = null; currentUserRole = null;
+            updateUserUI();
+            sidePanel.classList.remove('expanded');
+            document.body.classList.remove('panel-expanded');
+            isPanelExpanded = false;
+            updateToggleButton();
+            mainInterface.classList.remove('visible');
+            authContainer.classList.remove('hidden');
+            if (dateTimeInterval) { clearInterval(dateTimeInterval); dateTimeInterval = null; }
         }
 
         document.getElementById('loginForm').addEventListener('submit', e => {
-          e.preventDefault();
-          const u = document.getElementById('loginUser').value.trim();
-          const p = document.getElementById('loginPass').value;
-          const el = document.getElementById('loginError');
-          el.classList.remove('visible');
-          if (!u || !p) {
-            el.textContent = 'Заполните все поля';
-            el.classList.add('visible');
-            return;
-          }
-          const user = users[u];
-          if (!user) {
-            el.textContent = 'Пользователь не найден';
-            el.classList.add('visible');
-            return;
-          }
-          if (user.password !== p) {
-            el.textContent = 'Неверный пароль';
-            el.classList.add('visible');
-            return;
-          }
-          login(u);
+            e.preventDefault();
+            const u = document.getElementById('loginUser').value.trim();
+            const p = document.getElementById('loginPass').value;
+            const el = document.getElementById('loginError');
+            el.classList.remove('visible');
+            if (!u || !p) { el.textContent = 'Заполните все поля'; el.classList.add('visible'); return; }
+            const user = users[u];
+            if (!user) { el.textContent = 'Пользователь не найден'; el.classList.add('visible'); return; }
+            if (user.password !== p) { el.textContent = 'Неверный пароль'; el.classList.add('visible'); return; }
+            login(u);
         });
 
-        document
-          .getElementById('registerForm')
-          .addEventListener('submit', async e => {
+        document.getElementById('registerForm').addEventListener('submit', async e => {
             e.preventDefault();
             const u = document.getElementById('regUser').value.trim();
             const p = document.getElementById('regPass').value;
             const pc = document.getElementById('regPassConfirm').value;
             const el = document.getElementById('registerError');
             const sl = document.getElementById('registerSuccess');
-            el.classList.remove('visible');
-            sl.classList.remove('visible');
-            if (!u || !p || !pc) {
-              el.textContent = 'Заполните все поля';
-              el.classList.add('visible');
-              return;
-            }
-            if (u.length < 3) {
-              el.textContent = 'Логин не менее 3 символов';
-              el.classList.add('visible');
-              return;
-            }
-            if (p.length < 4) {
-              el.textContent = 'Пароль не менее 4 символов';
-              el.classList.add('visible');
-              return;
-            }
-            if (p !== pc) {
-              el.textContent = 'Пароли не совпадают';
-              el.classList.add('visible');
-              return;
-            }
+            el.classList.remove('visible'); sl.classList.remove('visible');
+            if (!u || !p || !pc) { el.textContent = 'Заполните все поля'; el.classList.add('visible'); return; }
+            if (u.length < 3) { el.textContent = 'Логин не менее 3 символов'; el.classList.add('visible'); return; }
+            if (p.length < 4) { el.textContent = 'Пароль не менее 4 символов'; el.classList.add('visible'); return; }
+            if (p !== pc) { el.textContent = 'Пароли не совпадают'; el.classList.add('visible'); return; }
             try {
-              await apiPost(API.users, {
-                username: u,
-                password: p,
-                role: 'user',
-              });
-              users[u] = {
-                password: p,
-                role: 'user',
-                createdAt: new Date().toISOString(),
-              };
-              sl.textContent = 'Регистрация успешна!';
-              sl.classList.add('visible');
-              document.getElementById('regUser').value = '';
-              document.getElementById('regPass').value = '';
-              document.getElementById('regPassConfirm').value = '';
-              setTimeout(() => {
-                document
-                  .querySelectorAll('.auth-tab')
-                  .forEach(t => t.classList.remove('active'));
-                document
-                  .querySelector('.auth-tab[data-tab="login"]')
-                  .classList.add('active');
-                document.getElementById('loginForm').style.display = 'flex';
-                document.getElementById('registerForm').style.display = 'none';
-                document.getElementById('loginUser').value = u;
-              }, 1500);
-            } catch (err) {
-              el.textContent = err.message;
-              el.classList.add('visible');
-            }
-          });
+                await apiPost(API.users, { username: u, password: p, role: 'user' });
+                users[u] = { password: p, role: 'user', createdAt: new Date().toISOString() };
+                sl.textContent = 'Регистрация успешна!'; sl.classList.add('visible');
+                document.getElementById('regUser').value = ''; document.getElementById('regPass').value = ''; document.getElementById('regPassConfirm').value = '';
+                setTimeout(() => {
+                    document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
+                    document.querySelector('.auth-tab[data-tab="login"]').classList.add('active');
+                    document.getElementById('loginForm').style.display = 'flex';
+                    document.getElementById('registerForm').style.display = 'none';
+                    document.getElementById('loginUser').value = u;
+                }, 1500);
+            } catch (err) { el.textContent = err.message; el.classList.add('visible'); }
+        });
 
         document.querySelectorAll('.auth-tab').forEach(tab => {
-          tab.addEventListener('click', () => {
-            document
-              .querySelectorAll('.auth-tab')
-              .forEach(t => t.classList.remove('active'));
-            tab.classList.add('active');
-            document.getElementById('loginForm').style.display =
-              tab.dataset.tab === 'login' ? 'flex' : 'none';
-            document.getElementById('registerForm').style.display =
-              tab.dataset.tab === 'register' ? 'flex' : 'none';
-          });
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                document.getElementById('loginForm').style.display = tab.dataset.tab === 'login' ? 'flex' : 'none';
+                document.getElementById('registerForm').style.display = tab.dataset.tab === 'register' ? 'flex' : 'none';
+            });
         });
 
-        themeToggle.addEventListener('click', () =>
-          applyTheme(currentTheme === 'dark' ? 'light' : 'dark')
-        );
-        logoutBtn.addEventListener('click', e => {
-          e.stopPropagation();
-          logout();
-        });
+        themeToggle.addEventListener('click', () => applyTheme(currentTheme === 'dark' ? 'light' : 'dark'));
+        logoutBtn.addEventListener('click', e => { e.stopPropagation(); logout(); });
 
-        function generateId() {
-          return (
-            'nav_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9)
-          );
-        }
-        function escapeHtml(text) {
-          const d = document.createElement('div');
-          d.textContent = text;
-          return d.innerHTML;
-        }
+        function generateId() { return 'nav_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9); }
+        function escapeHtml(text) { const d = document.createElement('div'); d.textContent = text; return d.innerHTML; }
 
         function renderNavMenu() {
-          navMenu.innerHTML = '';
-          const visibleItems = navItems.filter(item => {
-            if (item.id === 'instructions') return true;
-            if (item.adminOnly && currentUserRole !== 'admin') return false;
-            if (item.isDefault) return true;
-            if (
-              item.isCustom &&
-              item.createdBy !== currentUser &&
-              currentUserRole !== 'admin'
-            )
-              return false;
-            return true;
-          });
-          const instructionsItem = {
-            id: 'instructions',
-            label: 'Инструкции',
-            icon: 'bookmark',
-            isDefault: true,
-          };
-          const allItems = [...visibleItems, instructionsItem];
-          allItems.forEach(item => {
-            const li = document.createElement('li');
-            li.className = 'nav-item';
-            if (!item.isDefault) li.classList.add('user-added');
-            const button = document.createElement('button');
-            button.className =
-              'nav-link' + (item.id === activeNavId ? ' active' : '');
-            button.innerHTML =
-              (icons[item.icon] || icons.star) +
-              `<span>${escapeHtml(item.label)}</span>`;
-            if (!isPanelExpanded) button.title = item.label;
-            button.addEventListener('click', () => {
-              activeNavId = item.id;
-              renderNavMenu();
-              document
-                .querySelectorAll('.page-content')
-                .forEach(p => p.classList.remove('active'));
-              if (item.id === 'home')
-                document.getElementById('homePage').classList.add('active');
-              else if (item.id === 'all_devices') {
-                document
-                  .getElementById('allDevicesPage')
-                  .classList.add('active');
-                renderDevicesTable();
-              } else if (item.id === 'statistics') {
-                document
-                  .getElementById('statisticsPage')
-                  .classList.add('active');
-                renderStatistics();
-              } else if (item.id === 'instructions') {
-                document
-                  .getElementById('instructionsPage')
-                  .classList.add('active');
-                switchInstructionTab(
-                  currentUserRole === 'admin' ? 'admin_guide' : 'user_guide'
-                );
-              } else if (item.isCustom) renderCustomSection(item);
+            navMenu.innerHTML = '';
+            const visibleItems = navItems.filter(item => {
+                if (item.id === 'instructions') return true;
+                if (item.adminOnly && currentUserRole !== 'admin') return false;
+                if (item.isDefault) return true;
+                if (item.isCustom && item.createdBy !== currentUser && currentUserRole !== 'admin') return false;
+                return true;
             });
-            if (
-              !item.isDefault &&
-              item.id !== 'instructions' &&
-              currentUserRole === 'admin'
-            ) {
-              const delBtn = document.createElement('button');
-              delBtn.className = 'delete-nav-btn';
-              delBtn.innerHTML =
-                '<svg viewBox="0 0 24 24" fill="none" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>';
-              delBtn.addEventListener('click', e => {
-                e.stopPropagation();
-                deleteNavItem(item.id);
-              });
-              li.appendChild(delBtn);
-            }
-            li.appendChild(button);
-            navMenu.appendChild(li);
-          });
+            const instructionsItem = { id: 'instructions', label: 'Инструкции', icon: 'bookmark', isDefault: true };
+            const allItems = [...visibleItems, instructionsItem];
+            allItems.forEach(item => {
+                const li = document.createElement('li');
+                li.className = 'nav-item';
+                if (!item.isDefault) li.classList.add('user-added');
+                const button = document.createElement('button');
+                button.className = 'nav-link' + (item.id === activeNavId ? ' active' : '');
+                button.innerHTML = (icons[item.icon] || icons.star) + `<span>${escapeHtml(item.label)}</span>`;
+                if (!isPanelExpanded) button.title = item.label;
+                button.addEventListener('click', () => {
+                    activeNavId = item.id; renderNavMenu();
+                    document.querySelectorAll('.page-content').forEach(p => p.classList.remove('active'));
+                    if (item.id === 'home') document.getElementById('homePage').classList.add('active');
+                    else if (item.id === 'all_devices') { document.getElementById('allDevicesPage').classList.add('active'); renderDevicesTable(); }
+                    else if (item.id === 'statistics') { document.getElementById('statisticsPage').classList.add('active'); renderStatistics(); }
+                    else if (item.id === 'instructions') { document.getElementById('instructionsPage').classList.add('active'); switchInstructionTab(currentUserRole === 'admin' ? 'admin_guide' : 'user_guide'); }
+                    else if (item.isCustom) renderCustomSection(item);
+                });
+                if (!item.isDefault && item.id !== 'instructions' && currentUserRole === 'admin') {
+                    const delBtn = document.createElement('button');
+                    delBtn.className = 'delete-nav-btn';
+                    delBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>';
+                    delBtn.addEventListener('click', e => { e.stopPropagation(); deleteNavItem(item.id); });
+                    li.appendChild(delBtn);
+                }
+                li.appendChild(button); navMenu.appendChild(li);
+            });
         }
 
         async function deleteNavItem(navId) {
-          const item = navItems.find(i => i.id === navId);
-          if (!item || item.isDefault) return;
-          if (currentUserRole !== 'admin' && item.createdBy !== currentUser) {
-            alert('Вы можете удалять только свои таблицы');
-            return;
-          }
-          if (confirm(`Удалить "${item.label}"?`)) {
-            navItems = navItems.filter(i => i.id !== navId);
-            await saveNavigation();
-            if (item.isCustom) {
-              try {
-                await fetch('/penny/sections/' + item.id + '?deleteFile=true', {
-                  method: 'DELETE',
-                });
-              } catch (e) {}
+            const item = navItems.find(i => i.id === navId);
+            if (!item || item.isDefault) return;
+            if (currentUserRole !== 'admin' && item.createdBy !== currentUser) { alert('Вы можете удалять только свои таблицы'); return; }
+            if (confirm(`Удалить "${item.label}"?`)) {
+                navItems = navItems.filter(i => i.id !== navId);
+                await saveNavigation();
+                if (item.isCustom) { try { await fetch('/penny/sections/' + item.id + '?deleteFile=true', { method: 'DELETE' }); } catch (e) {} }
+                const pageEl = document.getElementById('page_' + navId);
+                if (pageEl) pageEl.remove();
+                if (activeNavId === navId) activeNavId = 'home';
+                renderNavMenu();
+                document.querySelectorAll('.page-content').forEach(p => p.classList.remove('active'));
+                document.getElementById('homePage').classList.add('active');
             }
-            const pageEl = document.getElementById('page_' + navId);
-            if (pageEl) pageEl.remove();
-            if (activeNavId === navId) activeNavId = 'home';
-            renderNavMenu();
-            document
-              .querySelectorAll('.page-content')
-              .forEach(p => p.classList.remove('active'));
-            document.getElementById('homePage').classList.add('active');
-          }
         }
 
         let tempSectionConfig = { tableColumns: [], fields: [], filters: [] };
         function openCreateSectionModal() {
-          document.getElementById('createSectionModal').classList.add('active');
-          document.getElementById('sectionName').value = '';
-          tempSectionConfig = {
-            tableColumns: [
-              { id: 'col_1', label: 'Дата', inForm: false, inFilter: false },
-              { id: 'col_2', label: 'Статус', inForm: true, inFilter: true },
-              {
-                id: 'col_3',
-                label: 'Серийный номер',
-                inForm: true,
-                inFilter: true,
-              },
-            ],
-            fields: [],
-            filters: [],
-          };
-          syncFieldsFromColumns();
-          syncFiltersFromColumns();
-          renderTableColumnsList();
-          renderFieldsList();
-          renderFiltersList();
-          switchConstructorTab('tab-general');
+            document.getElementById('createSectionModal').classList.add('active');
+            document.getElementById('sectionName').value = '';
+            tempSectionConfig = {
+                tableColumns: [{ id: 'col_1', label: 'Дата', inForm: false, inFilter: false }, { id: 'col_2', label: 'Статус', inForm: true, inFilter: true }, { id: 'col_3', label: 'Серийный номер', inForm: true, inFilter: true }],
+                fields: [], filters: []
+            };
+            syncFieldsFromColumns(); syncFiltersFromColumns();
+            renderTableColumnsList(); renderFieldsList(); renderFiltersList();
+            switchConstructorTab('tab-general');
         }
-        function closeCreateSectionModal() {
-          document
-            .getElementById('createSectionModal')
-            .classList.remove('active');
-        }
+        function closeCreateSectionModal() { document.getElementById('createSectionModal').classList.remove('active'); }
         function switchConstructorTab(tabId) {
-          document
-            .querySelectorAll('.constructor-tab')
-            .forEach(t => t.classList.remove('active'));
-          const tab = document.querySelector(
-            `.constructor-tab[data-tab="${tabId}"]`
-          );
-          if (tab) tab.classList.add('active');
-          document.querySelectorAll('.constructor-content').forEach(c => {
-            c.classList.remove('active');
-            c.style.display = 'none';
-          });
-          const content = document.getElementById(tabId);
-          if (content) {
-            content.classList.add('active');
-            content.style.display = 'block';
-          }
-          if (tabId === 'tab-fields') {
-            syncFieldsFromColumns();
-            renderFieldsList();
-          }
-          if (tabId === 'tab-filters') {
-            syncFiltersFromColumns();
-            renderFiltersList();
-          }
-          if (tabId === 'tab-table') renderTableColumnsList();
+            document.querySelectorAll('.constructor-tab').forEach(t => t.classList.remove('active'));
+            const tab = document.querySelector(`.constructor-tab[data-tab="${tabId}"]`); if (tab) tab.classList.add('active');
+            document.querySelectorAll('.constructor-content').forEach(c => { c.classList.remove('active'); c.style.display = 'none'; });
+            const content = document.getElementById(tabId); if (content) { content.classList.add('active'); content.style.display = 'block'; }
+            if (tabId === 'tab-fields') { syncFieldsFromColumns(); renderFieldsList(); }
+            if (tabId === 'tab-filters') { syncFiltersFromColumns(); renderFiltersList(); }
+            if (tabId === 'tab-table') renderTableColumnsList();
         }
         function syncFieldsFromColumns() {
-          const cif = tempSectionConfig.tableColumns.filter(c => c.inForm);
-          tempSectionConfig.fields = tempSectionConfig.fields.filter(f =>
-            cif.some(c => c.id === f.columnId)
-          );
-          cif.forEach(c => {
-            if (!tempSectionConfig.fields.find(f => f.columnId === c.id))
-              tempSectionConfig.fields.push({
-                columnId: c.id,
-                label: c.label,
-                type: 'text',
-                required: false,
-                hasHint: false,
-                options: [],
-              });
-            else {
-              const f = tempSectionConfig.fields.find(f => f.columnId === c.id);
-              if (f) f.label = c.label;
-            }
-          });
+            const cif = tempSectionConfig.tableColumns.filter(c => c.inForm);
+            tempSectionConfig.fields = tempSectionConfig.fields.filter(f => cif.some(c => c.id === f.columnId));
+            cif.forEach(c => {
+                if (!tempSectionConfig.fields.find(f => f.columnId === c.id))
+                    tempSectionConfig.fields.push({ columnId: c.id, label: c.label, type: 'text', required: false, hasHint: false, options: [] });
+                else { const f = tempSectionConfig.fields.find(f => f.columnId === c.id); if (f) f.label = c.label; }
+            });
         }
         function syncFiltersFromColumns() {
-          const cif = tempSectionConfig.tableColumns.filter(c => c.inFilter);
-          tempSectionConfig.filters = tempSectionConfig.filters.filter(f =>
-            cif.some(c => c.id === f.columnId)
-          );
-          cif.forEach(c => {
-            if (!tempSectionConfig.filters.find(f => f.columnId === c.id))
-              tempSectionConfig.filters.push({
-                columnId: c.id,
-                label: c.label,
-                type: 'text',
-              });
-            else {
-              const f = tempSectionConfig.filters.find(
-                f => f.columnId === c.id
-              );
-              if (f) f.label = c.label;
-            }
-          });
+            const cif = tempSectionConfig.tableColumns.filter(c => c.inFilter);
+            tempSectionConfig.filters = tempSectionConfig.filters.filter(f => cif.some(c => c.id === f.columnId));
+            cif.forEach(c => {
+                if (!tempSectionConfig.filters.find(f => f.columnId === c.id))
+                    tempSectionConfig.filters.push({ columnId: c.id, label: c.label, type: 'text' });
+                else { const f = tempSectionConfig.filters.find(f => f.columnId === c.id); if (f) f.label = c.label; }
+            });
         }
         function renderTableColumnsList() {
-          const container = document.getElementById('tableColumnsList');
-          if (!container) return;
-          container.innerHTML = '';
-          tempSectionConfig.tableColumns.forEach((c, i) => {
-            const card = document.createElement('div');
-            card.className = 'field-config-card';
-            card.innerHTML = `<div class="field-header"><input type="text" class="field-name-input" value="${c.label}" data-index="${i}"><button type="button" class="remove-field-btn" data-index="${i}">Удалить</button></div><div class="field-options"><label><input type="checkbox" class="column-in-form" data-index="${i}" ${c.inForm ? 'checked' : ''}> В форме</label><label><input type="checkbox" class="column-in-filter" data-index="${i}" ${c.inFilter ? 'checked' : ''}> В фильтре</label></div>`;
-            container.appendChild(card);
-          });
-          container.querySelectorAll('.field-name-input').forEach(inp =>
-            inp.addEventListener('input', function () {
-              tempSectionConfig.tableColumns[
-                parseInt(this.dataset.index)
-              ].label = this.value;
-            })
-          );
-          container.querySelectorAll('.remove-field-btn').forEach(btn =>
-            btn.addEventListener('click', function () {
-              tempSectionConfig.tableColumns.splice(
-                parseInt(this.dataset.index),
-                1
-              );
-              renderTableColumnsList();
-            })
-          );
-          container.querySelectorAll('.column-in-form').forEach(cb =>
-            cb.addEventListener('change', function () {
-              tempSectionConfig.tableColumns[
-                parseInt(this.dataset.index)
-              ].inForm = this.checked;
-            })
-          );
-          container.querySelectorAll('.column-in-filter').forEach(cb =>
-            cb.addEventListener('change', function () {
-              tempSectionConfig.tableColumns[
-                parseInt(this.dataset.index)
-              ].inFilter = this.checked;
-            })
-          );
+            const container = document.getElementById('tableColumnsList'); if (!container) return;
+            container.innerHTML = '';
+            tempSectionConfig.tableColumns.forEach((c, i) => {
+                const card = document.createElement('div'); card.className = 'field-config-card';
+                card.innerHTML = `<div class="field-header"><input type="text" class="field-name-input" value="${c.label}" data-index="${i}"><button type="button" class="remove-field-btn" data-index="${i}">Удалить</button></div><div class="field-options"><label><input type="checkbox" class="column-in-form" data-index="${i}" ${c.inForm ? 'checked' : ''}> В форме</label><label><input type="checkbox" class="column-in-filter" data-index="${i}" ${c.inFilter ? 'checked' : ''}> В фильтре</label></div>`;
+                container.appendChild(card);
+            });
+            container.querySelectorAll('.field-name-input').forEach(inp => inp.addEventListener('input', function () { tempSectionConfig.tableColumns[parseInt(this.dataset.index)].label = this.value; }));
+            container.querySelectorAll('.remove-field-btn').forEach(btn => btn.addEventListener('click', function () { tempSectionConfig.tableColumns.splice(parseInt(this.dataset.index), 1); renderTableColumnsList(); }));
+            container.querySelectorAll('.column-in-form').forEach(cb => cb.addEventListener('change', function () { tempSectionConfig.tableColumns[parseInt(this.dataset.index)].inForm = this.checked; }));
+            container.querySelectorAll('.column-in-filter').forEach(cb => cb.addEventListener('change', function () { tempSectionConfig.tableColumns[parseInt(this.dataset.index)].inFilter = this.checked; }));
         }
         function renderFieldsList() {
-          const container = document.getElementById('fieldsList');
-          if (!container) return;
-          container.innerHTML = '';
-          if (!tempSectionConfig.fields.length) {
-            container.innerHTML =
-              '<p style="color:var(--text-secondary);text-align:center;padding:1rem;">Нет полей.</p>';
-            return;
-          }
-          tempSectionConfig.fields.forEach((f, i) => {
-            const card = document.createElement('div');
-            card.className = 'field-config-card';
-            card.innerHTML = `<div class="field-header"><span style="font-weight:600;color:var(--text-primary);">${f.label}</span><select class="field-type-select" data-index="${i}"><option value="text" ${f.type === 'text' ? 'selected' : ''}>Текст</option><option value="select" ${f.type === 'select' ? 'selected' : ''}>Список</option><option value="textarea" ${f.type === 'textarea' ? 'selected' : ''}>Много текста</option></select></div><div class="field-options"><label><input type="checkbox" class="field-required" data-index="${i}" ${f.required ? 'checked' : ''}> Обязательное</label><label><input type="checkbox" class="field-hint" data-index="${i}" ${f.hasHint ? 'checked' : ''}> Подсказки</label>${f.type === 'select' ? `<input type="text" class="field-options-input" data-index="${i}" placeholder="Опции через запятую" value="${(f.options || []).join(',')}" style="flex:1;min-width:150px;">` : ''}</div>`;
-            container.appendChild(card);
-          });
-          container.querySelectorAll('.field-type-select').forEach(s =>
-            s.addEventListener('change', function () {
-              tempSectionConfig.fields[parseInt(this.dataset.index)].type =
-                this.value;
-              renderFieldsList();
-            })
-          );
-          container.querySelectorAll('.field-required').forEach(cb =>
-            cb.addEventListener('change', function () {
-              tempSectionConfig.fields[parseInt(this.dataset.index)].required =
-                this.checked;
-            })
-          );
-          container.querySelectorAll('.field-hint').forEach(cb =>
-            cb.addEventListener('change', function () {
-              tempSectionConfig.fields[parseInt(this.dataset.index)].hasHint =
-                this.checked;
-            })
-          );
-          container.querySelectorAll('.field-options-input').forEach(inp =>
-            inp.addEventListener('input', function () {
-              tempSectionConfig.fields[parseInt(this.dataset.index)].options =
-                this.value
-                  .split(',')
-                  .map(s => s.trim())
-                  .filter(Boolean);
-            })
-          );
+            const container = document.getElementById('fieldsList'); if (!container) return;
+            container.innerHTML = '';
+            if (!tempSectionConfig.fields.length) { container.innerHTML = '<p style="color:var(--text-secondary);text-align:center;padding:1rem;">Нет полей.</p>'; return; }
+            tempSectionConfig.fields.forEach((f, i) => {
+                const card = document.createElement('div'); card.className = 'field-config-card';
+                card.innerHTML = `<div class="field-header"><span style="font-weight:600;color:var(--text-primary);">${f.label}</span><select class="field-type-select" data-index="${i}"><option value="text" ${f.type === 'text' ? 'selected' : ''}>Текст</option><option value="select" ${f.type === 'select' ? 'selected' : ''}>Список</option><option value="textarea" ${f.type === 'textarea' ? 'selected' : ''}>Много текста</option></select></div><div class="field-options"><label><input type="checkbox" class="field-required" data-index="${i}" ${f.required ? 'checked' : ''}> Обязательное</label><label><input type="checkbox" class="field-hint" data-index="${i}" ${f.hasHint ? 'checked' : ''}> Подсказки</label>${f.type === 'select' ? `<input type="text" class="field-options-input" data-index="${i}" placeholder="Опции через запятую" value="${(f.options || []).join(',')}" style="flex:1;min-width:150px;">` : ''}</div>`;
+                container.appendChild(card);
+            });
+            container.querySelectorAll('.field-type-select').forEach(s => s.addEventListener('change', function () { tempSectionConfig.fields[parseInt(this.dataset.index)].type = this.value; renderFieldsList(); }));
+            container.querySelectorAll('.field-required').forEach(cb => cb.addEventListener('change', function () { tempSectionConfig.fields[parseInt(this.dataset.index)].required = this.checked; }));
+            container.querySelectorAll('.field-hint').forEach(cb => cb.addEventListener('change', function () { tempSectionConfig.fields[parseInt(this.dataset.index)].hasHint = this.checked; }));
+            container.querySelectorAll('.field-options-input').forEach(inp => inp.addEventListener('input', function () { tempSectionConfig.fields[parseInt(this.dataset.index)].options = this.value.split(',').map(s => s.trim()).filter(Boolean); }));
         }
         function renderFiltersList() {
-          const container = document.getElementById('filtersList');
-          if (!container) return;
-          container.innerHTML = '';
-          if (!tempSectionConfig.filters.length) {
-            container.innerHTML =
-              '<p style="color:var(--text-secondary);text-align:center;padding:1rem;">Нет фильтров.</p>';
-            return;
-          }
-          tempSectionConfig.filters.forEach((f, i) => {
-            const card = document.createElement('div');
-            card.className = 'field-config-card';
-            card.innerHTML = `<div class="field-header"><span style="font-weight:600;color:var(--text-primary);">${f.label}</span><select class="filter-type-select" data-index="${i}"><option value="text" ${f.type === 'text' ? 'selected' : ''}>Поиск</option><option value="select" ${f.type === 'select' ? 'selected' : ''}>Список</option></select></div>`;
-            container.appendChild(card);
-          });
-          container.querySelectorAll('.filter-type-select').forEach(s =>
-            s.addEventListener('change', function () {
-              tempSectionConfig.filters[parseInt(this.dataset.index)].type =
-                this.value;
-            })
-          );
+            const container = document.getElementById('filtersList'); if (!container) return;
+            container.innerHTML = '';
+            if (!tempSectionConfig.filters.length) { container.innerHTML = '<p style="color:var(--text-secondary);text-align:center;padding:1rem;">Нет фильтров.</p>'; return; }
+            tempSectionConfig.filters.forEach((f, i) => {
+                const card = document.createElement('div'); card.className = 'field-config-card';
+                card.innerHTML = `<div class="field-header"><span style="font-weight:600;color:var(--text-primary);">${f.label}</span><select class="filter-type-select" data-index="${i}"><option value="text" ${f.type === 'text' ? 'selected' : ''}>Поиск</option><option value="select" ${f.type === 'select' ? 'selected' : ''}>Список</option></select></div>`;
+                container.appendChild(card);
+            });
+            container.querySelectorAll('.filter-type-select').forEach(s => s.addEventListener('change', function () { tempSectionConfig.filters[parseInt(this.dataset.index)].type = this.value; }));
         }
         async function createCustomSection(e) {
-          e.preventDefault();
-          const name = document.getElementById('sectionName').value.trim();
-          if (!name) {
-            alert('Введите название');
-            return;
-          }
-          if (!tempSectionConfig.tableColumns.length) {
-            alert('Добавьте колонки');
-            return;
-          }
-          const section = {
-            id: generateId(),
-            label: name,
-            icon: document.getElementById('sectionIcon')?.value || 'star',
-            isDefault: false,
-            createdBy: currentUser,
-            isCustom: true,
-            config: {
-              tableColumns: tempSectionConfig.tableColumns,
-              fields: tempSectionConfig.fields,
-              filters: tempSectionConfig.filters,
-            },
-          };
-          navItems.push(section);
-          await saveNavigation();
-          closeCreateSectionModal();
-          activeNavId = section.id;
-          renderNavMenu();
-          renderCustomSection(section);
+            e.preventDefault();
+            const name = document.getElementById('sectionName').value.trim();
+            if (!name) { alert('Введите название'); return; }
+            if (!tempSectionConfig.tableColumns.length) { alert('Добавьте колонки'); return; }
+            const section = { id: generateId(), label: name, icon: document.getElementById('sectionIcon')?.value || 'star', isDefault: false, createdBy: currentUser, isCustom: true, config: { tableColumns: tempSectionConfig.tableColumns, fields: tempSectionConfig.fields, filters: tempSectionConfig.filters } };
+            navItems.push(section); await saveNavigation();
+            closeCreateSectionModal(); activeNavId = section.id; renderNavMenu(); renderCustomSection(section);
         }
         function initCreateSectionModal() {
-          document
-            .getElementById('closeCreateSectionModal')
-            ?.addEventListener('click', closeCreateSectionModal);
-          document
-            .getElementById('cancelCreateSectionBtn')
-            ?.addEventListener('click', closeCreateSectionModal);
-          document
-            .getElementById('createSectionModal')
-            ?.addEventListener('click', function (e) {
-              if (e.target === this) closeCreateSectionModal();
-            });
-          document
-            .getElementById('createSectionForm')
-            ?.addEventListener('submit', createCustomSection);
-          document.querySelectorAll('.constructor-tab').forEach(t =>
-            t.addEventListener('click', function () {
-              switchConstructorTab(this.dataset.tab);
-            })
-          );
-          const addColumnBtn = document.getElementById('addColumnBtn');
-          if (addColumnBtn) {
-            const newBtn = addColumnBtn.cloneNode(true);
-            addColumnBtn.parentNode.replaceChild(newBtn, addColumnBtn);
-            newBtn.addEventListener('click', () => {
-              tempSectionConfig.tableColumns.push({
-                id: 'col_' + Date.now(),
-                label: 'Новая колонка',
-                inForm: true,
-                inFilter: false,
-              });
-              renderTableColumnsList();
-            });
-          }
+            document.getElementById('closeCreateSectionModal')?.addEventListener('click', closeCreateSectionModal);
+            document.getElementById('cancelCreateSectionBtn')?.addEventListener('click', closeCreateSectionModal);
+            document.getElementById('createSectionModal')?.addEventListener('click', function (e) { if (e.target === this) closeCreateSectionModal(); });
+            document.getElementById('createSectionForm')?.addEventListener('submit', createCustomSection);
+            document.querySelectorAll('.constructor-tab').forEach(t => t.addEventListener('click', function () { switchConstructorTab(this.dataset.tab); }));
+            const addColumnBtn = document.getElementById('addColumnBtn');
+            if (addColumnBtn) {
+                const newBtn = addColumnBtn.cloneNode(true);
+                addColumnBtn.parentNode.replaceChild(newBtn, addColumnBtn);
+                newBtn.addEventListener('click', () => { tempSectionConfig.tableColumns.push({ id: 'col_' + Date.now(), label: 'Новая колонка', inForm: true, inFilter: false }); renderTableColumnsList(); });
+            }
         }
 
         function renderCustomSection(section) {
-          const existing = document.getElementById('page_' + section.id);
-          if (existing) {
-            document
-              .querySelectorAll('.page-content')
-              .forEach(p => p.classList.remove('active'));
-            existing.classList.add('active');
-            return;
-          }
-          const config = section.config || {},
-            tc = config.tableColumns || [],
-            flds = config.fields || [],
-            flts = config.filters || [];
-          const div = document.createElement('div');
-          div.className = 'page-content active';
-          div.id = 'page_' + section.id;
-          let fh = '';
-          flds.forEach(f => {
-            const req = f.required ? ' *' : '',
-              ra = f.required ? 'required' : '';
-            if (f.type === 'select')
-              fh += `<div class="form-group"><label>${f.label}${req}</label><select class="custom-field" data-field="${f.columnId}" ${ra}><option value="">Выберите...</option>${(f.options || []).map(o => `<option value="${o}">${o}</option>`).join('')}</select></div>`;
-            else if (f.type === 'textarea')
-              fh += `<div class="form-group" style="grid-column:1/-1;"><label>${f.label}${req}</label><textarea class="custom-field" data-field="${f.columnId}" rows="2" ${ra}></textarea></div>`;
-            else
-              fh += `<div class="form-group"><label>${f.label}${req}</label><input type="text" class="custom-field" data-field="${f.columnId}" ${ra}></div>`;
-          });
-          let flh = '';
-          flts.forEach(f => {
-            if (f.type === 'select')
-              flh += `<select class="custom-filter" data-field="${f.columnId}"><option value="">${f.label}</option></select>`;
-            else
-              flh += `<input type="text" class="custom-filter" data-field="${f.columnId}" placeholder="🔍 ${f.label}...">`;
-          });
-          if (flts.length)
-            flh +=
-              '<button class="reset-filters-btn custom-reset-filters">🔄 Сбросить</button>';
-          flh +=
-            '<button class="export-btn custom-export-btn">📥 Экспорт CSV</button>';
-          let th = '';
-          tc.forEach(c => (th += `<th>${c.label}</th>`));
-          th += '<th>Действ.</th>';
-          div.innerHTML = `<div class="content-card"><span class="badge">📋 ${escapeHtml(section.createdBy)}</span><h1>${escapeHtml(section.label)}</h1>${flds.length ? `<form class="record-form custom-record-form">${fh}<button type="submit" class="submit-btn">Добавить</button></form>` : ''}${tc.length ? `<h2>Таблица</h2>${flts.length ? `<div class="filter-bar custom-filter-bar">${flh}</div>` : ''}<div class="table-container"><table><thead><tr>${th}</tr></thead><tbody class="custom-table-body" id="tbody_${section.id}"><tr><td colspan="${tc.length + 1}" class="no-records">Нет записей</td></tr></tbody></table></div>` : ''}</div>`;
-          document.querySelector('.main-content').appendChild(div);
-          const form = div.querySelector('.custom-record-form');
-          if (form)
-            form.addEventListener('submit', async e => {
-              e.preventDefault();
-              const rd = {
-                username: currentUser,
-                sectionId: section.id,
-                customFields: {},
-                createdAt: new Date().toISOString(),
-              };
-              let err = false;
-              flds.forEach(f => {
-                const inp = form.querySelector(`[data-field="${f.columnId}"]`);
-                if (f.required && inp && !inp.value.trim()) {
-                  alert(`Поле "${f.label}" обязательно`);
-                  err = true;
-                }
-                if (inp) rd.customFields[f.columnId] = inp.value.trim();
-              });
-              if (err) return;
-              try {
-                const r = await fetch('/penny/sections/' + section.id, {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify(rd),
-                });
-                if (!r.ok) throw new Error('');
-                const result = await r.json();
-                form.reset();
-                renderCustomTableBody(section, result.record);
-              } catch (ex) {
-                alert('Ошибка');
-              }
+            const existing = document.getElementById('page_' + section.id);
+            if (existing) { document.querySelectorAll('.page-content').forEach(p => p.classList.remove('active')); existing.classList.add('active'); return; }
+            const config = section.config || {}, tc = config.tableColumns || [], flds = config.fields || [], flts = config.filters || [];
+            const div = document.createElement('div'); div.className = 'page-content active'; div.id = 'page_' + section.id;
+            let fh = '';
+            flds.forEach(f => {
+                const req = f.required ? ' *' : '', ra = f.required ? 'required' : '';
+                if (f.type === 'select') fh += `<div class="form-group"><label>${f.label}${req}</label><select class="custom-field" data-field="${f.columnId}" ${ra}><option value="">Выберите...</option>${(f.options || []).map(o => `<option value="${o}">${o}</option>`).join('')}</select></div>`;
+                else if (f.type === 'textarea') fh += `<div class="form-group" style="grid-column:1/-1;"><label>${f.label}${req}</label><textarea class="custom-field" data-field="${f.columnId}" rows="2" ${ra}></textarea></div>`;
+                else fh += `<div class="form-group"><label>${f.label}${req}</label><input type="text" class="custom-field" data-field="${f.columnId}" ${ra}></div>`;
             });
-          const expBtn = div.querySelector('.custom-export-btn');
-          if (expBtn)
-            expBtn.addEventListener('click', async () => {
-              try {
-                const r = await fetch('/penny/sections/' + section.id);
-                if (!r.ok) return;
-                const data = await r.json();
-                const cols = tc.map(c => ({ id: c.id, label: c.label }));
-                exportToCSV(
-                  data.map(r => {
-                    const row = {};
-                    cols.forEach(c => {
-                      row[c.id] =
-                        r.customFields && r.customFields[c.id]
-                          ? r.customFields[c.id]
-                          : '';
-                    });
-                    return row;
-                  }),
-                  cols,
-                  section.label + '_' + new Date().toISOString().slice(0, 10)
-                );
-              } catch (e) {}
+            let flh = '';
+            flts.forEach(f => { if (f.type === 'select') flh += `<select class="custom-filter" data-field="${f.columnId}"><option value="">${f.label}</option></select>`; else flh += `<input type="text" class="custom-filter" data-field="${f.columnId}" placeholder="🔍 ${f.label}...">`; });
+            if (flts.length) flh += '<button class="reset-filters-btn custom-reset-filters">🔄 Сбросить</button>';
+            flh += '<button class="export-btn custom-export-btn">📥 Экспорт CSV</button>';
+            let th = ''; tc.forEach(c => th += `<th>${c.label}</th>`); th += '<th>Действ.</th>';
+            div.innerHTML = `<div class="content-card"><span class="badge">📋 ${escapeHtml(section.createdBy)}</span><h1>${escapeHtml(section.label)}</h1>${flds.length ? `<form class="record-form custom-record-form">${fh}<button type="submit" class="submit-btn">Добавить</button></form>` : ''}${tc.length ? `<h2>Таблица</h2>${flts.length ? `<div class="filter-bar custom-filter-bar">${flh}</div>` : ''}<div class="table-container"><table><thead><tr>${th}</tr></thead><tbody class="custom-table-body" id="tbody_${section.id}"><tr><td colspan="${tc.length + 1}" class="no-records">Нет записей</td></tr></tbody></table></div>` : ''}</div>`;
+            document.querySelector('.main-content').appendChild(div);
+            const form = div.querySelector('.custom-record-form');
+            if (form) form.addEventListener('submit', async e => {
+                e.preventDefault();
+                const rd = { username: currentUser, sectionId: section.id, customFields: {}, createdAt: new Date().toISOString() };
+                let err = false;
+                flds.forEach(f => { const inp = form.querySelector(`[data-field="${f.columnId}"]`); if (f.required && inp && !inp.value.trim()) { alert(`Поле "${f.label}" обязательно`); err = true; } if (inp) rd.customFields[f.columnId] = inp.value.trim(); });
+                if (err) return;
+                try { const r = await fetch('/penny/sections/' + section.id, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(rd) }); if (!r.ok) throw new Error(''); const result = await r.json(); form.reset(); renderCustomTableBody(section, result.record); } catch (ex) { alert('Ошибка'); }
             });
-          loadCustomSectionRecords(section);
+            const expBtn = div.querySelector('.custom-export-btn');
+            if (expBtn) expBtn.addEventListener('click', async () => {
+                try { const r = await fetch('/penny/sections/' + section.id); if (!r.ok) return; const data = await r.json(); const cols = tc.map(c => ({ id: c.id, label: c.label })); exportToCSV(data.map(r => { const row = {}; cols.forEach(c => { row[c.id] = r.customFields && r.customFields[c.id] ? r.customFields[c.id] : ''; }); return row; }), cols, section.label + '_' + new Date().toISOString().slice(0, 10)); } catch (e) {}
+            });
+            loadCustomSectionRecords(section);
         }
         async function loadCustomSectionRecords(section) {
-          try {
-            const r = await fetch('/penny/sections/' + section.id);
-            if (!r.ok) return;
-            const data = await r.json();
-            const tb = document.getElementById('tbody_' + section.id);
-            if (tb && data.length) {
-              const nr = tb.querySelector('.no-records');
-              if (nr) tb.innerHTML = '';
-            }
-            data.forEach(rec => renderCustomTableBody(section, rec));
-          } catch (e) {}
+            try { const r = await fetch('/penny/sections/' + section.id); if (!r.ok) return; const data = await r.json(); const tb = document.getElementById('tbody_' + section.id); if (tb && data.length) { const nr = tb.querySelector('.no-records'); if (nr) tb.innerHTML = ''; } data.forEach(rec => renderCustomTableBody(section, rec)); } catch (e) {}
         }
         function renderCustomTableBody(section, record) {
-          const tb = document.getElementById('tbody_' + section.id);
-          if (!tb) return;
-          const nr = tb.querySelector('.no-records');
-          if (nr) tb.innerHTML = '';
-          const tc = section.config?.tableColumns || [];
-          const tr = document.createElement('tr');
-          let rh = '';
-          tc.forEach(c => {
-            let v = '-';
-            if (record.customFields?.[c.id])
-              v = escapeHtml(record.customFields[c.id]);
-            if (c.id === 'col_1' && record.createdAt)
-              v = new Date(record.createdAt).toLocaleString('ru-RU');
-            rh += `<td>${v}</td>`;
-          });
-          rh += '<td><button class="delete-btn">🗑️</button></td>';
-          tr.innerHTML = rh;
-          tr.querySelector('.delete-btn')?.addEventListener(
-            'click',
-            async () => {
-              if (confirm('Удалить?')) {
-                try {
-                  await fetch('/penny/sections/' + section.id, {
-                    method: 'DELETE',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ id: record.id }),
-                  });
-                  tr.remove();
-                  if (!tb.children.length)
-                    tb.innerHTML = `<tr><td colspan="${tc.length + 1}" class="no-records">Нет записей</td></tr>`;
-                } catch (e) {}
-              }
-            }
-          );
-          tb.appendChild(tr);
+            const tb = document.getElementById('tbody_' + section.id); if (!tb) return;
+            const nr = tb.querySelector('.no-records'); if (nr) tb.innerHTML = '';
+            const tc = section.config?.tableColumns || [];
+            const tr = document.createElement('tr');
+            let rh = ''; tc.forEach(c => { let v = '-'; if (record.customFields?.[c.id]) v = escapeHtml(record.customFields[c.id]); if (c.id === 'col_1' && record.createdAt) v = new Date(record.createdAt).toLocaleString('ru-RU'); rh += `<td>${v}</td>`; });
+            rh += '<td><button class="delete-btn">🗑️</button></td>';
+            tr.innerHTML = rh;
+            tr.querySelector('.delete-btn')?.addEventListener('click', async () => { if (confirm('Удалить?')) { try { await fetch('/penny/sections/' + section.id, { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: record.id }) }); tr.remove(); if (!tb.children.length) tb.innerHTML = `<tr><td colspan="${tc.length + 1}" class="no-records">Нет записей</td></tr>`; } catch (e) {} } });
+            tb.appendChild(tr);
         }
 
         function setupSuggestions(inpId, sugId, cb) {
-          const inp = document.getElementById(inpId),
-            sug = document.getElementById(sugId);
-          if (!inp || !sug) return;
-          inp.addEventListener('input', function () {
-            const v = this.value.toLowerCase().trim();
-            sug.innerHTML = '';
-            if (!v) {
-              sug.classList.remove('visible');
-              return;
-            }
-            const f = devices.filter(d =>
-              d.serialNumber.toLowerCase().includes(v)
-            );
-            if (!f.length) {
-              sug.classList.remove('visible');
-              return;
-            }
-            f.forEach(d => {
-              const div = document.createElement('div');
-              div.className = 'suggestion-item';
-              div.innerHTML = `<strong>${escapeHtml(d.serialNumber)}</strong> — ${escapeHtml(d.product)} / ${escapeHtml(d.device)}`;
-              div.addEventListener('mousedown', function (e) {
-                e.preventDefault();
-                cb(d);
-                sug.classList.remove('visible');
-              });
-              sug.appendChild(div);
+            const inp = document.getElementById(inpId), sug = document.getElementById(sugId);
+            if (!inp || !sug) return;
+            inp.addEventListener('input', function () {
+                const v = this.value.toLowerCase().trim(); sug.innerHTML = '';
+                if (!v) { sug.classList.remove('visible'); return; }
+                const f = devices.filter(d => d.serialNumber.toLowerCase().includes(v));
+                if (!f.length) { sug.classList.remove('visible'); return; }
+                f.forEach(d => { const div = document.createElement('div'); div.className = 'suggestion-item'; div.innerHTML = `<strong>${escapeHtml(d.serialNumber)}</strong> — ${escapeHtml(d.product)} / ${escapeHtml(d.device)}`; div.addEventListener('mousedown', function (e) { e.preventDefault(); cb(d); sug.classList.remove('visible'); }); sug.appendChild(div); });
+                sug.classList.add('visible');
             });
-            sug.classList.add('visible');
-          });
-          inp.addEventListener('blur', () =>
-            setTimeout(() => sug.classList.remove('visible'), 200)
-          );
-          inp.addEventListener('focus', function () {
-            if (this.value.trim()) this.dispatchEvent(new Event('input'));
-          });
+            inp.addEventListener('blur', () => setTimeout(() => sug.classList.remove('visible'), 200));
+            inp.addEventListener('focus', function () { if (this.value.trim()) this.dispatchEvent(new Event('input')); });
         }
 
         function setupAllSuggestions() {
-          setupSuggestions('recordSerial', 'serialSuggestions', d => {
-            document.getElementById('recordSerial').value = d.serialNumber;
-            document.getElementById('recordProduct').value = d.product;
-            document.getElementById('recordType').value = d.device;
-            document.getElementById('recordLocation').value = d.location || '';
-          });
-          setupSuggestions(
-            'recordReplaceSerial',
-            'replaceSerialSuggestions',
-            d => {
-              document.getElementById('recordReplaceSerial').value =
-                d.serialNumber;
-              document.getElementById('recordReplaceProduct').value = d.product;
-              document.getElementById('recordReplaceType').value = d.device;
-            }
-          );
+            setupSuggestions('recordSerial', 'serialSuggestions', d => {
+                document.getElementById('recordSerial').value = d.serialNumber;
+                document.getElementById('recordProduct').value = d.product;
+                document.getElementById('recordType').value = d.device;
+                document.getElementById('recordLocation').value = d.location || '';
+            });
+            setupSuggestions('recordReplaceSerial', 'replaceSerialSuggestions', d => {
+                document.getElementById('recordReplaceSerial').value = d.serialNumber;
+                document.getElementById('recordReplaceProduct').value = d.product;
+                document.getElementById('recordReplaceType').value = d.device;
+            });
         }
 
         function setupStatusChange() {
-          const statusSelect = document.getElementById('recordStatus');
-          if (!statusSelect) return;
-
-          const allConditionalFields = [
-            'newLocationField',
-            'newSPField',
-            'newLSIField',
-            'malfunctionDateField',
-            'brokenLocationField',
-            'recoveryDateField',
-            'replaceSerialField',
-            'replaceProductField',
-            'replaceTypeField',
-            'replaceLocationField',
-          ];
-
-          statusSelect.addEventListener('change', function () {
-            const st = this.value;
-
-            allConditionalFields.forEach(id => {
-              const el = document.getElementById(id);
-              if (el) el.classList.remove('visible');
+            const statusSelect = document.getElementById('recordStatus');
+            if (!statusSelect) return;
+            const allConditionalFields = [
+                'newLocationField', 'newSPField', 'newLSIField', 'malfunctionDateField',
+                'brokenLocationField', 'recoveryDateField', 'replaceSerialField',
+                'replaceProductField', 'replaceTypeField', 'replaceLocationField'
+            ];
+            statusSelect.addEventListener('change', function () {
+                const st = this.value;
+                allConditionalFields.forEach(id => { const el = document.getElementById(id); if (el) el.classList.remove('visible'); });
+                const replaceTitle = document.getElementById('replaceTitleField');
+                if (replaceTitle) replaceTitle.style.display = 'none';
+                if (st === 'move') { document.getElementById('newLocationField')?.classList.add('visible'); }
+                if (st === 'malfunction') {
+                    ['newSPField','newLSIField','malfunctionDateField','brokenLocationField','recoveryDateField','replaceSerialField','replaceProductField','replaceTypeField','replaceLocationField'].forEach(id => { document.getElementById(id)?.classList.add('visible'); });
+                    if (replaceTitle) replaceTitle.style.display = 'block';
+                }
             });
-            const replaceTitle = document.getElementById('replaceTitleField');
-            if (replaceTitle) replaceTitle.style.display = 'none';
-
-            if (st === 'move') {
-              document
-                .getElementById('newLocationField')
-                ?.classList.add('visible');
-            }
-            if (st === 'malfunction') {
-              [
-                'newSPField',
-                'newLSIField',
-                'malfunctionDateField',
-                'brokenLocationField',
-                'recoveryDateField',
-                'replaceSerialField',
-                'replaceProductField',
-                'replaceTypeField',
-                'replaceLocationField',
-              ].forEach(id => {
-                document.getElementById(id)?.classList.add('visible');
-              });
-              if (replaceTitle) replaceTitle.style.display = 'block';
-            }
-          });
         }
 
         setupAllSuggestions();
         setupStatusChange();
 
-        function getSerialDisplay(r) {
-          return escapeHtml(r.serialNumber);
-        }
-        function getTypeDisplay(r) {
-          return escapeHtml(r.techType || '-');
-        }
-        function getLocationDisplay(r) {
-          let d = escapeHtml(r.location || '-');
-          if (r.status === 'move' && r.newLocation)
-            d += ` → <span style="color:var(--accent);">${escapeHtml(r.newLocation)}</span>`;
-          return d;
-        }
+        function getSerialDisplay(r) { return escapeHtml(r.serialNumber); }
+        function getTypeDisplay(r) { return escapeHtml(r.techType || '-'); }
+        function getLocationDisplay(r) { let d = escapeHtml(r.location || '-'); if (r.status === 'move' && r.newLocation) d += ` → <span style="color:var(--accent);">${escapeHtml(r.newLocation)}</span>`; return d; }
 
         function getFilteredRecords() {
-          const fi = document.getElementById('filterImportance')?.value || '',
-            fp = document.getElementById('filterProduct')?.value || '',
-            fs = document.getElementById('filterStatus')?.value || '',
-            fu = document.getElementById('filterUser')?.value || '';
-          const ftt =
-              document
-                .getElementById('filterTechType')
-                ?.value?.toLowerCase()
-                .trim() || '',
-            fl =
-              document
-                .getElementById('filterLocation')
-                ?.value?.toLowerCase()
-                .trim() || '',
-            fsn =
-              document
-                .getElementById('filterSerial')
-                ?.value?.toLowerCase()
-                .trim() || '';
-          let f = [...records];
-          if (fi) f = f.filter(r => r.importance === fi);
-          if (fp) f = f.filter(r => r.product === fp);
-          if (fs) f = f.filter(r => r.status === fs);
-          if (fu) f = f.filter(r => r.username === fu);
-          if (ftt)
-            f = f.filter(
-              r =>
-                (r.techType || '').toLowerCase().includes(ftt) ||
-                (r.newTechType || '').toLowerCase().includes(ftt)
-            );
-          if (fl)
-            f = f.filter(
-              r =>
-                (r.location || '').toLowerCase().includes(fl) ||
-                (r.newLocation || '').toLowerCase().includes(fl)
-            );
-          if (fsn)
-            f = f.filter(
-              r =>
-                (r.serialNumber || '').toLowerCase().includes(fsn) ||
-                (r.newSerialNumber || '').toLowerCase().includes(fsn)
-            );
-          return f;
+            const fi = document.getElementById('filterImportance')?.value || '',
+                fp = document.getElementById('filterProduct')?.value || '',
+                fs = document.getElementById('filterStatus')?.value || '',
+                fu = document.getElementById('filterUser')?.value || '';
+            const ftt = document.getElementById('filterTechType')?.value?.toLowerCase().trim() || '',
+                fl = document.getElementById('filterLocation')?.value?.toLowerCase().trim() || '',
+                fsn = document.getElementById('filterSerial')?.value?.toLowerCase().trim() || '';
+            let f = [...records];
+            if (fi) f = f.filter(r => r.importance === fi);
+            if (fp) f = f.filter(r => r.product === fp);
+            if (fs) f = f.filter(r => r.status === fs);
+            if (fu) f = f.filter(r => r.username === fu);
+            if (ftt) f = f.filter(r => (r.techType || '').toLowerCase().includes(ftt) || (r.newTechType || '').toLowerCase().includes(ftt));
+            if (fl) f = f.filter(r => (r.location || '').toLowerCase().includes(fl) || (r.newLocation || '').toLowerCase().includes(fl));
+            if (fsn) f = f.filter(r => (r.serialNumber || '').toLowerCase().includes(fsn) || (r.newSerialNumber || '').toLowerCase().includes(fsn));
+            return f;
         }
 
         function renderRecordsTable() {
-          const tb = document.getElementById('recordsTableBody');
-          if (!tb) return;
-          tb.innerHTML = '';
-          const f = getFilteredRecords();
-          f.reverse();
-          if (!f.length) {
-            tb.innerHTML =
-              '<tr><td colspan="11" class="no-records">Нет записей</td></tr>';
+            const tb = document.getElementById('recordsTableBody'); if (!tb) return;
+            tb.innerHTML = ''; const f = getFilteredRecords(); f.reverse();
+            if (!f.length) { tb.innerHTML = '<tr><td colspan="11" class="no-records">Нет записей</td></tr>'; updateUserFilter(); return; }
+            f.forEach(r => {
+                const tr = document.createElement('tr');
+                if (r.completed || r.status === 'info' || r.status === 'move') tr.classList.add('completed');
+                if (r.status === 'malfunction' && !r.completed) tr.style.background = 'rgba(255,71,87,0.08)';
+                tr.innerHTML = `<td>${new Date(r.createdAt).toLocaleDateString('ru-RU')}<br>${new Date(r.createdAt).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}</td><td>${escapeHtml(r.username)}</td><td>${escapeHtml(r.requestNumber || '-')}</td><td>${IMPORTANCE_LABELS[r.importance] || '2-Средняя'}</td><td>${STATUS_LABELS[r.status] || r.status || '-'}</td><td><a href="javascript:void(0)" onclick="openDeviceInfoModal('${escapeHtml(r.serialNumber)}')" style="color:var(--accent);text-decoration:underline;cursor:pointer;">${getSerialDisplay(r)}</a></td><td>${escapeHtml(r.product || '-')}</td><td>${getTypeDisplay(r)}</td><td>${getLocationDisplay(r)}</td><td title="${escapeHtml(r.description || '')}"><div style="max-width:150px;max-height:2.8em;overflow:hidden;text-align:center;margin:0 auto;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;">${escapeHtml(r.description || '-')}</div></td><td><div class="action-buttons">${r.completed ? `<span class="completed-time">✅ ${new Date(r.completedAt || r.createdAt).toLocaleDateString('ru-RU')}<br>${new Date(r.completedAt || r.createdAt).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}</span>` : `<button class="complete-btn" title="Выполнено">✅</button>`}<button class="edit-btn" title="Редактировать">✏️</button><button class="delete-btn" title="Удалить">🗑️</button></div></td>`;
+                if (!r.completed) {
+                    tr.querySelector('.complete-btn')?.addEventListener('click', () => completeRecord(r.id));
+                }
+                tr.querySelector('.edit-btn')?.addEventListener('click', () => openEditModal(r.id));
+                tr.querySelector('.delete-btn')?.addEventListener('click', () => deleteRecord(r.id));
+                tb.appendChild(tr);
+            });
             updateUserFilter();
-            return;
-          }
-          f.forEach(r => {
-            const tr = document.createElement('tr');
-            if (r.completed || r.status === 'info' || r.status === 'move')
-              tr.classList.add('completed');
-            if (r.status === 'malfunction' && !r.completed)
-              tr.style.background = 'rgba(255,71,87,0.08)';
-            tr.innerHTML = `<td>${new Date(r.createdAt).toLocaleDateString('ru-RU')}<br>${new Date(r.createdAt).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}</td><td>${escapeHtml(r.username)}</td><td>${escapeHtml(r.requestNumber || '-')}</td><td>${IMPORTANCE_LABELS[r.importance] || '2-Средняя'}</td><td>${STATUS_LABELS[r.status] || r.status || '-'}</td><td>${getSerialDisplay(r)}</td><td>${escapeHtml(r.product || '-')}</td><td>${getTypeDisplay(r)}</td><td>${getLocationDisplay(r)}</td><td title="${escapeHtml(r.description || '')}"><div style="max-width:150px;max-height:2.8em;overflow:hidden;text-align:center;margin:0 auto;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;">${escapeHtml(r.description || '-')}</div></td><td><div class="action-buttons">${r.completed ? `<span class="completed-time">✅ ${new Date(r.completedAt || r.createdAt).toLocaleDateString('ru-RU')}<br>${new Date(r.completedAt || r.createdAt).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}</span>` : `<button class="complete-btn" title="Выполнено">✅</button>`}<button class="edit-btn" title="Редактировать">✏️</button><button class="delete-btn" title="Удалить">🗑️</button></div></td>`;
-            if (!r.completed) {
-              tr.querySelector('.complete-btn')?.addEventListener('click', () =>
-                completeRecord(r.id)
-              );
-            }
-            tr.querySelector('.edit-btn')?.addEventListener('click', () =>
-              openEditModal(r.id)
-            );
-            tr.querySelector('.delete-btn')?.addEventListener('click', () =>
-              deleteRecord(r.id)
-            );
-            tb.appendChild(tr);
-          });
-          updateUserFilter();
         }
 
         async function addRecord(data) {
-          try {
-            const r = await apiPost(API.records, data);
-            records.push(r.record);
-            renderRecordsTable();
-            renderStatistics();
-            return true;
-          } catch (e) {
-            alert('Ошибка');
-            return false;
-          }
+            try { const r = await apiPost(API.records, data); records.push(r.record); renderRecordsTable(); renderStatistics(); return true; } catch (e) { alert('Ошибка'); return false; }
         }
         async function deleteRecord(id) {
-          if (!confirm('Удалить?')) return;
-          try {
-            await apiDelete(API.records, { id });
-            records = records.filter(r => r.id !== id);
-            renderRecordsTable();
-            renderStatistics();
-          } catch (e) {}
+            if (!confirm('Удалить?')) return;
+            try { await apiDelete(API.records, { id }); records = records.filter(r => r.id !== id); renderRecordsTable(); renderStatistics(); } catch (e) {}
         }
 
         async function completeRecord(id) {
-          const rec = records.find(r => r.id === id);
-          if (!rec) return;
-          if (rec.status === 'malfunction') {
-            const hasSP = rec.newSPRequisites?.trim(),
-              hasLSI = rec.newLSIRequisites?.trim();
-            if (hasSP || hasLSI) {
-              const dev = devices.find(
-                d => d.serialNumber === rec.serialNumber
-              );
-              if (dev) {
-                try {
-                  const ud = { serialNumber: dev.serialNumber };
-                  if (hasSP) ud.spRequisites = rec.newSPRequisites;
-                  if (hasLSI) ud.lsiRequisites = rec.newLSIRequisites;
-                  const r = await fetch(API.devices, {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(ud),
-                  });
-                  if (r.ok) {
-                    const result = await r.json();
-                    const di = devices.findIndex(
-                      d => d.serialNumber === dev.serialNumber
-                    );
-                    if (di >= 0) devices[di] = result.device;
-                  }
-                } catch (e) {}
-              }
+            const rec = records.find(r => r.id === id); if (!rec) return;
+            if (rec.status === 'malfunction') {
+                const hasSP = rec.newSPRequisites?.trim(), hasLSI = rec.newLSIRequisites?.trim();
+                if (hasSP || hasLSI) {
+                    const dev = devices.find(d => d.serialNumber === rec.serialNumber);
+                    if (dev) { try { const ud = { serialNumber: dev.serialNumber }; if (hasSP) ud.spRequisites = rec.newSPRequisites; if (hasLSI) ud.lsiRequisites = rec.newLSIRequisites; const r = await fetch(API.devices, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(ud) }); if (r.ok) { const result = await r.json(); const di = devices.findIndex(d => d.serialNumber === dev.serialNumber); if (di >= 0) devices[di] = result.device; } } catch (e) {} }
+                }
             }
-          }
-          rec.completed = true;
-          rec.completedAt = new Date().toISOString();
-          try {
-            const r = await fetch(API.records, {
-              method: 'PUT',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                id,
-                completed: true,
-                completedAt: rec.completedAt,
-              }),
-            });
-            if (r.ok) {
-              const result = await r.json();
-              const i = records.findIndex(x => x.id === id);
-              if (i >= 0 && result.record) records[i] = result.record;
-            }
-          } catch (e) {}
-          renderRecordsTable();
-          renderStatistics();
+            rec.completed = true; rec.completedAt = new Date().toISOString();
+            try { const r = await fetch(API.records, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id, completed: true, completedAt: rec.completedAt }) }); if (r.ok) { const result = await r.json(); const i = records.findIndex(x => x.id === id); if (i >= 0 && result.record) records[i] = result.record; } } catch (e) {}
+            renderRecordsTable(); renderStatistics();
         }
 
         function initAddRecordModal() {
-          const openBtn = document.getElementById('openAddRecordModal');
-          if (openBtn) {
-            const newBtn = openBtn.cloneNode(true);
-            openBtn.parentNode.replaceChild(newBtn, openBtn);
-            newBtn.addEventListener('click', openAddRecordModal);
-          }
-          document
-            .getElementById('closeAddRecordModal')
-            ?.addEventListener('click', closeAddRecordModal);
-          document
-            .getElementById('cancelAddRecordBtn')
-            ?.addEventListener('click', closeAddRecordModal);
-          document
-            .getElementById('addRecordModalOverlay')
-            ?.addEventListener('click', function (e) {
-              if (e.target === this) closeAddRecordModal();
-            });
+            const openBtn = document.getElementById('openAddRecordModal');
+            if (openBtn) { const newBtn = openBtn.cloneNode(true); openBtn.parentNode.replaceChild(newBtn, openBtn); newBtn.addEventListener('click', openAddRecordModal); }
+            document.getElementById('closeAddRecordModal')?.addEventListener('click', closeAddRecordModal);
+            document.getElementById('cancelAddRecordBtn')?.addEventListener('click', closeAddRecordModal);
+            document.getElementById('addRecordModalOverlay')?.addEventListener('click', function (e) { if (e.target === this) closeAddRecordModal(); });
 
-          const form = document.getElementById('addRecordForm');
-          if (form) {
-            const newForm = form.cloneNode(true);
-            form.parentNode.replaceChild(newForm, form);
-            newForm.addEventListener('submit', async e => {
-              e.preventDefault();
+            const form = document.getElementById('addRecordForm');
+            if (form) {
+                const newForm = form.cloneNode(true);
+                form.parentNode.replaceChild(newForm, form);
+                newForm.addEventListener('submit', async e => {
+                    e.preventDefault();
+                    newForm.querySelectorAll('.error').forEach(el => el.classList.remove('error'));
 
-              // Снимаем подсветку со всех полей
-              newForm
-                .querySelectorAll('.error')
-                .forEach(el => el.classList.remove('error'));
+                    const st = document.getElementById('recordStatus').value;
+                    const sn = document.getElementById('recordSerial').value.trim();
+                    const pr = document.getElementById('recordProduct').value;
+                    const tt = document.getElementById('recordType').value.trim();
+                    const loc = document.getElementById('recordLocation').value.trim();
+                    const nl = st === 'move' ? document.getElementById('recordNewLocation').value.trim() : '';
+                    const desc = document.getElementById('recordDescription').value.trim();
+                    const sp = st === 'malfunction' ? (document.getElementById('recordNewSP')?.value.trim() || '') : '';
+                    const lsi = st === 'malfunction' ? (document.getElementById('recordNewLSI')?.value.trim() || '') : '';
+                    const mDate = st === 'malfunction' ? (document.getElementById('recordMalfunctionDate')?.value || '') : '';
+                    const brokenLoc = st === 'malfunction' ? (document.getElementById('recordBrokenLocation')?.value.trim() || '') : '';
+                    const recDate = st === 'malfunction' ? (document.getElementById('recordRecoveryDate')?.value || '') : '';
+                    const repSN = st === 'malfunction' ? (document.getElementById('recordReplaceSerial')?.value.trim() || '') : '';
+                    const repPr = st === 'malfunction' ? (document.getElementById('recordReplaceProduct')?.value || '') : '';
+                    const repTT = st === 'malfunction' ? (document.getElementById('recordReplaceType')?.value.trim() || '') : '';
+                    const repLoc = st === 'malfunction' ? (document.getElementById('recordReplaceLocation')?.value.trim() || '') : '';
 
-              const st = document.getElementById('recordStatus').value;
-              const sn = document.getElementById('recordSerial').value.trim();
-              const pr = document.getElementById('recordProduct').value;
-              const tt = document.getElementById('recordType').value.trim();
-              const loc = document
-                .getElementById('recordLocation')
-                .value.trim();
-              const nl =
-                st === 'move'
-                  ? document.getElementById('recordNewLocation').value.trim()
-                  : '';
-              const desc = document
-                .getElementById('recordDescription')
-                .value.trim();
-              const sp =
-                st === 'malfunction'
-                  ? document.getElementById('recordNewSP')?.value.trim() || ''
-                  : '';
-              const lsi =
-                st === 'malfunction'
-                  ? document.getElementById('recordNewLSI')?.value.trim() || ''
-                  : '';
-              const mDate =
-                st === 'malfunction'
-                  ? document.getElementById('recordMalfunctionDate')?.value ||
-                    ''
-                  : '';
-              const brokenLoc =
-                st === 'malfunction'
-                  ? document
-                      .getElementById('recordBrokenLocation')
-                      ?.value.trim() || ''
-                  : '';
-              const recDate =
-                st === 'malfunction'
-                  ? document.getElementById('recordRecoveryDate')?.value || ''
-                  : '';
-              const repSN =
-                st === 'malfunction'
-                  ? document
-                      .getElementById('recordReplaceSerial')
-                      ?.value.trim() || ''
-                  : '';
-              const repPr =
-                st === 'malfunction'
-                  ? document.getElementById('recordReplaceProduct')?.value || ''
-                  : '';
-              const repTT =
-                st === 'malfunction'
-                  ? document
-                      .getElementById('recordReplaceType')
-                      ?.value.trim() || ''
-                  : '';
-              const repLoc =
-                st === 'malfunction'
-                  ? document
-                      .getElementById('recordReplaceLocation')
-                      ?.value.trim() || ''
-                  : '';
+                    if (!st) { alert('Выберите статус'); return; }
 
-              if (!st) {
-                alert('Выберите статус');
-                return;
-              }
+                    let hasError = false;
 
-              // Проверка обязательных полей
-              let hasError = false;
-
-              if (st === 'move') {
-                if (!sn) {
-                  document
-                    .getElementById('recordSerial')
-                    .classList.add('error');
-                  hasError = true;
-                }
-                if (!pr) {
-                  document
-                    .getElementById('recordProduct')
-                    .classList.add('error');
-                  hasError = true;
-                }
-                if (!tt) {
-                  document.getElementById('recordType').classList.add('error');
-                  hasError = true;
-                }
-                if (!nl) {
-                  document
-                    .getElementById('recordNewLocation')
-                    .classList.add('error');
-                  hasError = true;
-                }
-                if (hasError) {
-                  alert('Заполните обязательные поля (выделены красным)');
-                  return;
-                }
-                if (!devices.some(d => d.serialNumber === sn)) {
-                  alert(`Серийный номер "${sn}" не найден в базе!`);
-                  return;
-                }
-                const di = devices.findIndex(d => d.serialNumber === sn);
-                if (di >= 0) {
-                  try {
-                    const r = await fetch(API.devices, {
-                      method: 'PUT',
-                      headers: { 'Content-Type': 'application/json' },
-                      body: JSON.stringify({ serialNumber: sn, location: nl }),
-                    });
-                    if (r.ok) {
-                      const result = await r.json();
-                      devices[di] = result.device;
+                    if (st === 'move') {
+                        if (!sn) { document.getElementById('recordSerial').classList.add('error'); hasError = true; }
+                        if (!pr) { document.getElementById('recordProduct').classList.add('error'); hasError = true; }
+                        if (!tt) { document.getElementById('recordType').classList.add('error'); hasError = true; }
+                        if (!nl) { document.getElementById('recordNewLocation').classList.add('error'); hasError = true; }
+                        if (hasError) { alert('Заполните обязательные поля (выделены красным)'); return; }
+                        if (!devices.some(d => d.serialNumber === sn)) { alert(`Серийный номер "${sn}" не найден в базе!`); return; }
+                        const di = devices.findIndex(d => d.serialNumber === sn);
+                        if (di >= 0) { try { const r = await fetch(API.devices, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ serialNumber: sn, location: nl }) }); if (r.ok) { const result = await r.json(); devices[di] = result.device; } } catch (e) {} }
                     }
-                  } catch (e) {}
-                }
-              }
 
-              if (st === 'malfunction') {
-                if (!mDate) {
-                  document
-                    .getElementById('recordMalfunctionDate')
-                    .classList.add('error');
-                  hasError = true;
-                }
-                if (!sn) {
-                  document
-                    .getElementById('recordSerial')
-                    .classList.add('error');
-                  hasError = true;
-                }
-                if (!pr) {
-                  document
-                    .getElementById('recordProduct')
-                    .classList.add('error');
-                  hasError = true;
-                }
-                if (!tt) {
-                  document.getElementById('recordType').classList.add('error');
-                  hasError = true;
-                }
-                if (!desc) {
-                  document
-                    .getElementById('recordDescription')
-                    .classList.add('error');
-                  hasError = true;
-                }
-                if (hasError) {
-                  alert('Заполните обязательные поля (выделены красным)');
-                  return;
-                }
-                if (!devices.some(d => d.serialNumber === sn)) {
-                  alert(`Серийный номер "${sn}" не найден в базе!`);
-                  return;
-                }
-                if (brokenLoc) {
-                  const di = devices.findIndex(d => d.serialNumber === sn);
-                  if (di >= 0) {
-                    try {
-                      const r = await fetch(API.devices, {
-                        method: 'PUT',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                          serialNumber: sn,
-                          location: brokenLoc,
-                        }),
-                      });
-                      if (r.ok) {
-                        const result = await r.json();
-                        devices[di] = result.device;
-                      }
-                    } catch (e) {}
-                  }
-                }
-                if (repSN && repLoc) {
-                  if (!devices.some(d => d.serialNumber === repSN)) {
-                    alert(
-                      `Серийный номер подменного устройства "${repSN}" не найден в базе!`
-                    );
-                    return;
-                  }
-                  const rdi = devices.findIndex(d => d.serialNumber === repSN);
-                  if (rdi >= 0) {
-                    try {
-                      const r = await fetch(API.devices, {
-                        method: 'PUT',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                          serialNumber: repSN,
-                          location: repLoc,
-                        }),
-                      });
-                      if (r.ok) {
-                        const result = await r.json();
-                        devices[rdi] = result.device;
-                      }
-                    } catch (e) {}
-                  }
-                }
-              }
+                    if (st === 'malfunction') {
+                        if (!mDate) { document.getElementById('recordMalfunctionDate').classList.add('error'); hasError = true; }
+                        if (!sn) { document.getElementById('recordSerial').classList.add('error'); hasError = true; }
+                        if (!pr) { document.getElementById('recordProduct').classList.add('error'); hasError = true; }
+                        if (!tt) { document.getElementById('recordType').classList.add('error'); hasError = true; }
+                        if (!desc) { document.getElementById('recordDescription').classList.add('error'); hasError = true; }
+                        if (hasError) { alert('Заполните обязательные поля (выделены красным)'); return; }
+                        if (!devices.some(d => d.serialNumber === sn)) { alert(`Серийный номер "${sn}" не найден в базе!`); return; }
+                        if (brokenLoc) {
+                            const di = devices.findIndex(d => d.serialNumber === sn);
+                            if (di >= 0) { try { const r = await fetch(API.devices, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ serialNumber: sn, location: brokenLoc }) }); if (r.ok) { const result = await r.json(); devices[di] = result.device; } } catch (e) {} }
+                        }
+                        if (repSN && repLoc) {
+                            if (!devices.some(d => d.serialNumber === repSN)) { alert(`Серийный номер подменного устройства "${repSN}" не найден в базе!`); return; }
+                            const rdi = devices.findIndex(d => d.serialNumber === repSN);
+                            if (rdi >= 0) { try { const r = await fetch(API.devices, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ serialNumber: repSN, location: repLoc }) }); if (r.ok) { const result = await r.json(); devices[rdi] = result.device; } } catch (e) {} }
+                        }
+                    }
 
-              const data = {
-                username: currentUser,
-                requestNumber: document
-                  .getElementById('recordRequest')
-                  .value.trim(),
-                importance: document.getElementById('recordImportance').value,
-                status: st,
-                serialNumber: sn,
-                newSerialNumber: '',
-                product: pr,
-                techType: tt,
-                newTechType: '',
-                location: loc,
-                newLocation: nl,
-                description: desc,
-                newSPRequisites: sp,
-                newLSIRequisites: lsi,
-                malfunctionDate: mDate,
-                brokenLocation: brokenLoc,
-                recoveryDate: recDate,
-                replaceSerial: repSN,
-                replaceProduct: repPr,
-                replaceType: repTT,
-                replaceLocation: repLoc,
-                completed: st === 'info' || st === 'move',
-              };
+                    const data = {
+                        username: currentUser,
+                        requestNumber: document.getElementById('recordRequest').value.trim(),
+                        importance: document.getElementById('recordImportance').value,
+                        status: st, serialNumber: sn, newSerialNumber: '',
+                        product: pr, techType: tt, newTechType: '',
+                        location: loc, newLocation: nl, description: desc,
+                        newSPRequisites: sp, newLSIRequisites: lsi,
+                        malfunctionDate: mDate, brokenLocation: brokenLoc,
+                        recoveryDate: recDate, replaceSerial: repSN,
+                        replaceProduct: repPr, replaceType: repTT,
+                        replaceLocation: repLoc,
+                        completed: (st === 'info' || st === 'move')
+                    };
 
-              if (await addRecord(data)) {
-                document.getElementById('recordSerial').value = '';
-                document.getElementById('recordProduct').value = '';
-                document.getElementById('recordType').value = '';
-                document.getElementById('recordLocation').value = '';
-                document.getElementById('recordNewLocation').value = '';
-                document.getElementById('recordDescription').value = '';
-                document.getElementById('recordRequest').value =
-                  getNextRequestNumber();
-                document.getElementById('recordStatus').value = '';
-                document.getElementById('recordImportance').value = '2';
-                if (document.getElementById('recordNewSP'))
-                  document.getElementById('recordNewSP').value = '';
-                if (document.getElementById('recordNewLSI'))
-                  document.getElementById('recordNewLSI').value = '';
-                if (document.getElementById('recordMalfunctionDate'))
-                  document.getElementById('recordMalfunctionDate').value = '';
-                if (document.getElementById('recordBrokenLocation'))
-                  document.getElementById('recordBrokenLocation').value = '';
-                if (document.getElementById('recordRecoveryDate'))
-                  document.getElementById('recordRecoveryDate').value = '';
-                if (document.getElementById('recordReplaceSerial'))
-                  document.getElementById('recordReplaceSerial').value = '';
-                if (document.getElementById('recordReplaceProduct'))
-                  document.getElementById('recordReplaceProduct').value = '';
-                if (document.getElementById('recordReplaceType'))
-                  document.getElementById('recordReplaceType').value = '';
-                if (document.getElementById('recordReplaceLocation'))
-                  document.getElementById('recordReplaceLocation').value = '';
-                [
-                  'newLocationField',
-                  'newSPField',
-                  'newLSIField',
-                  'malfunctionDateField',
-                  'brokenLocationField',
-                  'recoveryDateField',
-                  'replaceSerialField',
-                  'replaceProductField',
-                  'replaceTypeField',
-                  'replaceLocationField',
-                ].forEach(id => {
-                  const el = document.getElementById(id);
-                  if (el) el.classList.remove('visible');
+                    if (await addRecord(data)) {
+                        document.getElementById('recordSerial').value = '';
+                        document.getElementById('recordProduct').value = '';
+                        document.getElementById('recordType').value = '';
+                        document.getElementById('recordLocation').value = '';
+                        document.getElementById('recordNewLocation').value = '';
+                        document.getElementById('recordDescription').value = '';
+                        document.getElementById('recordRequest').value = getNextRequestNumber();
+                        document.getElementById('recordStatus').value = '';
+                        document.getElementById('recordImportance').value = '2';
+                        if (document.getElementById('recordNewSP')) document.getElementById('recordNewSP').value = '';
+                        if (document.getElementById('recordNewLSI')) document.getElementById('recordNewLSI').value = '';
+                        if (document.getElementById('recordMalfunctionDate')) document.getElementById('recordMalfunctionDate').value = '';
+                        if (document.getElementById('recordBrokenLocation')) document.getElementById('recordBrokenLocation').value = '';
+                        if (document.getElementById('recordRecoveryDate')) document.getElementById('recordRecoveryDate').value = '';
+                        if (document.getElementById('recordReplaceSerial')) document.getElementById('recordReplaceSerial').value = '';
+                        if (document.getElementById('recordReplaceProduct')) document.getElementById('recordReplaceProduct').value = '';
+                        if (document.getElementById('recordReplaceType')) document.getElementById('recordReplaceType').value = '';
+                        if (document.getElementById('recordReplaceLocation')) document.getElementById('recordReplaceLocation').value = '';
+                        ['newLocationField','newSPField','newLSIField','malfunctionDateField','brokenLocationField','recoveryDateField','replaceSerialField','replaceProductField','replaceTypeField','replaceLocationField'].forEach(id => { const el = document.getElementById(id); if (el) el.classList.remove('visible'); });
+                        const replaceTitle = document.getElementById('replaceTitleField');
+                        if (replaceTitle) replaceTitle.style.display = 'none';
+                        updateDateTime();
+                        if (st === 'move' || st === 'malfunction') renderDevicesTable();
+                        closeAddRecordModal();
+                    }
                 });
-                const replaceTitle =
-                  document.getElementById('replaceTitleField');
-                if (replaceTitle) replaceTitle.style.display = 'none';
-                updateDateTime();
-                if (st === 'move' || st === 'malfunction') renderDevicesTable();
-                closeAddRecordModal();
-              }
-            });
-            setupAllSuggestions();
-            setupStatusChange();
-          }
+                setupAllSuggestions();
+                setupStatusChange();
+            }
         }
 
         function openAddRecordModal() {
-          document.getElementById('recordRequest').value =
-            getNextRequestNumber();
-          document.getElementById('recordUser').value = currentUser;
-          updateDateTime();
-          updateProductSelect();
-          document
-            .getElementById('addRecordModalOverlay')
-            .classList.add('active');
+            document.getElementById('recordRequest').value = getNextRequestNumber();
+            document.getElementById('recordUser').value = currentUser;
+            updateDateTime();
+            updateProductSelect();
+            document.getElementById('addRecordModalOverlay').classList.add('active');
         }
 
         function closeAddRecordModal() {
-          document
-            .getElementById('addRecordModalOverlay')
-            .classList.remove('active');
+            document.getElementById('addRecordModalOverlay').classList.remove('active');
         }
 
         function initAddDeviceModal() {
-          const openBtn = document.getElementById('openAddDeviceModal');
-          if (openBtn) {
-            const newBtn = openBtn.cloneNode(true);
-            openBtn.parentNode.replaceChild(newBtn, openBtn);
-            newBtn.addEventListener('click', openAddDeviceModal);
-          }
-          document
-            .getElementById('closeAddDeviceModal')
-            ?.addEventListener('click', closeAddDeviceModal);
-          document
-            .getElementById('cancelAddDeviceBtn')
-            ?.addEventListener('click', closeAddDeviceModal);
-          document
-            .getElementById('addDeviceModalOverlay')
-            ?.addEventListener('click', function (e) {
-              if (e.target === this) closeAddDeviceModal();
-            });
+            const openBtn = document.getElementById('openAddDeviceModal');
+            if (openBtn) { const newBtn = openBtn.cloneNode(true); openBtn.parentNode.replaceChild(newBtn, openBtn); newBtn.addEventListener('click', openAddDeviceModal); }
+            document.getElementById('closeAddDeviceModal')?.addEventListener('click', closeAddDeviceModal);
+            document.getElementById('cancelAddDeviceBtn')?.addEventListener('click', closeAddDeviceModal);
+            document.getElementById('addDeviceModalOverlay')?.addEventListener('click', function (e) { if (e.target === this) closeAddDeviceModal(); });
 
-          const form = document.getElementById('addDeviceForm');
-          if (form) {
-            const newForm = form.cloneNode(true);
-            form.parentNode.replaceChild(newForm, form);
-            newForm.addEventListener('submit', async e => {
-              e.preventDefault();
-              const p = document.getElementById('deviceProduct').value.trim(),
-                d = document.getElementById('deviceName').value.trim(),
-                s = document.getElementById('deviceSerial').value.trim(),
-                sb = document.getElementById('deviceSupplyBasis').value.trim(),
-                sp = document.getElementById('deviceSPRequisites').value.trim(),
-                lsi = document
-                  .getElementById('deviceLSIRequisites')
-                  .value.trim(),
-                w = document.getElementById('deviceWarranty')?.value || '';
-              if (!p || !d || !s || !sb || !sp || !lsi) {
-                alert('Заполните обязательные поля');
-                return;
-              }
-              if (
-                await addDevice({
-                  product: p,
-                  device: d,
-                  serialNumber: s,
-                  supplyBasis: sb,
-                  spRequisites: sp,
-                  lsiRequisites: lsi,
-                  location: document
-                    .getElementById('deviceLocation')
-                    .value.trim(),
-                  specs: document.getElementById('deviceSpecs').value.trim(),
-                  notes: document.getElementById('deviceNotes').value.trim(),
-                  warranty: w,
-                })
-              ) {
-                [
-                  'deviceProduct',
-                  'deviceName',
-                  'deviceSerial',
-                  'deviceSupplyBasis',
-                  'deviceSPRequisites',
-                  'deviceLSIRequisites',
-                  'deviceLocation',
-                  'deviceSpecs',
-                  'deviceNotes',
-                  'deviceWarranty',
-                ].forEach(id => {
-                  const el = document.getElementById(id);
-                  if (el) el.value = '';
+            const form = document.getElementById('addDeviceForm');
+            if (form) {
+                const newForm = form.cloneNode(true);
+                form.parentNode.replaceChild(newForm, form);
+                newForm.addEventListener('submit', async e => {
+                    e.preventDefault();
+                    const p = document.getElementById('deviceProduct').value.trim(),
+                        d = document.getElementById('deviceName').value.trim(),
+                        s = document.getElementById('deviceSerial').value.trim(),
+                        sb = document.getElementById('deviceSupplyBasis').value.trim(),
+                        sp = document.getElementById('deviceSPRequisites').value.trim(),
+                        lsi = document.getElementById('deviceLSIRequisites').value.trim(),
+                        w = document.getElementById('deviceWarranty')?.value || '';
+                    if (!p || !d || !s || !sb || !sp || !lsi) { alert('Заполните обязательные поля'); return; }
+                    if (await addDevice({ product: p, device: d, serialNumber: s, supplyBasis: sb, spRequisites: sp, lsiRequisites: lsi, location: document.getElementById('deviceLocation').value.trim(), specs: document.getElementById('deviceSpecs').value.trim(), notes: document.getElementById('deviceNotes').value.trim(), warranty: w })) {
+                        ['deviceProduct','deviceName','deviceSerial','deviceSupplyBasis','deviceSPRequisites','deviceLSIRequisites','deviceLocation','deviceSpecs','deviceNotes','deviceWarranty'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+                        closeAddDeviceModal();
+                    }
                 });
-                closeAddDeviceModal();
-              }
-            });
-          }
+            }
         }
 
-        function openAddDeviceModal() {
-          document
-            .getElementById('addDeviceModalOverlay')
-            .classList.add('active');
-        }
-
-        function closeAddDeviceModal() {
-          document
-            .getElementById('addDeviceModalOverlay')
-            .classList.remove('active');
-        }
+        function openAddDeviceModal() { document.getElementById('addDeviceModalOverlay').classList.add('active'); }
+        function closeAddDeviceModal() { document.getElementById('addDeviceModalOverlay').classList.remove('active'); }
 
         function initFilters() {
-          [
-            'filterImportance',
-            'filterProduct',
-            'filterStatus',
-            'filterUser',
-          ].forEach(id =>
-            document
-              .getElementById(id)
-              ?.addEventListener('change', renderRecordsTable)
-          );
-          ['filterTechType', 'filterLocation', 'filterSerial'].forEach(id =>
-            document
-              .getElementById(id)
-              ?.addEventListener('input', renderRecordsTable)
-          );
-          document
-            .getElementById('resetFiltersBtn')
-            ?.addEventListener('click', () => {
-              [
-                'filterImportance',
-                'filterProduct',
-                'filterStatus',
-                'filterUser',
-                'filterTechType',
-                'filterLocation',
-                'filterSerial',
-              ].forEach(id => {
-                const el = document.getElementById(id);
-                if (el) el.value = '';
-              });
-              renderRecordsTable();
-            });
+            ['filterImportance','filterProduct','filterStatus','filterUser'].forEach(id => document.getElementById(id)?.addEventListener('change', renderRecordsTable));
+            ['filterTechType','filterLocation','filterSerial'].forEach(id => document.getElementById(id)?.addEventListener('input', renderRecordsTable));
+            document.getElementById('resetFiltersBtn')?.addEventListener('click', () => { ['filterImportance','filterProduct','filterStatus','filterUser','filterTechType','filterLocation','filterSerial'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; }); renderRecordsTable(); });
         }
 
         function openEditModal(id) {
-          const rec = records.find(r => r.id === id);
-          if (!rec) return;
-          editingRecordId = id;
-          const sv = (elId, v) => {
-            const el = document.getElementById(elId);
-            if (el) el.value = v || '';
-          };
-          sv('editRequestNumber', rec.requestNumber || '');
-          sv('editImportance', rec.importance || '2');
-          sv('editStatus', rec.status || '');
-          sv('editSerialNumber', rec.serialNumber || '');
-          sv('editProduct', rec.product || '');
-          sv('editTechType', rec.techType || '');
-          sv('editLocation', rec.location || '');
-          sv('editNewLocation', rec.newLocation || '');
-          sv('editDescription', rec.description || '');
-          sv('editNewSP', rec.newSPRequisites || '');
-          sv('editNewLSI', rec.newLSIRequisites || '');
-          sv('editMalfunctionDate', rec.malfunctionDate || '');
-          sv('editBrokenLocation', rec.brokenLocation || '');
-          sv('editRecoveryDate', rec.recoveryDate || '');
-          sv('editReplaceSerial', rec.replaceSerial || '');
-          sv('editReplaceProduct', rec.replaceProduct || '');
-          sv('editReplaceType', rec.replaceType || '');
-          sv('editReplaceLocation', rec.replaceLocation || '');
-          updateEditModalConditionalFields();
-          document.getElementById('editModalOverlay').classList.add('active');
+            const rec = records.find(r => r.id === id); if (!rec) return; editingRecordId = id;
+            const sv = (elId, v) => { const el = document.getElementById(elId); if (el) el.value = v || ''; };
+            sv('editRequestNumber', rec.requestNumber || ''); sv('editImportance', rec.importance || '2'); sv('editStatus', rec.status || ''); sv('editSerialNumber', rec.serialNumber || ''); sv('editProduct', rec.product || ''); sv('editTechType', rec.techType || ''); sv('editLocation', rec.location || ''); sv('editNewLocation', rec.newLocation || ''); sv('editDescription', rec.description || ''); sv('editNewSP', rec.newSPRequisites || ''); sv('editNewLSI', rec.newLSIRequisites || '');
+            sv('editMalfunctionDate', rec.malfunctionDate || ''); sv('editBrokenLocation', rec.brokenLocation || ''); sv('editRecoveryDate', rec.recoveryDate || '');
+            sv('editReplaceSerial', rec.replaceSerial || ''); sv('editReplaceProduct', rec.replaceProduct || ''); sv('editReplaceType', rec.replaceType || ''); sv('editReplaceLocation', rec.replaceLocation || '');
+            updateEditModalConditionalFields();
+            document.getElementById('editModalOverlay').classList.add('active');
         }
-        function closeEditModal() {
-          document
-            .getElementById('editModalOverlay')
-            .classList.remove('active');
-          editingRecordId = null;
-        }
+        function closeEditModal() { document.getElementById('editModalOverlay').classList.remove('active'); editingRecordId = null; }
         function updateEditModalConditionalFields() {
-          const s = document.getElementById('editStatus').value;
-          document.getElementById('editNewLocationGroup').style.display =
-            s === 'move' ? 'block' : 'none';
-          document.getElementById('editMalfunctionGroup').style.display =
-            s === 'malfunction' ? 'flex' : 'none';
-          document.getElementById('editNewSPGroup').style.display =
-            s === 'malfunction' ? 'block' : 'none';
-          document.getElementById('editNewLSIGroup').style.display =
-            s === 'malfunction' ? 'block' : 'none';
+            const s = document.getElementById('editStatus').value;
+            document.getElementById('editNewLocationGroup').style.display = s === 'move' ? 'block' : 'none';
+            document.getElementById('editMalfunctionGroup').style.display = s === 'malfunction' ? 'flex' : 'none';
+            document.getElementById('editNewSPGroup').style.display = s === 'malfunction' ? 'block' : 'none';
+            document.getElementById('editNewLSIGroup').style.display = s === 'malfunction' ? 'block' : 'none';
         }
         async function saveEditRecord(e) {
-          e.preventDefault();
-          if (!editingRecordId) return;
-          const s = document.getElementById('editStatus').value,
-            sn = document.getElementById('editSerialNumber').value.trim();
-          if (
-            s === 'move' &&
-            !document.getElementById('editNewLocation').value.trim()
-          ) {
-            alert('Укажите новое расположение');
-            return;
-          }
-          if (sn && !devices.some(d => d.serialNumber === sn)) {
-            alert(`Серийный номер "${sn}" не найден в базе!`);
-            return;
-          }
-          const data = {
-            id: editingRecordId,
-            requestNumber: document
-              .getElementById('editRequestNumber')
-              .value.trim(),
-            importance: document.getElementById('editImportance').value,
-            status: s,
-            serialNumber: sn,
-            newSerialNumber: '',
-            product: document.getElementById('editProduct').value.trim(),
-            techType: document.getElementById('editTechType').value.trim(),
-            newTechType: '',
-            location: document.getElementById('editLocation').value.trim(),
-            newLocation:
-              s === 'move'
-                ? document.getElementById('editNewLocation').value.trim()
-                : '',
-            description: document
-              .getElementById('editDescription')
-              .value.trim(),
-            newSPRequisites:
-              s === 'malfunction'
-                ? document.getElementById('editNewSP')?.value.trim() || ''
-                : '',
-            newLSIRequisites:
-              s === 'malfunction'
-                ? document.getElementById('editNewLSI')?.value.trim() || ''
-                : '',
-            malfunctionDate:
-              s === 'malfunction'
-                ? document.getElementById('editMalfunctionDate')?.value || ''
-                : '',
-            brokenLocation:
-              s === 'malfunction'
-                ? document.getElementById('editBrokenLocation')?.value.trim() ||
-                  ''
-                : '',
-            recoveryDate:
-              s === 'malfunction'
-                ? document.getElementById('editRecoveryDate')?.value || ''
-                : '',
-            replaceSerial:
-              s === 'malfunction'
-                ? document.getElementById('editReplaceSerial')?.value.trim() ||
-                  ''
-                : '',
-            replaceProduct:
-              s === 'malfunction'
-                ? document.getElementById('editReplaceProduct')?.value.trim() ||
-                  ''
-                : '',
-            replaceType:
-              s === 'malfunction'
-                ? document.getElementById('editReplaceType')?.value.trim() || ''
-                : '',
-            replaceLocation:
-              s === 'malfunction'
-                ? document
-                    .getElementById('editReplaceLocation')
-                    ?.value.trim() || ''
-                : '',
-          };
-          try {
-            await apiPut(API.records, data);
-            const i = records.findIndex(r => r.id === editingRecordId);
-            if (i >= 0) records[i] = { ...records[i], ...data };
-            closeEditModal();
-            renderRecordsTable();
-          } catch (ex) {
-            alert('Не удалось сохранить');
-          }
+            e.preventDefault(); if (!editingRecordId) return;
+            const s = document.getElementById('editStatus').value, sn = document.getElementById('editSerialNumber').value.trim();
+            if (s === 'move' && !document.getElementById('editNewLocation').value.trim()) { alert('Укажите новое расположение'); return; }
+            if (sn && !devices.some(d => d.serialNumber === sn)) { alert(`Серийный номер "${sn}" не найден в базе!`); return; }
+            const data = {
+                id: editingRecordId, requestNumber: document.getElementById('editRequestNumber').value.trim(),
+                importance: document.getElementById('editImportance').value, status: s,
+                serialNumber: sn, newSerialNumber: '', product: document.getElementById('editProduct').value.trim(),
+                techType: document.getElementById('editTechType').value.trim(), newTechType: '',
+                location: document.getElementById('editLocation').value.trim(),
+                newLocation: s === 'move' ? document.getElementById('editNewLocation').value.trim() : '',
+                description: document.getElementById('editDescription').value.trim(),
+                newSPRequisites: s === 'malfunction' ? (document.getElementById('editNewSP')?.value.trim() || '') : '',
+                newLSIRequisites: s === 'malfunction' ? (document.getElementById('editNewLSI')?.value.trim() || '') : '',
+                malfunctionDate: s === 'malfunction' ? (document.getElementById('editMalfunctionDate')?.value || '') : '',
+                brokenLocation: s === 'malfunction' ? (document.getElementById('editBrokenLocation')?.value.trim() || '') : '',
+                recoveryDate: s === 'malfunction' ? (document.getElementById('editRecoveryDate')?.value || '') : '',
+                replaceSerial: s === 'malfunction' ? (document.getElementById('editReplaceSerial')?.value.trim() || '') : '',
+                replaceProduct: s === 'malfunction' ? (document.getElementById('editReplaceProduct')?.value.trim() || '') : '',
+                replaceType: s === 'malfunction' ? (document.getElementById('editReplaceType')?.value.trim() || '') : '',
+                replaceLocation: s === 'malfunction' ? (document.getElementById('editReplaceLocation')?.value.trim() || '') : ''
+            };
+            try { await apiPut(API.records, data); const i = records.findIndex(r => r.id === editingRecordId); if (i >= 0) records[i] = { ...records[i], ...data }; closeEditModal(); renderRecordsTable(); } catch (ex) { alert('Не удалось сохранить'); }
         }
         function getNextRequestNumber() {
-          if (!records.length) return '1';
-          let m = 0;
-          records.forEach(r => {
-            const n = parseInt(r.requestNumber);
-            if (!isNaN(n) && n > m) m = n;
-          });
-          return String(m + 1);
+            if (!records.length) return '1'; let m = 0;
+            records.forEach(r => { const n = parseInt(r.requestNumber); if (!isNaN(n) && n > m) m = n; });
+            return String(m + 1);
         }
         function initEditModal() {
-          document
-            .getElementById('closeEditModal')
-            ?.addEventListener('click', closeEditModal);
-          document
-            .getElementById('cancelEditBtn')
-            ?.addEventListener('click', closeEditModal);
-          document
-            .getElementById('editModalOverlay')
-            ?.addEventListener('click', function (e) {
-              if (e.target === this) closeEditModal();
-            });
-          document.addEventListener('keydown', function (e) {
-            if (
-              e.key === 'Escape' &&
-              document
-                .getElementById('editModalOverlay')
-                .classList.contains('active')
-            )
-              closeEditModal();
-          });
-          document
-            .getElementById('editStatus')
-            ?.addEventListener('change', updateEditModalConditionalFields);
-          document
-            .getElementById('editRecordForm')
-            ?.addEventListener('submit', saveEditRecord);
+            document.getElementById('closeEditModal')?.addEventListener('click', closeEditModal);
+            document.getElementById('cancelEditBtn')?.addEventListener('click', closeEditModal);
+            document.getElementById('editModalOverlay')?.addEventListener('click', function (e) { if (e.target === this) closeEditModal(); });
+            document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && document.getElementById('editModalOverlay').classList.contains('active')) closeEditModal(); });
+            document.getElementById('editStatus')?.addEventListener('change', updateEditModalConditionalFields);
+            document.getElementById('editRecordForm')?.addEventListener('submit', saveEditRecord);
         }
 
         function openDeviceEditModal(id) {
-          const dev = devices.find(d => d.id === id);
-          if (!dev) return;
-          editingDeviceId = id;
-          const sv = (elId, v) => {
-            const el = document.getElementById(elId);
-            if (el) el.value = v || '';
-          };
-          sv('editDeviceProduct', dev.product);
-          sv('editDeviceName', dev.device);
-          sv('editDeviceSerial', dev.serialNumber);
-          sv('editDeviceSupplyBasis', dev.supplyBasis);
-          sv('editDeviceSPRequisites', dev.spRequisites);
-          sv('editDeviceLSIRequisites', dev.lsiRequisites);
-          sv('editDeviceLocation', dev.location);
-          sv('editDeviceSpecs', dev.specs);
-          sv('editDeviceWarranty', dev.warranty);
-          sv('editDeviceNotes', dev.notes);
-          document
-            .getElementById('editDeviceModalOverlay')
-            .classList.add('active');
+            const dev = devices.find(d => d.id === id); if (!dev) return; editingDeviceId = id;
+            const sv = (elId, v) => { const el = document.getElementById(elId); if (el) el.value = v || ''; };
+            sv('editDeviceProduct', dev.product); sv('editDeviceName', dev.device); sv('editDeviceSerial', dev.serialNumber);
+            sv('editDeviceSupplyBasis', dev.supplyBasis); sv('editDeviceSPRequisites', dev.spRequisites); sv('editDeviceLSIRequisites', dev.lsiRequisites);
+            sv('editDeviceLocation', dev.location); sv('editDeviceSpecs', dev.specs); sv('editDeviceWarranty', dev.warranty); sv('editDeviceNotes', dev.notes);
+            document.getElementById('editDeviceModalOverlay').classList.add('active');
         }
-
-        function closeDeviceEditModal() {
-          document
-            .getElementById('editDeviceModalOverlay')
-            .classList.remove('active');
-          editingDeviceId = null;
-        }
-
+        function closeDeviceEditModal() { document.getElementById('editDeviceModalOverlay').classList.remove('active'); editingDeviceId = null; }
         async function saveDeviceEdit(e) {
-          e.preventDefault();
-          if (!editingDeviceId) return;
-          const dev = devices.find(d => d.id === editingDeviceId);
-          if (!dev) return;
-          const newSerial = document
-            .getElementById('editDeviceSerial')
-            .value.trim();
-          const data = {
-            serialNumber: newSerial,
-            product: document.getElementById('editDeviceProduct').value.trim(),
-            device: document.getElementById('editDeviceName').value.trim(),
-            supplyBasis: document
-              .getElementById('editDeviceSupplyBasis')
-              .value.trim(),
-            spRequisites: document
-              .getElementById('editDeviceSPRequisites')
-              .value.trim(),
-            lsiRequisites: document
-              .getElementById('editDeviceLSIRequisites')
-              .value.trim(),
-            location: document
-              .getElementById('editDeviceLocation')
-              .value.trim(),
-            specs: document.getElementById('editDeviceSpecs').value.trim(),
-            warranty: document.getElementById('editDeviceWarranty').value,
-            notes: document.getElementById('editDeviceNotes').value.trim(),
-          };
-          if (
-            !data.product ||
-            !data.device ||
-            !data.serialNumber ||
-            !data.supplyBasis ||
-            !data.spRequisites ||
-            !data.lsiRequisites
-          ) {
-            alert('Заполните обязательные поля');
-            return;
-          }
-          try {
-            const r = await fetch(API.devices, {
-              method: 'PUT',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify(data),
-            });
-            if (r.ok) {
-              const result = await r.json();
-              const idx = devices.findIndex(d => d.id === editingDeviceId);
-              if (idx >= 0) devices[idx] = result.device;
-              closeDeviceEditModal();
-              renderDevicesTable();
-              updateProductSelect();
-            }
-          } catch (e) {
-            alert('Ошибка сохранения');
-          }
+            e.preventDefault(); if (!editingDeviceId) return;
+            const dev = devices.find(d => d.id === editingDeviceId); if (!dev) return;
+            const newSerial = document.getElementById('editDeviceSerial').value.trim();
+            const data = {
+                serialNumber: newSerial, product: document.getElementById('editDeviceProduct').value.trim(),
+                device: document.getElementById('editDeviceName').value.trim(),
+                supplyBasis: document.getElementById('editDeviceSupplyBasis').value.trim(),
+                spRequisites: document.getElementById('editDeviceSPRequisites').value.trim(),
+                lsiRequisites: document.getElementById('editDeviceLSIRequisites').value.trim(),
+                location: document.getElementById('editDeviceLocation').value.trim(),
+                specs: document.getElementById('editDeviceSpecs').value.trim(),
+                warranty: document.getElementById('editDeviceWarranty').value,
+                notes: document.getElementById('editDeviceNotes').value.trim()
+            };
+            if (!data.product || !data.device || !data.serialNumber || !data.supplyBasis || !data.spRequisites || !data.lsiRequisites) { alert('Заполните обязательные поля'); return; }
+            try {
+                const r = await fetch(API.devices, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
+                if (r.ok) { const result = await r.json(); const idx = devices.findIndex(d => d.id === editingDeviceId); if (idx >= 0) devices[idx] = result.device; closeDeviceEditModal(); renderDevicesTable(); updateProductSelect(); }
+            } catch (e) { alert('Ошибка сохранения'); }
         }
-
         function initDeviceEditModal() {
-          document
-            .getElementById('closeEditDeviceModal')
-            ?.addEventListener('click', closeDeviceEditModal);
-          document
-            .getElementById('cancelEditDeviceBtn')
-            ?.addEventListener('click', closeDeviceEditModal);
-          document
-            .getElementById('editDeviceModalOverlay')
-            ?.addEventListener('click', function (e) {
-              if (e.target === this) closeDeviceEditModal();
-            });
-          document.addEventListener('keydown', function (e) {
-            if (
-              e.key === 'Escape' &&
-              document
-                .getElementById('editDeviceModalOverlay')
-                .classList.contains('active')
-            )
-              closeDeviceEditModal();
-          });
-          document
-            .getElementById('editDeviceForm')
-            ?.addEventListener('submit', saveDeviceEdit);
+            document.getElementById('closeEditDeviceModal')?.addEventListener('click', closeDeviceEditModal);
+            document.getElementById('cancelEditDeviceBtn')?.addEventListener('click', closeDeviceEditModal);
+            document.getElementById('editDeviceModalOverlay')?.addEventListener('click', function (e) { if (e.target === this) closeDeviceEditModal(); });
+            document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && document.getElementById('editDeviceModalOverlay').classList.contains('active')) closeDeviceEditModal(); });
+            document.getElementById('editDeviceForm')?.addEventListener('submit', saveDeviceEdit);
         }
 
-        async function addDevice(data) {
-          try {
-            const r = await apiPost(API.devices, data);
-            devices.push(r.device);
-            renderDevicesTable();
-            updateProductSelect();
-            return true;
-          } catch (e) {
-            alert('Ошибка');
-            return false;
-          }
+        function openDeviceInfoModal(serialNumber) {
+            const dev = devices.find(d => d.serialNumber === serialNumber);
+            if (!dev) { alert('Устройство не найдено'); return; }
+
+            const devRecords = records.filter(r =>
+                r.serialNumber === serialNumber ||
+                r.newSerialNumber === serialNumber ||
+                r.replaceSerial === serialNumber
+            );
+
+            const container = document.getElementById('deviceInfoContent');
+            container.innerHTML = `
+                <h3>📦 ${escapeHtml(dev.device)}</h3>
+                <table>
+                    <tr><th>Изделие</th><td>${escapeHtml(dev.product)}</td></tr>
+                    <tr><th>Серийный номер</th><td>${escapeHtml(dev.serialNumber)}</td></tr>
+                    <tr><th>Основание поставки</th><td>${escapeHtml(dev.supplyBasis || '-')}</td></tr>
+                    <tr><th>Реквизиты СП</th><td>${escapeHtml(dev.spRequisites || '-')}</td></tr>
+                    <tr><th>Реквизиты ЛСИ</th><td>${escapeHtml(dev.lsiRequisites || '-')}</td></tr>
+                    <tr><th>Расположение</th><td>${escapeHtml(dev.location || '-')}</td></tr>
+                    <tr><th>Характеристики</th><td>${escapeHtml(dev.specs || '-')}</td></tr>
+                    <tr><th>Гарантия до</th><td>${dev.warranty ? new Date(dev.warranty).toLocaleDateString('ru-RU') : '-'}</td></tr>
+                    <tr><th>Примечание</th><td>${escapeHtml(dev.notes || '-')}</td></tr>
+                    <tr><th>Дата добавления</th><td>${new Date(dev.createdAt).toLocaleString('ru-RU')}</td></tr>
+                </table>
+                <h3>📋 История операций (${devRecords.length})</h3>
+                ${devRecords.length ? `
+                <div style="max-height:300px;overflow-y:auto;">
+                    <table>
+                        <thead><tr><th>Дата</th><th>Пользователь</th><th>Статус</th><th>Описание</th></tr></thead>
+                        <tbody>
+                            ${devRecords.sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt)).map(r => `
+                                <tr>
+                                    <td>${new Date(r.createdAt).toLocaleString('ru-RU')}</td>
+                                    <td>${escapeHtml(r.username)}</td>
+                                    <td>${STATUS_LABELS[r.status] || r.status}</td>
+                                    <td>${escapeHtml(r.description || '-')}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>` : '<p>Нет записей</p>'}
+            `;
+
+            document.getElementById('deviceInfoModalOverlay').classList.add('active');
         }
-        async function deleteDevice(id) {
-          if (!confirm('Удалить?')) return;
-          try {
-            await apiDelete(API.devices, { id });
-            devices = devices.filter(d => d.id !== id);
-            renderDevicesTable();
-            updateProductSelect();
-          } catch (e) {}
+        window.openDeviceInfoModal = openDeviceInfoModal;
+
+        function closeDeviceInfoModal() {
+            document.getElementById('deviceInfoModalOverlay').classList.remove('active');
         }
+        function initDeviceInfoModal() {
+            document.getElementById('closeDeviceInfoModal')?.addEventListener('click', closeDeviceInfoModal);
+            document.getElementById('deviceInfoModalOverlay')?.addEventListener('click', function(e) { if (e.target === this) closeDeviceInfoModal(); });
+            document.addEventListener('keydown', function(e) { if (e.key === 'Escape' && document.getElementById('deviceInfoModalOverlay').classList.contains('active')) closeDeviceInfoModal(); });
+        }
+
+        async function addDevice(data) { try { const r = await apiPost(API.devices, data); devices.push(r.device); renderDevicesTable(); updateProductSelect(); return true; } catch (e) { alert('Ошибка'); return false; } }
+        async function deleteDevice(id) { if (!confirm('Удалить?')) return; try { await apiDelete(API.devices, { id }); devices = devices.filter(d => d.id !== id); renderDevicesTable(); updateProductSelect(); } catch (e) {} }
 
         function getFilteredDevices() {
-          const fp = document.getElementById('filterDevProduct')?.value || '',
-            fd =
-              document
-                .getElementById('filterDevDevice')
-                ?.value?.toLowerCase()
-                .trim() || '',
-            fs =
-              document
-                .getElementById('filterDevSerial')
-                ?.value?.toLowerCase()
-                .trim() || '',
-            fl =
-              document
-                .getElementById('filterDevLocation')
-                ?.value?.toLowerCase()
-                .trim() || '',
-            fsb =
-              document
-                .getElementById('filterDevSupplyBasis')
-                ?.value?.toLowerCase()
-                .trim() || '',
-            fsp =
-              document
-                .getElementById('filterDevSPRequisites')
-                ?.value?.toLowerCase()
-                .trim() || '',
-            flsi =
-              document
-                .getElementById('filterDevLSIRequisites')
-                ?.value?.toLowerCase()
-                .trim() || '';
-          let f = [...devices];
-          if (fp) f = f.filter(d => d.product === fp);
-          if (fd) f = f.filter(d => d.device?.toLowerCase().includes(fd));
-          if (fs) f = f.filter(d => d.serialNumber?.toLowerCase().includes(fs));
-          if (fl) f = f.filter(d => d.location?.toLowerCase().includes(fl));
-          if (fsb)
-            f = f.filter(d => d.supplyBasis?.toLowerCase().includes(fsb));
-          if (fsp)
-            f = f.filter(d => d.spRequisites?.toLowerCase().includes(fsp));
-          if (flsi)
-            f = f.filter(d => d.lsiRequisites?.toLowerCase().includes(flsi));
-          return f;
+            const fp = document.getElementById('filterDevProduct')?.value || '',
+                fd = document.getElementById('filterDevDevice')?.value?.toLowerCase().trim() || '',
+                fs = document.getElementById('filterDevSerial')?.value?.toLowerCase().trim() || '',
+                fl = document.getElementById('filterDevLocation')?.value?.toLowerCase().trim() || '',
+                fsb = document.getElementById('filterDevSupplyBasis')?.value?.toLowerCase().trim() || '',
+                fsp = document.getElementById('filterDevSPRequisites')?.value?.toLowerCase().trim() || '',
+                flsi = document.getElementById('filterDevLSIRequisites')?.value?.toLowerCase().trim() || '';
+            let f = [...devices];
+            if (fp) f = f.filter(d => d.product === fp);
+            if (fd) f = f.filter(d => d.device?.toLowerCase().includes(fd));
+            if (fs) f = f.filter(d => d.serialNumber?.toLowerCase().includes(fs));
+            if (fl) f = f.filter(d => d.location?.toLowerCase().includes(fl));
+            if (fsb) f = f.filter(d => d.supplyBasis?.toLowerCase().includes(fsb));
+            if (fsp) f = f.filter(d => d.spRequisites?.toLowerCase().includes(fsp));
+            if (flsi) f = f.filter(d => d.lsiRequisites?.toLowerCase().includes(flsi));
+            return f;
         }
 
         function renderDevicesTable() {
-          const tb = document.getElementById('devicesTableBody');
-          if (!tb) return;
-          tb.innerHTML = '';
-          const f = getFilteredDevices();
-          f.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-          if (!f.length) {
-            tb.innerHTML =
-              '<tr><td colspan="11" class="no-records">Нет устройств</td></tr>';
+            const tb = document.getElementById('devicesTableBody'); if (!tb) return;
+            tb.innerHTML = ''; const f = getFilteredDevices(); f.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+            if (!f.length) { tb.innerHTML = '<tr><td colspan="11" class="no-records">Нет устройств</td></tr>'; updateDeviceFilterSelects(); return; }
+            f.forEach(d => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `<td>${escapeHtml(d.product)}</td><td>${escapeHtml(d.device)}</td><td><a href="javascript:void(0)" onclick="openDeviceInfoModal('${escapeHtml(d.serialNumber)}')" style="color:var(--accent);text-decoration:underline;cursor:pointer;">${escapeHtml(d.serialNumber)}</a></td><td>${escapeHtml(d.supplyBasis || '-')}</td><td>${escapeHtml(d.spRequisites || '-')}</td><td>${escapeHtml(d.lsiRequisites || '-')}</td><td>${escapeHtml(d.location || '-')}</td><td style="max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${escapeHtml(d.specs || '')}">${escapeHtml(d.specs || '-')}</td><td style="max-width:150px;overflow:hidden;text-overflow:ellipsis" title="${escapeHtml(d.notes || '')}">${escapeHtml(d.notes || '-')}</td><td>${new Date(d.createdAt).toLocaleDateString('ru-RU')}</td><td><div class="action-buttons"><button class="edit-btn" title="Редактировать">✏️</button><button class="delete-btn" title="Удалить">🗑️</button></div></td>`;
+                tr.querySelector('.delete-btn')?.addEventListener('click', () => deleteDevice(d.id));
+                tr.querySelector('.edit-btn')?.addEventListener('click', () => openDeviceEditModal(d.id));
+                tb.appendChild(tr);
+            });
             updateDeviceFilterSelects();
-            return;
-          }
-          f.forEach(d => {
-            const tr = document.createElement('tr');
-            tr.innerHTML = `<td>${escapeHtml(d.product)}</td><td>${escapeHtml(d.device)}</td><td>${escapeHtml(d.serialNumber)}</td><td>${escapeHtml(d.supplyBasis || '-')}</td><td>${escapeHtml(d.spRequisites || '-')}</td><td>${escapeHtml(d.lsiRequisites || '-')}</td><td>${escapeHtml(d.location || '-')}</td><td style="max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${escapeHtml(d.specs || '')}">${escapeHtml(d.specs || '-')}</td><td style="max-width:150px;overflow:hidden;text-overflow:ellipsis" title="${escapeHtml(d.notes || '')}">${escapeHtml(d.notes || '-')}</td><td>${new Date(d.createdAt).toLocaleDateString('ru-RU')}</td><td><div class="action-buttons"><button class="edit-btn" title="Редактировать">✏️</button><button class="delete-btn" title="Удалить">🗑️</button></div></td>`;
-            tr.querySelector('.delete-btn')?.addEventListener('click', () =>
-              deleteDevice(d.id)
-            );
-            tr.querySelector('.edit-btn')?.addEventListener('click', () =>
-              openDeviceEditModal(d.id)
-            );
-            tb.appendChild(tr);
-          });
-          updateDeviceFilterSelects();
         }
 
         function updateDeviceFilterSelects() {
-          const el = document.getElementById('filterDevProduct');
-          if (!el) return;
-          const cv = el.value;
-          el.innerHTML = '<option value="">Все изделия</option>';
-          [...new Set(devices.map(d => d.product).filter(Boolean))]
-            .sort()
-            .forEach(p => {
-              const o = document.createElement('option');
-              o.value = p;
-              o.textContent = p;
-              el.appendChild(o);
-            });
-          el.value = cv;
+            const el = document.getElementById('filterDevProduct'); if (!el) return;
+            const cv = el.value; el.innerHTML = '<option value="">Все изделия</option>';
+            [...new Set(devices.map(d => d.product).filter(Boolean))].sort().forEach(p => { const o = document.createElement('option'); o.value = p; o.textContent = p; el.appendChild(o); });
+            el.value = cv;
         }
 
         function initDevicesFilters() {
-          ['filterDevProduct'].forEach(id =>
-            document
-              .getElementById(id)
-              ?.addEventListener('change', renderDevicesTable)
-          );
-          [
-            'filterDevDevice',
-            'filterDevSerial',
-            'filterDevLocation',
-            'filterDevSupplyBasis',
-            'filterDevSPRequisites',
-            'filterDevLSIRequisites',
-          ].forEach(id =>
-            document
-              .getElementById(id)
-              ?.addEventListener('input', renderDevicesTable)
-          );
-          document
-            .getElementById('resetDevFiltersBtn')
-            ?.addEventListener('click', () => {
-              [
-                'filterDevProduct',
-                'filterDevDevice',
-                'filterDevSerial',
-                'filterDevLocation',
-                'filterDevSupplyBasis',
-                'filterDevSPRequisites',
-                'filterDevLSIRequisites',
-              ].forEach(id => {
-                const el = document.getElementById(id);
-                if (el) el.value = '';
-              });
-              renderDevicesTable();
-            });
-          updateDeviceFilterSelects();
+            ['filterDevProduct'].forEach(id => document.getElementById(id)?.addEventListener('change', renderDevicesTable));
+            ['filterDevDevice','filterDevSerial','filterDevLocation','filterDevSupplyBasis','filterDevSPRequisites','filterDevLSIRequisites'].forEach(id => document.getElementById(id)?.addEventListener('input', renderDevicesTable));
+            document.getElementById('resetDevFiltersBtn')?.addEventListener('click', () => { ['filterDevProduct','filterDevDevice','filterDevSerial','filterDevLocation','filterDevSupplyBasis','filterDevSPRequisites','filterDevLSIRequisites'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; }); renderDevicesTable(); });
+            updateDeviceFilterSelects();
         }
 
         function exportToCSV(data, columns, filename) {
-          if (!data?.length) {
-            alert('Нет данных');
-            return;
-          }
-          let csv =
-            '\uFEFF' +
-            columns
-              .map(c => '"' + (c.label || c).replace(/"/g, '""') + '"')
-              .join(';') +
-            '\n';
-          data.forEach(row => {
-            csv +=
-              columns
-                .map(c => {
-                  let v = row[c.id] || '';
-                  if (row.customFields?.[c.id]) v = row.customFields[c.id];
-                  return '"' + String(v).replace(/"/g, '""') + '"';
-                })
-                .join(';') + '\n';
-          });
-          const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' }),
-            url = URL.createObjectURL(blob),
-            a = document.createElement('a');
-          a.href = url;
-          a.download = filename + '.csv';
-          document.body.appendChild(a);
-          a.click();
-          document.body.removeChild(a);
-          URL.revokeObjectURL(url);
+            if (!data?.length) { alert('Нет данных'); return; }
+            let csv = '\uFEFF' + columns.map(c => '"' + (c.label || c).replace(/"/g, '""') + '"').join(';') + '\n';
+            data.forEach(row => { csv += columns.map(c => { let v = row[c.id] || ''; if (row.customFields?.[c.id]) v = row.customFields[c.id]; return '"' + String(v).replace(/"/g, '""') + '"'; }).join(';') + '\n'; });
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' }), url = URL.createObjectURL(blob), a = document.createElement('a');
+            a.href = url; a.download = filename + '.csv'; document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
         }
 
         function initExportButtons() {
-          const exportRecordsBtn = document.getElementById('exportRecordsBtn');
-          if (exportRecordsBtn) {
-            const newBtn = exportRecordsBtn.cloneNode(true);
-            exportRecordsBtn.parentNode.replaceChild(newBtn, exportRecordsBtn);
-            newBtn.addEventListener('click', () => {
-              const f = getFilteredRecords();
-              exportToCSV(
-                f.map(r => ({
-                  ...r,
-                  createdAt: new Date(r.createdAt).toLocaleString('ru-RU'),
-                  importance: IMPORTANCE_LABELS[r.importance] || r.importance,
-                  status: STATUS_LABELS[r.status] || r.status,
-                })),
-                [
-                  { id: 'createdAt', label: 'Дата и время' },
-                  { id: 'username', label: 'Пользователь' },
-                  { id: 'requestNumber', label: '№ Заявки' },
-                  { id: 'importance', label: 'Важность' },
-                  { id: 'status', label: 'Статус' },
-                  { id: 'serialNumber', label: 'Серийный номер' },
-                  { id: 'product', label: 'Изделие' },
-                  { id: 'techType', label: 'Тип техники' },
-                  { id: 'location', label: 'Расположение' },
-                  { id: 'description', label: 'Описание' },
-                ],
-                'records_' + new Date().toISOString().slice(0, 10)
-              );
-            });
-          }
-
-          const exportDevicesBtn = document.getElementById('exportDevicesBtn');
-          if (exportDevicesBtn) {
-            const newBtn = exportDevicesBtn.cloneNode(true);
-            exportDevicesBtn.parentNode.replaceChild(newBtn, exportDevicesBtn);
-            newBtn.addEventListener('click', () => {
-              const f = getFilteredDevices();
-              exportToCSV(
-                f.map(d => ({
-                  ...d,
-                  createdAt: new Date(d.createdAt).toLocaleDateString('ru-RU'),
-                })),
-                [
-                  { id: 'product', label: 'Изделие' },
-                  { id: 'device', label: 'Устройство' },
-                  { id: 'serialNumber', label: 'Серийный номер' },
-                  { id: 'supplyBasis', label: 'Основание поставки' },
-                  { id: 'spRequisites', label: 'Реквизиты СП' },
-                  { id: 'lsiRequisites', label: 'Реквизиты ЛСИ' },
-                  { id: 'location', label: 'Расположение' },
-                  { id: 'specs', label: 'Характеристики' },
-                  { id: 'notes', label: 'Примечание' },
-                  { id: 'createdAt', label: 'Дата добавления' },
-                ],
-                'devices_' + new Date().toISOString().slice(0, 10)
-              );
-            });
-          }
-
-          const printActBtn = document.getElementById('printActBtn');
-          if (printActBtn) {
-            const newBtn = printActBtn.cloneNode(true);
-            printActBtn.parentNode.replaceChild(newBtn, printActBtn);
-            newBtn.addEventListener('click', () => {
-              const devs = getFilteredDevices();
-              if (!devs.length) {
-                alert('Нет устройств');
-                return;
-              }
-              const now = new Date().toLocaleString('ru-RU');
-              let h = `<html><head><meta charset="utf-8"><title>Акт</title><style>body{font-family:Arial;padding:40px}h1{text-align:center;font-size:18px}h2{text-align:center;font-size:14px}table{width:100%;border-collapse:collapse;margin-top:20px;font-size:12px}th,td{border:1px solid #000;padding:6px 8px}th{background:#f0f0f0}.footer{margin-top:40px;display:flex;justify-content:space-between}.sign{width:200px;border-top:1px solid #000;text-align:center;padding-top:5px}</style></head><body><h1>АКТ ПРИЁМА-ПЕРЕДАЧИ</h1><h2>от ${now}</h2><table><tr><th>№</th><th>Изделие</th><th>Устройство</th><th>Серийный №</th><th>Основание</th><th>Расположение</th></tr>`;
-              devs.forEach((d, i) => {
-                h += `<tr><td>${i + 1}</td><td>${d.product}</td><td>${d.device}</td><td>${d.serialNumber}</td><td>${d.supplyBasis || '-'}</td><td>${d.location || '-'}</td></tr>`;
-              });
-              h += `</table><div class="footer"><div class="sign">Сдал</div><div class="sign">Принял</div></div></body></html>`;
-              const pw = window.open('', '_blank');
-              pw.document.write(h);
-              pw.document.close();
-              pw.print();
-            });
-          }
+            const exportRecordsBtn = document.getElementById('exportRecordsBtn');
+            if (exportRecordsBtn) {
+                const newBtn = exportRecordsBtn.cloneNode(true);
+                exportRecordsBtn.parentNode.replaceChild(newBtn, exportRecordsBtn);
+                newBtn.addEventListener('click', () => {
+                    const f = getFilteredRecords();
+                    exportToCSV(f.map(r => ({ ...r, createdAt: new Date(r.createdAt).toLocaleString('ru-RU'), importance: IMPORTANCE_LABELS[r.importance] || r.importance, status: STATUS_LABELS[r.status] || r.status })), [{ id: 'createdAt', label: 'Дата и время' }, { id: 'username', label: 'Пользователь' }, { id: 'requestNumber', label: '№ Заявки' }, { id: 'importance', label: 'Важность' }, { id: 'status', label: 'Статус' }, { id: 'serialNumber', label: 'Серийный номер' }, { id: 'product', label: 'Изделие' }, { id: 'techType', label: 'Тип техники' }, { id: 'location', label: 'Расположение' }, { id: 'description', label: 'Описание' }], 'records_' + new Date().toISOString().slice(0, 10));
+                });
+            }
+            const exportDevicesBtn = document.getElementById('exportDevicesBtn');
+            if (exportDevicesBtn) {
+                const newBtn = exportDevicesBtn.cloneNode(true);
+                exportDevicesBtn.parentNode.replaceChild(newBtn, exportDevicesBtn);
+                newBtn.addEventListener('click', () => {
+                    const f = getFilteredDevices();
+                    exportToCSV(f.map(d => ({ ...d, createdAt: new Date(d.createdAt).toLocaleDateString('ru-RU') })), [{ id: 'product', label: 'Изделие' }, { id: 'device', label: 'Устройство' }, { id: 'serialNumber', label: 'Серийный номер' }, { id: 'supplyBasis', label: 'Основание поставки' }, { id: 'spRequisites', label: 'Реквизиты СП' }, { id: 'lsiRequisites', label: 'Реквизиты ЛСИ' }, { id: 'location', label: 'Расположение' }, { id: 'specs', label: 'Характеристики' }, { id: 'notes', label: 'Примечание' }, { id: 'createdAt', label: 'Дата добавления' }], 'devices_' + new Date().toISOString().slice(0, 10));
+                });
+            }
+            const printActBtn = document.getElementById('printActBtn');
+            if (printActBtn) {
+                const newBtn = printActBtn.cloneNode(true);
+                printActBtn.parentNode.replaceChild(newBtn, printActBtn);
+                newBtn.addEventListener('click', () => {
+                    const devs = getFilteredDevices();
+                    if (!devs.length) { alert('Нет устройств'); return; }
+                    const now = new Date().toLocaleString('ru-RU');
+                    let h = `<html><head><meta charset="utf-8"><title>Акт</title><style>body{font-family:Arial;padding:40px}h1{text-align:center;font-size:18px}h2{text-align:center;font-size:14px}table{width:100%;border-collapse:collapse;margin-top:20px;font-size:12px}th,td{border:1px solid #000;padding:6px 8px}th{background:#f0f0f0}.footer{margin-top:40px;display:flex;justify-content:space-between}.sign{width:200px;border-top:1px solid #000;text-align:center;padding-top:5px}</style></head><body><h1>АКТ ПРИЁМА-ПЕРЕДАЧИ</h1><h2>от ${now}</h2><table><tr><th>№</th><th>Изделие</th><th>Устройство</th><th>Серийный №</th><th>Основание</th><th>Расположение</th></tr>`;
+                    devs.forEach((d, i) => { h += `<tr><td>${i + 1}</td><td>${d.product}</td><td>${d.device}</td><td>${d.serialNumber}</td><td>${d.supplyBasis || '-'}</td><td>${d.location || '-'}</td></tr>`; });
+                    h += `</table><div class="footer"><div class="sign">Сдал</div><div class="sign">Принял</div></div></body></html>`;
+                    const pw = window.open('', '_blank'); pw.document.write(h); pw.document.close(); pw.print();
+                });
+            }
         }
 
         function initImportButtons() {
-          const btn = document.getElementById('importDevicesBtn'),
-            inp = document.getElementById('importFileInput');
-          if (!btn || !inp) return;
-          const newBtn = btn.cloneNode(true);
-          btn.parentNode.replaceChild(newBtn, btn);
-          const newInp = inp.cloneNode(true);
-          inp.parentNode.replaceChild(newInp, inp);
-          newBtn.addEventListener('click', () => newInp.click());
-          newInp.addEventListener('change', async e => {
-            const file = e.target.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = async function (ev) {
-              const lines = ev.target.result.split('\n');
-              if (lines.length < 2) {
-                alert('Файл пуст');
-                return;
-              }
-              const headers = lines[0].replace(/"/g, '').split(';');
-              let imported = 0;
-              for (let i = 1; i < lines.length; i++) {
-                if (!lines[i].trim()) continue;
-                const vals = lines[i]
-                  .split(';')
-                  .map(v => v.replace(/"/g, '').trim());
-                const dev = {};
-                headers.forEach((h, j) => {
-                  if (h.trim() === 'Изделие') dev.product = vals[j] || '';
-                  else if (h.trim() === 'Устройство')
-                    dev.device = vals[j] || '';
-                  else if (h.trim() === 'Серийный номер')
-                    dev.serialNumber = vals[j] || '';
-                  else if (h.trim() === 'Основание поставки')
-                    dev.supplyBasis = vals[j] || '';
-                  else if (h.trim() === 'Реквизиты СП')
-                    dev.spRequisites = vals[j] || '';
-                  else if (h.trim() === 'Реквизиты ЛСИ')
-                    dev.lsiRequisites = vals[j] || '';
-                  else if (h.trim() === 'Расположение')
-                    dev.location = vals[j] || '';
-                  else if (h.trim() === 'Характеристики')
-                    dev.specs = vals[j] || '';
-                  else if (h.trim() === 'Примечание') dev.notes = vals[j] || '';
-                  else if (h.trim() === 'Гарантия до')
-                    dev.warranty = vals[j] || '';
-                });
-                if (dev.serialNumber) {
-                  try {
-                    await apiPost(API.devices, dev);
-                    imported++;
-                  } catch (ex) {}
-                }
-              }
-              if (imported) {
-                alert(`Импортировано: ${imported}`);
-                await loadData();
-                renderDevicesTable();
-                updateProductSelect();
-                renderStatistics();
-              } else alert('Не удалось импортировать');
-            };
-            reader.readAsText(file, 'UTF-8');
-          });
+            const btn = document.getElementById('importDevicesBtn'), inp = document.getElementById('importFileInput');
+            if (!btn || !inp) return;
+            const newBtn = btn.cloneNode(true); btn.parentNode.replaceChild(newBtn, btn);
+            const newInp = inp.cloneNode(true); inp.parentNode.replaceChild(newInp, inp);
+            newBtn.addEventListener('click', () => newInp.click());
+            newInp.addEventListener('change', async e => {
+                const file = e.target.files[0]; if (!file) return;
+                const reader = new FileReader();
+                reader.onload = async function (ev) {
+                    const lines = ev.target.result.split('\n');
+                    if (lines.length < 2) { alert('Файл пуст'); return; }
+                    const headers = lines[0].replace(/"/g, '').split(';');
+                    let imported = 0;
+                    for (let i = 1; i < lines.length; i++) {
+                        if (!lines[i].trim()) continue;
+                        const vals = lines[i].split(';').map(v => v.replace(/"/g, '').trim());
+                        const dev = {};
+                        headers.forEach((h, j) => {
+                            if (h.trim() === 'Изделие') dev.product = vals[j] || '';
+                            else if (h.trim() === 'Устройство') dev.device = vals[j] || '';
+                            else if (h.trim() === 'Серийный номер') dev.serialNumber = vals[j] || '';
+                            else if (h.trim() === 'Основание поставки') dev.supplyBasis = vals[j] || '';
+                            else if (h.trim() === 'Реквизиты СП') dev.spRequisites = vals[j] || '';
+                            else if (h.trim() === 'Реквизиты ЛСИ') dev.lsiRequisites = vals[j] || '';
+                            else if (h.trim() === 'Расположение') dev.location = vals[j] || '';
+                            else if (h.trim() === 'Характеристики') dev.specs = vals[j] || '';
+                            else if (h.trim() === 'Примечание') dev.notes = vals[j] || '';
+                            else if (h.trim() === 'Гарантия до') dev.warranty = vals[j] || '';
+                        });
+                        if (dev.serialNumber) { try { await apiPost(API.devices, dev); imported++; } catch (ex) {} }
+                    }
+                    if (imported) { alert(`Импортировано: ${imported}`); await loadData(); renderDevicesTable(); updateProductSelect(); renderStatistics(); }
+                    else alert('Не удалось импортировать');
+                };
+                reader.readAsText(file, 'UTF-8');
+            });
         }
 
         function renderStatistics() {
-          if (!document.getElementById('statisticsPage')) return;
-          document.getElementById('statTotalDevices').textContent =
-            devices.length;
-          document.getElementById('statTotalRecords').textContent =
-            records.length;
-          document.getElementById('statCompleted').textContent = records.filter(
-            r => r.completed
-          ).length;
-          document.getElementById('statInProgress').textContent =
-            records.filter(r => !r.completed).length;
-          document.getElementById('statMalfunctions').textContent =
-            records.filter(r => r.status === 'malfunction').length;
-          document.getElementById('statMoves').textContent = records.filter(
-            r => r.status === 'move'
-          ).length;
+            if (!document.getElementById('statisticsPage')) return;
+            document.getElementById('statTotalDevices').textContent = devices.length;
+            document.getElementById('statTotalRecords').textContent = records.length;
+            document.getElementById('statCompleted').textContent = records.filter(r => r.completed).length;
+            document.getElementById('statInProgress').textContent = records.filter(r => !r.completed).length;
+            document.getElementById('statMalfunctions').textContent = records.filter(r => r.status === 'malfunction').length;
+            document.getElementById('statMoves').textContent = records.filter(r => r.status === 'move').length;
 
-          const ps = {};
-          devices.forEach(d => {
-            if (!ps[d.product])
-              ps[d.product] = {
-                count: 0,
-                records: 0,
-                malfunctions: 0,
-                moves: 0,
-                infos: 0,
-              };
-            ps[d.product].count++;
-          });
-          records.forEach(r => {
-            if (r.product && ps[r.product]) {
-              ps[r.product].records++;
-              if (r.status === 'malfunction') ps[r.product].malfunctions++;
-              if (r.status === 'move') ps[r.product].moves++;
-              if (r.status === 'info') ps[r.product].infos++;
+            const ps = {};
+            devices.forEach(d => { if (!ps[d.product]) ps[d.product] = { count: 0, records: 0, malfunctions: 0, moves: 0, infos: 0 }; ps[d.product].count++; });
+            records.forEach(r => { if (r.product && ps[r.product]) { ps[r.product].records++; if (r.status === 'malfunction') ps[r.product].malfunctions++; if (r.status === 'move') ps[r.product].moves++; if (r.status === 'info') ps[r.product].infos++; } });
+            const stb = document.getElementById('statsTableBody'); stb.innerHTML = '';
+            const sp = Object.entries(ps).sort((a, b) => b[1].count - a[1].count);
+            if (!sp.length) stb.innerHTML = '<tr><td colspan="6" class="no-records">Нет данных</td></tr>';
+            else sp.forEach(([p, s]) => { const tr = document.createElement('tr'); tr.innerHTML = `<td>${escapeHtml(p)}</td><td>${s.count}</td><td>${s.records}</td><td>${s.malfunctions}</td><td>${s.moves}</td><td>${s.infos}</td>`; stb.appendChild(tr); });
+
+            const ss = { malfunction: { label: 'Неисправность', total: 0, completed: 0 }, info: { label: 'Информация', total: 0, completed: 0 }, move: { label: 'Перемещение', total: 0, completed: 0 } };
+            records.forEach(r => { if (r.status && ss[r.status]) { ss[r.status].total++; if (r.completed) ss[r.status].completed++; } });
+            const sstb = document.getElementById('statusStatsTableBody'); sstb.innerHTML = '';
+            Object.values(ss).forEach(s => { const tr = document.createElement('tr'); tr.innerHTML = `<td>${s.label}</td><td>${s.total}</td><td>${s.completed}</td><td>${s.total - s.completed}</td>`; sstb.appendChild(tr); });
+
+            const us = {};
+            records.forEach(r => { if (!r.username) return; if (!us[r.username]) us[r.username] = { total: 0, completed: 0, inProgress: 0, malfunctions: 0, moves: 0, infos: 0 }; us[r.username].total++; if (r.completed) us[r.username].completed++; else us[r.username].inProgress++; if (r.status === 'malfunction') us[r.username].malfunctions++; if (r.status === 'move') us[r.username].moves++; if (r.status === 'info') us[r.username].infos++; });
+            const ustb = document.getElementById('userStatsTableBody'); if (ustb) {
+                ustb.innerHTML = ''; const su = Object.entries(us).sort((a, b) => b[1].total - a[1].total); if (!su.length) ustb.innerHTML = '<tr><td colspan="8" class="no-records">Нет данных</td></tr>';
+                else su.forEach(([un, s]) => { const pt = records.length > 0 ? ((s.total / records.length) * 100).toFixed(1) + '%' : '0%'; const tr = document.createElement('tr'); tr.innerHTML = `<td><strong>${escapeHtml(un)}</strong></td><td>${s.total} (${pt})</td><td>${s.completed}</td><td>${s.inProgress}</td><td>${pt}</td><td>${s.malfunctions}</td><td>${s.moves}</td><td>${s.infos}</td>`; ustb.appendChild(tr); });
             }
-          });
-          const stb = document.getElementById('statsTableBody');
-          stb.innerHTML = '';
-          const sp = Object.entries(ps).sort((a, b) => b[1].count - a[1].count);
-          if (!sp.length)
-            stb.innerHTML =
-              '<tr><td colspan="6" class="no-records">Нет данных</td></tr>';
-          else
-            sp.forEach(([p, s]) => {
-              const tr = document.createElement('tr');
-              tr.innerHTML = `<td>${escapeHtml(p)}</td><td>${s.count}</td><td>${s.records}</td><td>${s.malfunctions}</td><td>${s.moves}</td><td>${s.infos}</td>`;
-              stb.appendChild(tr);
-            });
 
-          const ss = {
-            malfunction: { label: 'Неисправность', total: 0, completed: 0 },
-            info: { label: 'Информация', total: 0, completed: 0 },
-            move: { label: 'Перемещение', total: 0, completed: 0 },
-          };
-          records.forEach(r => {
-            if (r.status && ss[r.status]) {
-              ss[r.status].total++;
-              if (r.completed) ss[r.status].completed++;
+            const wtb = document.getElementById('warrantyTableBody');
+            if (wtb) {
+                wtb.innerHTML = ''; const now = new Date(), wd = new Date(); wd.setDate(wd.getDate() + 30);
+                const dw = devices.filter(d => d.warranty);
+                if (!dw.length) wtb.innerHTML = '<tr><td colspan="4" class="no-records">Нет данных</td></tr>';
+                else { dw.sort((a, b) => new Date(a.warranty) - new Date(b.warranty)); dw.forEach(d => { const we = new Date(d.warranty); const tr = document.createElement('tr'); let st = '✅ Действует'; if (we < now) { st = '❌ Истекла'; tr.style.background = 'rgba(255,71,87,0.1)'; } else if (we < wd) { st = '⚠️ Истекает'; tr.style.background = 'rgba(255,165,2,0.1)'; } tr.innerHTML = `<td>${escapeHtml(d.device)}</td><td>${escapeHtml(d.serialNumber)}</td><td>${we.toLocaleDateString('ru-RU')}</td><td>${st}</td>`; wtb.appendChild(tr); }); }
             }
-          });
-          const sstb = document.getElementById('statusStatsTableBody');
-          sstb.innerHTML = '';
-          Object.values(ss).forEach(s => {
-            const tr = document.createElement('tr');
-            tr.innerHTML = `<td>${s.label}</td><td>${s.total}</td><td>${s.completed}</td><td>${s.total - s.completed}</td>`;
-            sstb.appendChild(tr);
-          });
-
-          const us = {};
-          records.forEach(r => {
-            if (!r.username) return;
-            if (!us[r.username])
-              us[r.username] = {
-                total: 0,
-                completed: 0,
-                inProgress: 0,
-                malfunctions: 0,
-                moves: 0,
-                infos: 0,
-              };
-            us[r.username].total++;
-            if (r.completed) us[r.username].completed++;
-            else us[r.username].inProgress++;
-            if (r.status === 'malfunction') us[r.username].malfunctions++;
-            if (r.status === 'move') us[r.username].moves++;
-            if (r.status === 'info') us[r.username].infos++;
-          });
-          const ustb = document.getElementById('userStatsTableBody');
-          if (ustb) {
-            ustb.innerHTML = '';
-            const su = Object.entries(us).sort(
-              (a, b) => b[1].total - a[1].total
-            );
-            if (!su.length)
-              ustb.innerHTML =
-                '<tr><td colspan="8" class="no-records">Нет данных</td></tr>';
-            else
-              su.forEach(([un, s]) => {
-                const pt =
-                  records.length > 0
-                    ? ((s.total / records.length) * 100).toFixed(1) + '%'
-                    : '0%';
-                const tr = document.createElement('tr');
-                tr.innerHTML = `<td><strong>${escapeHtml(un)}</strong></td><td>${s.total} (${pt})</td><td>${s.completed}</td><td>${s.inProgress}</td><td>${pt}</td><td>${s.malfunctions}</td><td>${s.moves}</td><td>${s.infos}</td>`;
-                ustb.appendChild(tr);
-              });
-          }
-
-          const wtb = document.getElementById('warrantyTableBody');
-          if (wtb) {
-            wtb.innerHTML = '';
-            const now = new Date(),
-              wd = new Date();
-            wd.setDate(wd.getDate() + 30);
-            const dw = devices.filter(d => d.warranty);
-            if (!dw.length)
-              wtb.innerHTML =
-                '<tr><td colspan="4" class="no-records">Нет данных</td></tr>';
-            else {
-              dw.sort((a, b) => new Date(a.warranty) - new Date(b.warranty));
-              dw.forEach(d => {
-                const we = new Date(d.warranty);
-                const tr = document.createElement('tr');
-                let st = '✅ Действует';
-                if (we < now) {
-                  st = '❌ Истекла';
-                  tr.style.background = 'rgba(255,71,87,0.1)';
-                } else if (we < wd) {
-                  st = '⚠️ Истекает';
-                  tr.style.background = 'rgba(255,165,2,0.1)';
-                }
-                tr.innerHTML = `<td>${escapeHtml(d.device)}</td><td>${escapeHtml(d.serialNumber)}</td><td>${we.toLocaleDateString('ru-RU')}</td><td>${st}</td>`;
-                wtb.appendChild(tr);
-              });
-            }
-          }
         }
 
         const instructionsContent = {
-          user_guide: `<div class="instructions-content"><h1>📖 Руководство пользователя</h1><h2>🔐 Вход в систему</h2><p>Откройте браузер и перейдите по адресу <strong>http://localhost:3000</strong>.</p><p>Введите логин и пароль, затем нажмите «Войти». Учётные данные по умолчанию:</p><ul><li><strong>Администратор:</strong> admin / admin123</li><li><strong>Пользователь:</strong> user / user123</li></ul><p>Если у вас нет учётной записи, перейдите на вкладку «Регистрация», придумайте логин (от 3 символов) и пароль (от 4 символов).</p><h2>🧭 Навигация</h2><p>Слева расположена боковая панель с разделами. Чтобы развернуть/свернуть панель, нажмите кнопку ✕ в верхней части панели.</p><h2>📝 Добавление записи</h2><p>Нажмите кнопку <strong>«Добавить запись»</strong>. Выберите статус:</p><ul><li><strong>Информация</strong> — все поля необязательные, подтягиваются по серийному номеру. Заявка сразу выполнена.</li><li><strong>Перемещение</strong> — обязательные: серийный номер, изделие, тип техники, новое расположение. Заявка сразу выполнена.</li><li><strong>Неисправность</strong> — обязательные: дата обнаружения, серийный номер, изделие, тип техники, описание. Можно указать новые реквизиты СП и ЛСИ, куда отнесли сломанное, дату восстановления и данные подменного устройства. Заявка создаётся в работе.</li></ul><h2>📊 Таблица записей</h2><p>Фильтры и экспорт CSV. Действия: ✏️ редактировать, 🗑️ удалить, ✅ отметить неисправность выполненной.</p></div>`,
-          admin_guide: `<div class="instructions-content"><h1>🔧 Руководство администратора</h1><h2>⚙️ Вся техника</h2><p>Добавление, редактирование, удаление устройств. Импорт/экспорт CSV, печать акта.</p><h2>📊 Статистика</h2><p>По изделиям, статусам, пользователям. Контроль гарантийных сроков.</p><h2>🏗️ Конструктор таблиц</h2><p>Создание пользовательских разделов с настраиваемыми полями.</p></div>`,
-          dev_guide: `<div class="instructions-content"><h1>💻 Руководство разработчика</h1><p>Стек: ванильный JS (SPA) + Node.js. Данные в JSON-файлах. Запуск: <code>node server.js</code> → http://localhost:3000</p></div>`,
+            user_guide: `<div class="instructions-content"><h1>📖 Руководство пользователя</h1><h2>🔐 Вход в систему</h2><p>Откройте браузер и перейдите по адресу <strong>http://localhost:3000</strong>.</p><p>Введите логин и пароль, затем нажмите «Войти». Учётные данные по умолчанию:</p><ul><li><strong>Администратор:</strong> admin / admin123</li><li><strong>Пользователь:</strong> user / user123</li></ul><p>Если у вас нет учётной записи, перейдите на вкладку «Регистрация», придумайте логин (от 3 символов) и пароль (от 4 символов).</p><h2>🧭 Навигация</h2><p>Слева расположена боковая панель с разделами. Чтобы развернуть/свернуть панель, нажмите кнопку ✕ в верхней части панели.</p><h2>📝 Добавление записи</h2><p>Нажмите кнопку <strong>«Добавить запись»</strong>. Выберите статус:</p><ul><li><strong>Информация</strong> — все поля необязательные, подтягиваются по серийному номеру. Заявка сразу выполнена.</li><li><strong>Перемещение</strong> — обязательные: серийный номер, изделие, тип техники, новое расположение. Заявка сразу выполнена.</li><li><strong>Неисправность</strong> — обязательные: дата обнаружения, серийный номер, изделие, тип техники, описание. Можно указать новые реквизиты СП и ЛСИ, куда отнесли сломанное, дату восстановления и данные подменного устройства. Заявка создаётся в работе.</li></ul><h2>📊 Таблица записей</h2><p>Фильтры и экспорт CSV. Действия: ✏️ редактировать, 🗑️ удалить, ✅ отметить неисправность выполненной.</p></div>`,
+            admin_guide: `<div class="instructions-content"><h1>🔧 Руководство администратора</h1><h2>⚙️ Вся техника</h2><p>Добавление, редактирование, удаление устройств. Импорт/экспорт CSV, печать акта.</p><h2>📊 Статистика</h2><p>По изделиям, статусам, пользователям. Контроль гарантийных сроков.</p><h2>🏗️ Конструктор таблиц</h2><p>Создание пользовательских разделов с настраиваемыми полями.</p></div>`,
+            dev_guide: `<div class="instructions-content"><h1>💻 Руководство разработчика</h1><p>Стек: ванильный JS (SPA) + Node.js. Данные в JSON-файлах. Запуск: <code>node server.js</code> → http://localhost:3000</p></div>`
         };
-        function switchInstructionTab(id) {
-          if (
-            (id === 'admin_guide' || id === 'dev_guide') &&
-            currentUserRole !== 'admin'
-          )
-            return;
-          document
-            .querySelectorAll('.instruction-tab')
-            .forEach(t => t.classList.toggle('active', t.dataset.tab === id));
-          const c = document.getElementById('instructionsContent');
-          if (c && instructionsContent[id])
-            c.innerHTML = instructionsContent[id];
-        }
-        function updateInstructionsTabs() {
-          document
-            .querySelectorAll('.admin-only')
-            .forEach(
-              t => (t.style.display = currentUserRole === 'admin' ? '' : 'none')
-            );
-        }
-        function initInstructionTabs() {
-          updateInstructionsTabs();
-          document.querySelectorAll('.instruction-tab').forEach(t =>
-            t.addEventListener('click', () => {
-              if (
-                (t.dataset.tab === 'admin_guide' ||
-                  t.dataset.tab === 'dev_guide') &&
-                currentUserRole !== 'admin'
-              )
-                return;
-              switchInstructionTab(t.dataset.tab);
-            })
-          );
-        }
+        function switchInstructionTab(id) { if ((id === 'admin_guide' || id === 'dev_guide') && currentUserRole !== 'admin') return; document.querySelectorAll('.instruction-tab').forEach(t => t.classList.toggle('active', t.dataset.tab === id)); const c = document.getElementById('instructionsContent'); if (c && instructionsContent[id]) c.innerHTML = instructionsContent[id]; }
+        function updateInstructionsTabs() { document.querySelectorAll('.admin-only').forEach(t => t.style.display = currentUserRole === 'admin' ? '' : 'none'); }
+        function initInstructionTabs() { updateInstructionsTabs(); document.querySelectorAll('.instruction-tab').forEach(t => t.addEventListener('click', () => { if ((t.dataset.tab === 'admin_guide' || t.dataset.tab === 'dev_guide') && currentUserRole !== 'admin') return; switchInstructionTab(t.dataset.tab); })); }
 
-        document
-          .getElementById('addNavItemBtn')
-          .addEventListener('click', openCreateSectionModal);
+        document.getElementById('addNavItemBtn').addEventListener('click', openCreateSectionModal);
 
-        document
-          .getElementById('backupBtn')
-          ?.addEventListener('click', async () => {
-            try {
-              const r = await fetch(API.backup, { method: 'POST' });
-              if (r.ok) alert('✅ Резервная копия создана');
-              else alert('❌ Ошибка');
-            } catch (e) {
-              alert('❌ Ошибка');
-            }
-          });
+        document.getElementById('backupBtn')?.addEventListener('click', async () => { try { const r = await fetch(API.backup, { method: 'POST' }); if (r.ok) alert('✅ Резервная копия создана'); else alert('❌ Ошибка'); } catch (e) { alert('❌ Ошибка'); } });
 
         async function init() {
-          await loadData();
-          applyTheme(localStorage.getItem('navipro_theme') || 'dark');
-          updateUserUI();
-          updateToggleButton();
-          renderNavMenu();
-          updateProductSelect();
-          renderRecordsTable();
-          renderDevicesTable();
-          initInstructionTabs();
-          initDevicesFilters();
-          initCreateSectionModal();
-          initExportButtons();
-          initImportButtons();
-          initDeviceEditModal();
-          initAddRecordModal();
-          initAddDeviceModal();
-          loadingScreen.classList.add('hidden');
-          authContainer.classList.remove('hidden');
+            await loadData();
+            applyTheme(localStorage.getItem('navipro_theme') || 'dark');
+            updateUserUI(); updateToggleButton(); renderNavMenu();
+            updateProductSelect(); renderRecordsTable(); renderDevicesTable();
+            initInstructionTabs(); initDevicesFilters(); initCreateSectionModal(); initExportButtons(); initImportButtons();
+            initDeviceEditModal(); initAddRecordModal(); initAddDeviceModal(); initDeviceInfoModal();
+            loadingScreen.classList.add('hidden'); authContainer.classList.remove('hidden');
         }
         init();
-      })();
-    </script>
+    })();
+</script>
   </body>
 </html>
