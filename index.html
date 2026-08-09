@@ -369,10 +369,13 @@
       }
 
       .side-panel.expanded .panel-footer {
-        flex-direction: row;
         justify-content: space-between;
         align-items: center;
         padding: 0.6rem 0.8rem;
+      }
+
+      .side-panel:not(.expanded) .panel-actions {
+        flex-direction: column;
       }
 
       .user-info {
@@ -468,6 +471,11 @@
 
       .logout-btn.visible {
         display: flex;
+      }
+
+      /* Когда панель свёрнута и 3 кнопки — делаем их компактнее */
+      .side-panel:not(.expanded) .panel-actions {
+        gap: 0.1rem;
       }
 
       .main-content {
@@ -1776,6 +1784,10 @@
       .timeline-btn.active .tl-date {
         color: rgba(255, 255, 255, 0.8);
       }
+
+      .admin-only-btn.hidden {
+        display: none;
+      }
     </style>
   </head>
 
@@ -2028,7 +2040,7 @@
               "
             >
               <button
-                class="submit-btn"
+                class="submit-btn admin-only-btn"
                 id="openAddDeviceModal"
                 style="margin-bottom: 0"
               >
@@ -3158,6 +3170,9 @@
           document.getElementById('homePage').classList.add('active');
           if (dateTimeInterval) clearInterval(dateTimeInterval);
           dateTimeInterval = setInterval(updateDateTime, 1000);
+          document.querySelectorAll('.admin-only-btn').forEach(btn => {
+            btn.classList.toggle('hidden', currentUserRole !== 'admin');
+          });
         }
 
         function logout() {
@@ -3174,6 +3189,9 @@
             clearInterval(dateTimeInterval);
             dateTimeInterval = null;
           }
+          document.querySelectorAll('.admin-only-btn').forEach(btn => {
+            btn.classList.add('hidden');
+          });
         }
 
         document.getElementById('loginForm').addEventListener('submit', e => {
@@ -3300,7 +3318,8 @@
         function renderNavMenu() {
           navMenu.innerHTML = '';
           const visibleItems = navItems.filter(item => {
-            if (item.id === 'instructions') return true;
+            if (item.id === 'instructions' || item.id === 'all_devices')
+              return true;
             if (item.adminOnly && currentUserRole !== 'admin') return false;
             if (item.isDefault) return true;
             if (
@@ -4047,11 +4066,87 @@
         }
         async function deleteRecord(id) {
           if (!confirm('Удалить?')) return;
+          const rec = records.find(r => r.id === id);
+          if (!rec) return;
+
+          // Если это перемещение — откатываем расположение
+          if (rec.status === 'move' && rec.serialNumber) {
+            // Ищем последнюю запись перед этой, которая меняла расположение
+            const prevRecords = records
+              .filter(
+                r =>
+                  r.serialNumber === rec.serialNumber &&
+                  r.createdAt < rec.createdAt
+              )
+              .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+            let prevLocation = '';
+
+            // Ищем последнее перемещение или неисправность с "Куда отнесли"
+            const lastMove = prevRecords.find(
+              r => r.status === 'move' && r.newLocation
+            );
+            const lastMalf = prevRecords.find(
+              r => r.status === 'malfunction' && r.brokenLocation
+            );
+
+            if (lastMove && lastMalf) {
+              prevLocation =
+                new Date(lastMove.createdAt) > new Date(lastMalf.createdAt)
+                  ? lastMove.newLocation
+                  : lastMalf.brokenLocation;
+            } else if (lastMove) {
+              prevLocation = lastMove.newLocation;
+            } else if (lastMalf) {
+              prevLocation = lastMalf.brokenLocation;
+            } else {
+              // Если не было предыдущих перемещений — берём изначальное расположение из базы
+              const dev = devices.find(
+                d => d.serialNumber === rec.serialNumber
+              );
+              if (dev) {
+                // Ищем самую первую запись для этого устройства
+                const firstRecord = records
+                  .filter(r => r.serialNumber === rec.serialNumber)
+                  .sort(
+                    (a, b) => new Date(a.createdAt) - new Date(b.createdAt)
+                  )[0];
+                prevLocation = firstRecord
+                  ? firstRecord.location
+                  : dev.location || '';
+              }
+            }
+
+            if (prevLocation) {
+              const di = devices.findIndex(
+                d => d.serialNumber === rec.serialNumber
+              );
+              if (di >= 0) {
+                try {
+                  const r = await fetch(API.devices, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                      serialNumber: rec.serialNumber,
+                      location: prevLocation,
+                    }),
+                  });
+                  if (r.ok) {
+                    const result = await r.json();
+                    devices[di] = result.device;
+                  }
+                } catch (e) {}
+              }
+            }
+          }
+
           try {
             await apiDelete(API.records, { id });
             records = records.filter(r => r.id !== id);
             renderRecordsTable();
             renderStatistics();
+            if (rec.status === 'move' || rec.status === 'malfunction')
+              renderDevicesTable();
           } catch (e) {}
         }
 
@@ -4416,6 +4511,10 @@
             setupAllSuggestions();
             setupStatusChange();
           }
+          // Перепривязываем кнопку Отмена после клонирования формы
+          document
+            .getElementById('cancelAddRecordBtn')
+            ?.addEventListener('click', closeAddRecordModal);
         }
 
         function openAddRecordModal() {
@@ -4508,6 +4607,9 @@
               }
             });
           }
+          document
+            .getElementById('cancelAddDeviceBtn')
+            ?.addEventListener('click', closeAddDeviceModal);
         }
 
         function openAddDeviceModal() {
@@ -5061,7 +5163,40 @@
           }
           f.forEach(d => {
             const tr = document.createElement('tr');
-            tr.innerHTML = `<td>${escapeHtml(d.product)}</td><td>${escapeHtml(d.device)}</td><td><a href="javascript:void(0)" onclick="openDeviceInfoModal('${escapeHtml(d.serialNumber)}')" style="color:var(--accent);text-decoration:underline;cursor:pointer;">${escapeHtml(d.serialNumber)}</a></td><td>${escapeHtml(d.supplyBasis || '-')}</td><td>${escapeHtml(d.spRequisites || '-')}</td><td>${escapeHtml(d.lsiRequisites || '-')}</td><td>${escapeHtml(d.location || '-')}</td><td style="max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${escapeHtml(d.specs || '')}">${escapeHtml(d.specs || '-')}</td><td style="max-width:150px;overflow:hidden;text-overflow:ellipsis" title="${escapeHtml(d.notes || '')}">${escapeHtml(d.notes || '-')}</td><td>${new Date(d.createdAt).toLocaleDateString('ru-RU')}</td><td><div class="action-buttons"><button class="edit-btn" title="Редактировать">✏️</button><button class="delete-btn" title="Удалить">🗑️</button></div></td>`;
+            tb.innerHTML = '';
+            const f = getFilteredDevices();
+            f.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+            const isAdmin = currentUserRole === 'admin';
+            const colSpan = isAdmin ? 11 : 10;
+            if (!f.length) {
+              tb.innerHTML = `<tr><td colspan="${colSpan}" class="no-records">Нет устройств</td></tr>`;
+              updateDeviceFilterSelects();
+              return;
+            }
+
+            // Обновляем заголовки
+            const thead = document.querySelector('#devicesTable thead tr');
+            if (thead) {
+              thead.innerHTML =
+                '<th>Изделие</th><th>Устройство</th><th>Серийный номер</th><th>Основание поставки</th><th>Реквизиты СП</th><th>Реквизиты ЛСИ</th><th>Расположение</th><th>Характеристики</th><th>Примечание</th><th>Дата добавления</th>' +
+                (isAdmin ? '<th>Действия</th>' : '');
+            }
+
+            f.forEach(d => {
+              const tr = document.createElement('tr');
+              tr.innerHTML = `<td>${escapeHtml(d.product)}</td><td>${escapeHtml(d.device)}</td><td><a href="javascript:void(0)" onclick="openDeviceInfoModal('${escapeHtml(d.serialNumber)}')" style="color:var(--accent);text-decoration:underline;cursor:pointer;">${escapeHtml(d.serialNumber)}</a></td><td>${escapeHtml(d.supplyBasis || '-')}</td><td>${escapeHtml(d.spRequisites || '-')}</td><td>${escapeHtml(d.lsiRequisites || '-')}</td><td>${escapeHtml(d.location || '-')}</td><td style="max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${escapeHtml(d.specs || '')}">${escapeHtml(d.specs || '-')}</td><td style="max-width:150px;overflow:hidden;text-overflow:ellipsis" title="${escapeHtml(d.notes || '')}">${escapeHtml(d.notes || '-')}</td><td>${new Date(d.createdAt).toLocaleDateString('ru-RU')}</td>${isAdmin ? `<td><div class="action-buttons"><button class="edit-btn" title="Редактировать">✏️</button><button class="delete-btn" title="Удалить">🗑️</button></div></td>` : ''}`;
+
+              if (isAdmin) {
+                tr.querySelector('.delete-btn')?.addEventListener('click', () =>
+                  deleteDevice(d.id)
+                );
+                tr.querySelector('.edit-btn')?.addEventListener('click', () =>
+                  openDeviceEditModal(d.id)
+                );
+              }
+              tb.appendChild(tr);
+            });
+            updateDeviceFilterSelects();
             tr.querySelector('.delete-btn')?.addEventListener('click', () =>
               deleteDevice(d.id)
             );

@@ -207,5 +207,15 @@
     },
     "id": "hist_1786254036347",
     "timestamp": "2026-08-09T05:40:36.348Z"
+  },
+  {
+    "action": "update_device",
+    "serialNumber": "asdfg",
+    "changes": {
+      "serialNumber": "asdfg",
+      "location": "534"
+    },
+    "id": "hist_1786269067135",
+    "timestamp": "2026-08-09T09:51:07.135Z"
   }
 ]
