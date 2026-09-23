@@ -244,6 +244,9 @@ function computeStatistics() {
       malfunction: { total: 0, completed: 0 },
       move: { total: 0, completed: 0 },
       info: { total: 0, completed: 0 },
+      repair: { total: 0, completed: 0 },
+      replace: { total: 0, completed: 0 },
+      archive: { total: 0, completed: 0 },
     },
     byUser: {},
     warrantyAlerts: [],
@@ -325,6 +328,7 @@ const server = http.createServer((req, res) => {
     'GET, POST, PUT, DELETE, OPTIONS'
   );
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  res.setHeader('Cache-Control', 'no-store');
 
   if (req.method === 'OPTIONS') {
     res.writeHead(200);

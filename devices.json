@@ -6,7 +6,7 @@
     "supplyBasis": "23321",
     "spRequisites": "qqew",
     "lsiRequisites": "aqsda",
-    "location": "4354",
+    "location": "632",
     "specs": "",
     "notes": "",
     "id": "dev_1784544441696",
@@ -33,7 +33,7 @@
     "supplyBasis": "23321",
     "spRequisites": "СП-791",
     "lsiRequisites": "ЛСИ-458",
-    "location": "123",
+    "location": "302",
     "specs": "kmkmcwc",
     "notes": "fdsf",
     "warranty": "",
@@ -42485,5 +42485,33 @@
     "notes": "",
     "id": "dev_1786280312975",
     "createdAt": "2026-08-09T12:58:32.975Z"
+  },
+  {
+    "product": "Тест",
+    "device": "Ноутбук1",
+    "serialNumber": "фывап",
+    "supplyBasis": "Договор №47",
+    "spRequisites": "12321",
+    "lsiRequisites": "ЛСИ-458",
+    "location": "632",
+    "specs": "",
+    "notes": "",
+    "warranty": "",
+    "id": "dev_1790160023479",
+    "createdAt": "2026-09-23T10:40:23.479Z"
+  },
+  {
+    "product": "Тест",
+    "device": "Ноутбук2",
+    "serialNumber": "йцуке",
+    "supplyBasis": "Договор №47",
+    "spRequisites": "12321",
+    "lsiRequisites": "ЛСИ-458",
+    "location": "302",
+    "specs": "",
+    "notes": "",
+    "warranty": "",
+    "id": "dev_1790160039210",
+    "createdAt": "2026-09-23T10:40:39.210Z"
   }
 ]

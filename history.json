@@ -247,5 +247,149 @@
     },
     "id": "hist_1790152103698",
     "timestamp": "2026-09-23T08:28:23.698Z"
+  },
+  {
+    "action": "create_device",
+    "serialNumber": "asdfg",
+    "product": "Тест",
+    "device": "Коммутатор1",
+    "id": "hist_1790158708194",
+    "timestamp": "2026-09-23T10:18:28.194Z"
+  },
+  {
+    "action": "create_device",
+    "serialNumber": "qwerty",
+    "product": "Тест",
+    "device": "Коммутатор2",
+    "id": "hist_1790158729315",
+    "timestamp": "2026-09-23T10:18:49.315Z"
+  },
+  {
+    "action": "update_device",
+    "serialNumber": "asdfg",
+    "changes": {
+      "serialNumber": "asdfg",
+      "location": "302"
+    },
+    "id": "hist_1790158806359",
+    "timestamp": "2026-09-23T10:20:06.359Z"
+  },
+  {
+    "action": "update_device",
+    "serialNumber": "asdfg",
+    "changes": {
+      "serialNumber": "asdfg",
+      "location": "302"
+    },
+    "id": "hist_1790158983560",
+    "timestamp": "2026-09-23T10:23:03.560Z"
+  },
+  {
+    "action": "update_device",
+    "serialNumber": "asdfg",
+    "changes": {
+      "serialNumber": "asdfg",
+      "location": "302"
+    },
+    "id": "hist_1790159416145",
+    "timestamp": "2026-09-23T10:30:16.145Z"
+  },
+  {
+    "action": "update_device",
+    "serialNumber": "qwerty",
+    "changes": {
+      "serialNumber": "qwerty",
+      "location": "632"
+    },
+    "id": "hist_1790159416163",
+    "timestamp": "2026-09-23T10:30:16.163Z"
+  },
+  {
+    "action": "update_device",
+    "serialNumber": "asdfg",
+    "changes": {
+      "serialNumber": "asdfg",
+      "location": "302"
+    },
+    "id": "hist_1790159700580",
+    "timestamp": "2026-09-23T10:35:00.580Z"
+  },
+  {
+    "action": "update_device",
+    "serialNumber": "qwerty",
+    "changes": {
+      "serialNumber": "qwerty",
+      "location": "632"
+    },
+    "id": "hist_1790159700597",
+    "timestamp": "2026-09-23T10:35:00.597Z"
+  },
+  {
+    "action": "create_device",
+    "serialNumber": "фывап",
+    "product": "Тест",
+    "device": "Ноутбук1",
+    "id": "hist_1790160023487",
+    "timestamp": "2026-09-23T10:40:23.487Z"
+  },
+  {
+    "action": "create_device",
+    "serialNumber": "йцуке",
+    "product": "Тест",
+    "device": "Ноутбук2",
+    "id": "hist_1790160039219",
+    "timestamp": "2026-09-23T10:40:39.219Z"
+  },
+  {
+    "action": "update_device",
+    "serialNumber": "фывап",
+    "changes": {
+      "serialNumber": "фывап",
+      "location": "302"
+    },
+    "id": "hist_1790160080765",
+    "timestamp": "2026-09-23T10:41:20.765Z"
+  },
+  {
+    "action": "update_device",
+    "serialNumber": "йцуке",
+    "changes": {
+      "serialNumber": "йцуке",
+      "location": "632"
+    },
+    "id": "hist_1790160080784",
+    "timestamp": "2026-09-23T10:41:20.784Z"
+  },
+  {
+    "action": "update_device",
+    "serialNumber": "йцуке",
+    "changes": {
+      "serialNumber": "йцуке",
+      "location": "302"
+    },
+    "id": "hist_1790160136536",
+    "timestamp": "2026-09-23T10:42:16.536Z"
+  },
+  {
+    "action": "update_device",
+    "serialNumber": "фывап",
+    "changes": {
+      "serialNumber": "фывап",
+      "location": "632"
+    },
+    "id": "hist_1790160136554",
+    "timestamp": "2026-09-23T10:42:16.554Z"
+  },
+  {
+    "action": "delete_device",
+    "serialNumber": "asdfg",
+    "id": "hist_1790160151471",
+    "timestamp": "2026-09-23T10:42:31.471Z"
+  },
+  {
+    "action": "delete_device",
+    "serialNumber": "qwerty",
+    "id": "hist_1790160153340",
+    "timestamp": "2026-09-23T10:42:33.340Z"
   }
 ]
