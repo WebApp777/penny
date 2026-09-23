@@ -775,6 +775,7 @@
       tbody tr {
         border-bottom: 1px solid var(--glass-border);
         transition: background 0.15s;
+        position: relative;
       }
       tbody tr:last-child {
         border-bottom: none;
@@ -826,6 +827,8 @@
         align-items: center;
         justify-content: center;
         flex-wrap: nowrap;
+        position: relative;
+        overflow: visible !important;
       }
 
       .complete-btn,
@@ -868,6 +871,72 @@
       .delete-btn:hover {
         background: var(--danger);
         color: white;
+      }
+
+      .solution-btn {
+        padding: 0.3rem 0.6rem;
+        height: 28px;
+        border: 1px solid var(--accent);
+        color: var(--accent);
+        background: transparent;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 0.7rem;
+        font-weight: 600;
+        white-space: nowrap;
+        transition: all 0.15s;
+        font-family: inherit;
+        flex-shrink: 0;
+      }
+      .solution-btn:hover {
+        background: var(--accent);
+        color: white;
+      }
+
+      .solution-menu {
+        position: absolute;
+        top: 100%;
+        left: 50%;
+        transform: translateX(-50%);
+        margin-top: 4px;
+        background: var(--bg-secondary);
+        border: 1px solid var(--glass-border);
+        border-radius: 8px;
+        box-shadow: var(--shadow);
+        z-index: 99999;
+        min-width: 130px;
+        display: none;
+        padding: 0.3rem 0;
+      }
+      .solution-menu.visible {
+        display: block;
+      }
+      [data-theme='dark'] .solution-menu {
+        background: #1a1a2e;
+      }
+      [data-theme='light'] .solution-menu {
+        background: #ffffff;
+      }
+
+      .solution-menu-item {
+        display: block;
+        padding: 0.5rem 1rem;
+        cursor: pointer;
+        font-size: 0.8rem;
+        color: var(--text-primary);
+        transition: background 0.15s;
+        text-align: left;
+        border: none;
+        background: none;
+        width: 100%;
+        font-family: inherit;
+      }
+      .solution-menu-item:hover {
+        background: var(--glass-bg);
+        color: var(--accent);
+      }
+      .solution-menu-item + .solution-menu-item {
+        border-top: 1px solid var(--glass-border);
       }
 
       .completed-time {
@@ -2442,15 +2511,7 @@
           </div>
           <div class="form-group">
             <label for="editStatus">📌 Статус</label
-            ><select id="editStatus">
-              <option value="">Выберите...</option>
-              <option value="malfunction">Неисправность</option>
-              <option value="repair">Ремонт</option>
-              <option value="replace">Замена</option>
-              <option value="archive">Архив</option>
-              <option value="info">Информация</option>
-              <option value="move">Перемещение</option>
-            </select>
+            ><select id="editStatus"></select>
           </div>
           <div class="form-group">
             <label for="editSerialNumber">🔢 Серийный номер</label
@@ -2525,7 +2586,27 @@
             style="display: none"
           >
             <label for="editReplaceLocation">📍 Расположение</label
-            ><input type="text" id="editReplaceLocation" readonly />
+            ><input type="text" id="editReplaceLocation" />
+          </div>
+          <div class="form-group" id="editReplaceSPGroup" style="display: none">
+            <label for="editReplaceSP">📄 Новые реквизиты СП</label
+            ><input
+              type="text"
+              id="editReplaceSP"
+              placeholder="Новые реквизиты СП"
+            />
+          </div>
+          <div
+            class="form-group"
+            id="editReplaceLSIGroup"
+            style="display: none"
+          >
+            <label for="editReplaceLSI">📑 Новые реквизиты ЛСИ</label
+            ><input
+              type="text"
+              id="editReplaceLSI"
+              placeholder="Новые реквизиты ЛСИ"
+            />
           </div>
 
           <div
@@ -2557,6 +2638,15 @@
             <label for="editRecoveryDate"
               >📅 Дата и время оперативного восстановления</label
             ><input type="datetime-local" id="editRecoveryDate" />
+          </div>
+          <div
+            class="form-group"
+            id="editFullRecoveryDateGroup"
+            style="display: none"
+          >
+            <label for="editFullRecoveryDate"
+              >📅 Дата и время полного восстановления</label
+            ><input type="datetime-local" id="editFullRecoveryDate" />
           </div>
 
           <div class="form-group" style="grid-column: 1/-1">
@@ -2831,7 +2921,6 @@
           isPanelExpanded = false,
           editingRecordId = null,
           dateTimeInterval = null;
-
         let recordsTotal = 0,
           devicesTotal = 0;
         let recordsPage = 1,
@@ -3954,7 +4043,6 @@
           tb.appendChild(tr);
         }
 
-        // Setup status change для формы добавления
         function setupStatusChange() {
           const statusSelect = document.getElementById('recordStatus');
           if (!statusSelect) return;
@@ -4044,20 +4132,22 @@
 
         function renderRecordRow(r, tb) {
           const tr = document.createElement('tr');
-          if (r.status === 'repair' || r.status === 'replace')
+          if (r.status === 'repair' && !r.completed)
             tr.classList.add('repair-row');
+          else if (r.status === 'replace') tr.classList.add('repair-row');
           else if (r.status === 'archive') tr.classList.add('archive-row');
           else if (r.completed || r.status === 'info' || r.status === 'move')
             tr.classList.add('completed');
           else if (r.status === 'malfunction')
             tr.style.background = 'rgba(255,71,87,0.08)';
-          tr.innerHTML = `<td>${new Date(r.createdAt).toLocaleDateString('ru-RU')}<br>${new Date(r.createdAt).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}</td><td>${escapeHtml(r.username)}</td><td>${escapeHtml(r.requestNumber || '-')}</td><td>${IMPORTANCE_LABELS[r.importance] || '2-Средняя'}</td><td>${STATUS_LABELS[r.status] || r.status || '-'}</td><td><a href="javascript:void(0)" onclick="openDeviceInfoModal('${escapeHtml(r.serialNumber)}')" style="color:var(--accent);text-decoration:underline;cursor:pointer;">${getSerialDisplay(r)}</a></td><td>${escapeHtml(r.product || '-')}</td><td>${getTypeDisplay(r)}</td><td>${getLocationDisplay(r)}</td><td title="${escapeHtml(r.description || '')}"><div style="max-width:150px;max-height:2.8em;overflow:hidden;text-align:center;margin:0 auto;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;">${escapeHtml(r.description || '-')}</div></td><td><div class="action-buttons">${r.status === 'repair' || r.status === 'replace' || r.status === 'archive' ? `<span class="completed-time">✅</span>` : r.completed ? `<span class="completed-time">✅ ${new Date(r.completedAt || r.createdAt).toLocaleDateString('ru-RU')}<br>${new Date(r.completedAt || r.createdAt).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}</span>` : `<button class="complete-btn" title="Выполнено">✅</button>`}<button class="edit-btn" title="Редактировать">✏️</button><button class="delete-btn" title="Удалить">🗑️</button></div></td>`;
-          if (
-            !r.completed &&
-            r.status !== 'repair' &&
-            r.status !== 'replace' &&
-            r.status !== 'archive'
-          )
+          const isMalfunctionActive =
+            r.status === 'malfunction' && !r.completed;
+          const isRepairActive = r.status === 'repair' && !r.completed;
+          const hasSolution = isMalfunctionActive || isRepairActive;
+          const showComplete =
+            !hasSolution && !r.completed && r.status !== 'archive';
+          tr.innerHTML = `<td>${new Date(r.createdAt).toLocaleDateString('ru-RU')}<br>${new Date(r.createdAt).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}</td><td>${escapeHtml(r.username)}</td><td>${escapeHtml(r.requestNumber || '-')}</td><td>${IMPORTANCE_LABELS[r.importance] || '2-Средняя'}</td><td>${STATUS_LABELS[r.status] || r.status || '-'}</td><td><a href="javascript:void(0)" onclick="openDeviceInfoModal('${escapeHtml(r.serialNumber)}')" style="color:var(--accent);text-decoration:underline;cursor:pointer;">${getSerialDisplay(r)}</a></td><td>${escapeHtml(r.product || '-')}</td><td>${getTypeDisplay(r)}</td><td>${getLocationDisplay(r)}</td><td title="${escapeHtml(r.description || '')}"><div style="max-width:150px;max-height:2.8em;overflow:hidden;text-align:center;margin:0 auto;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;">${escapeHtml(r.description || '-')}</div></td><td><div class="action-buttons">${hasSolution ? `<button class="solution-btn" title="Решение">Решение ▼</button>` : ''}${r.completed && r.status !== 'repair' && r.status !== 'replace' ? `<span class="completed-time">✅ ${new Date(r.completedAt || r.createdAt).toLocaleDateString('ru-RU')}<br>${new Date(r.completedAt || r.createdAt).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}</span>` : r.completed ? `<span class="completed-time">✅</span>` : showComplete ? `<button class="complete-btn" title="Выполнено">✅</button>` : ''}<button class="edit-btn" title="Редактировать">✏️</button><button class="delete-btn" title="Удалить">🗑️</button></div></td>`;
+          if (showComplete)
             tr.querySelector('.complete-btn')?.addEventListener('click', () =>
               completeRecord(r.id)
             );
@@ -4067,6 +4157,12 @@
           tr.querySelector('.delete-btn')?.addEventListener('click', () =>
             deleteRecord(r.id)
           );
+          const solBtn = tr.querySelector('.solution-btn');
+          if (solBtn)
+            solBtn.addEventListener('click', e => {
+              e.stopPropagation();
+              showSolutionMenu(solBtn, r.id, r.status);
+            });
           tb.appendChild(tr);
         }
 
@@ -4083,6 +4179,64 @@
               '<td colspan="11" style="text-align:center;padding:1rem;color:var(--text-secondary);">Загрузка...</td>';
             tb.appendChild(tr);
           }
+        }
+
+        function showSolutionMenu(btn, recordId, currentStatus) {
+          closeSolutionMenu();
+          const menu = document.createElement('div');
+          menu.className = 'solution-menu visible';
+          menu.id = 'activeSolutionMenu';
+          let options = [];
+          if (currentStatus === 'malfunction') {
+            options = [
+              ['Ремонт', 'repair'],
+              ['Замена', 'replace'],
+              ['Архив', 'archive'],
+            ];
+          } else if (currentStatus === 'repair') {
+            options = [
+              ['Выполнено', 'repair_done'],
+              ['Замена', 'replace'],
+              ['Архив', 'archive'],
+            ];
+          }
+          options.forEach(([label, status]) => {
+            const item = document.createElement('button');
+            item.className = 'solution-menu-item';
+            item.textContent = label;
+            item.addEventListener('click', e => {
+              e.stopPropagation();
+              closeSolutionMenu();
+              openEditModalWithStatus(recordId, status);
+            });
+            menu.appendChild(item);
+          });
+          btn.parentElement.appendChild(menu);
+          setTimeout(() => {
+            document.addEventListener('click', closeSolutionMenu, {
+              once: true,
+            });
+          }, 0);
+        }
+        window.showSolutionMenu = showSolutionMenu;
+
+        function closeSolutionMenu() {
+          const menu = document.getElementById('activeSolutionMenu');
+          if (menu) menu.remove();
+        }
+        window.closeSolutionMenu = closeSolutionMenu;
+
+        function openEditModalWithStatus(id, status) {
+          openEditModal(id);
+          document.getElementById('editStatus').value = status;
+          if (status === 'repair_done') {
+            const now = new Date();
+            now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+            document.getElementById('editFullRecoveryDate').value = now
+              .toISOString()
+              .slice(0, 16);
+          }
+          updateEditModalConditionalFields();
         }
 
         async function addRecord(data) {
@@ -4250,7 +4404,6 @@
                       .getElementById('recordReplaceLocation')
                       ?.value.trim() || ''
                   : '';
-
               if (!st) {
                 alert('Выберите статус');
                 return;
@@ -4360,8 +4513,6 @@
                   alert(`Серийный номер "${sn}" не найден в базе!`);
                   return;
                 }
-
-                // Обновляем расположение неисправного устройства
                 if (brokenLoc) {
                   try {
                     await fetch(API.devices, {
@@ -4374,8 +4525,6 @@
                     });
                   } catch (e) {}
                 }
-
-                // Обновляем расположение подменного устройства
                 if (repSN && repLoc) {
                   if (!devices.some(d => d.serialNumber === repSN)) {
                     alert(
@@ -4620,9 +4769,55 @@
             const el = document.getElementById(elId);
             if (el) el.value = v || '';
           };
+
+          const statusSelect = document.getElementById('editStatus');
+          let options = [];
+
+          if (rec.status === 'malfunction') {
+            options = [
+              { value: 'malfunction', label: 'Неисправность' },
+              { value: 'repair', label: 'Ремонт' },
+              { value: 'replace', label: 'Замена' },
+              { value: 'archive', label: 'Архив' },
+            ];
+          } else if (rec.status === 'repair') {
+            options = [
+              { value: 'repair', label: 'Ремонт' },
+              { value: 'repair_done', label: 'Выполнено (ремонт)' },
+              { value: 'replace', label: 'Замена' },
+              { value: 'archive', label: 'Архив' },
+            ];
+          } else if (rec.status === 'replace') {
+            options = [
+              { value: 'replace', label: 'Замена' },
+              { value: 'archive', label: 'Архив' },
+            ];
+          } else if (rec.status === 'archive') {
+            options = [{ value: 'archive', label: 'Архив' }];
+          } else {
+            options = [
+              { value: 'malfunction', label: 'Неисправность' },
+              { value: 'repair', label: 'Ремонт' },
+              { value: 'replace', label: 'Замена' },
+              { value: 'archive', label: 'Архив' },
+            ];
+          }
+
+          statusSelect.innerHTML = '';
+          options.forEach(o => {
+            const opt = document.createElement('option');
+            opt.value = o.value;
+            opt.textContent = o.label;
+            statusSelect.appendChild(opt);
+          });
+
+          let displayStatus = rec.status;
+          if (rec.status === 'repair' && rec.completed)
+            displayStatus = 'repair_done';
+          statusSelect.value = displayStatus;
+
           sv('editRequestNumber', rec.requestNumber || '');
           sv('editImportance', rec.importance || '2');
-          sv('editStatus', rec.status || '');
           sv('editSerialNumber', rec.serialNumber || '');
           sv('editProduct', rec.product || '');
           sv('editTechType', rec.techType || '');
@@ -4634,9 +4829,13 @@
           sv('editReplaceProduct', rec.replaceProduct || '');
           sv('editReplaceType', rec.replaceType || '');
           sv('editReplaceLocation', rec.replaceLocation || '');
+          sv('editReplaceSP', rec.newSPRequisites || '');
+          sv('editReplaceLSI', rec.newLSIRequisites || '');
           sv('editDefectAct', rec.defectAct || '');
           sv('editMalfunctionDate', rec.malfunctionDate || '');
           sv('editRecoveryDate', rec.recoveryDate || '');
+          sv('editFullRecoveryDate', rec.fullRecoveryDate || '');
+
           updateEditModalConditionalFields();
           document.getElementById('editModalOverlay').classList.add('active');
         }
@@ -4650,7 +4849,6 @@
 
         function updateEditModalConditionalFields() {
           const s = document.getElementById('editStatus').value;
-          // Скрываем все группы
           [
             'editNewLocationGroup',
             'editBrokenLocationGroup',
@@ -4659,19 +4857,41 @@
             'editReplaceProductGroup',
             'editReplaceTypeGroup',
             'editReplaceLocationGroup',
+            'editReplaceSPGroup',
+            'editReplaceLSIGroup',
             'editDefectActGroup',
             'editMalfunctionDateGroup',
             'editRecoveryDateGroup',
+            'editFullRecoveryDateGroup',
           ].forEach(id => {
             const el = document.getElementById(id);
             if (el) el.style.display = 'none';
           });
 
-          // Показываем в зависимости от статуса
+          const brokenEl = document.getElementById('editBrokenLocation');
+          const repSerEl = document.getElementById('editReplaceSerial');
+          const repProdEl = document.getElementById('editReplaceProduct');
+          const repTypeEl = document.getElementById('editReplaceType');
+          const repLocEl = document.getElementById('editReplaceLocation');
+          const defActEl = document.getElementById('editDefectAct');
+
+          // Сброс readonly по умолчанию
+          [
+            brokenEl,
+            repSerEl,
+            repProdEl,
+            repTypeEl,
+            repLocEl,
+            defActEl,
+          ].forEach(el => {
+            if (el) el.removeAttribute('readonly');
+          });
+
           if (s === 'move') {
             document.getElementById('editNewLocationGroup').style.display =
               'flex';
           }
+
           if (s === 'malfunction') {
             document.getElementById('editMalfunctionDateGroup').style.display =
               'flex';
@@ -4689,20 +4909,14 @@
               'flex';
             document.getElementById('editReplaceLocationGroup').style.display =
               'flex';
-            // readonly-поля для неисправности
-            document
-              .getElementById('editBrokenLocation')
-              .removeAttribute('readonly');
-            [
-              'editReplaceSerial',
-              'editReplaceProduct',
-              'editReplaceType',
-              'editReplaceLocation',
-            ].forEach(id =>
-              document.getElementById(id).removeAttribute('readonly')
-            );
+            brokenEl.setAttribute('readonly', 'readonly');
+            repSerEl.setAttribute('readonly', 'readonly');
+            repProdEl.setAttribute('readonly', 'readonly');
+            repTypeEl.setAttribute('readonly', 'readonly');
+            repLocEl.setAttribute('readonly', 'readonly');
           }
-          if (s === 'repair' || s === 'replace') {
+
+          if (s === 'repair') {
             document.getElementById('editDefectActGroup').style.display =
               'flex';
             document.getElementById('editBrokenLocationGroup').style.display =
@@ -4717,22 +4931,74 @@
               'flex';
             document.getElementById('editReplaceLocationGroup').style.display =
               'flex';
-            // readonly-поля
-            document
-              .getElementById('editBrokenLocation')
-              .setAttribute('readonly', 'readonly');
-            [
-              'editReplaceSerial',
-              'editReplaceProduct',
-              'editReplaceType',
-              'editReplaceLocation',
-            ].forEach(id =>
-              document.getElementById(id).setAttribute('readonly', 'readonly')
-            );
+            brokenEl.setAttribute('readonly', 'readonly');
+            repSerEl.setAttribute('readonly', 'readonly');
+            repProdEl.setAttribute('readonly', 'readonly');
+            repTypeEl.setAttribute('readonly', 'readonly');
+            repLocEl.setAttribute('readonly', 'readonly');
+            defActEl.setAttribute('readonly', 'readonly');
           }
+
+          if (s === 'repair_done') {
+            document.getElementById('editDefectActGroup').style.display =
+              'flex';
+            document.getElementById('editBrokenLocationGroup').style.display =
+              'flex';
+            document.getElementById('editReplaceTitleGroup').style.display =
+              'block';
+            document.getElementById('editReplaceSerialGroup').style.display =
+              'flex';
+            document.getElementById('editReplaceProductGroup').style.display =
+              'flex';
+            document.getElementById('editReplaceTypeGroup').style.display =
+              'flex';
+            document.getElementById('editReplaceLocationGroup').style.display =
+              'flex';
+            document.getElementById('editReplaceSPGroup').style.display =
+              'flex';
+            document.getElementById('editReplaceLSIGroup').style.display =
+              'flex';
+            document.getElementById('editFullRecoveryDateGroup').style.display =
+              'flex';
+            brokenEl.setAttribute('readonly', 'readonly');
+            repSerEl.setAttribute('readonly', 'readonly');
+            repProdEl.setAttribute('readonly', 'readonly');
+            repTypeEl.setAttribute('readonly', 'readonly');
+            repLocEl.removeAttribute('readonly');
+            defActEl.setAttribute('readonly', 'readonly');
+            document
+              .getElementById('editReplaceSP')
+              .removeAttribute('readonly');
+            document
+              .getElementById('editReplaceLSI')
+              .removeAttribute('readonly');
+          }
+
+          if (s === 'replace') {
+            document.getElementById('editDefectActGroup').style.display =
+              'flex';
+            document.getElementById('editBrokenLocationGroup').style.display =
+              'flex';
+            document.getElementById('editReplaceTitleGroup').style.display =
+              'block';
+            document.getElementById('editReplaceSerialGroup').style.display =
+              'flex';
+            document.getElementById('editReplaceProductGroup').style.display =
+              'flex';
+            document.getElementById('editReplaceTypeGroup').style.display =
+              'flex';
+            document.getElementById('editReplaceLocationGroup').style.display =
+              'flex';
+            brokenEl.setAttribute('readonly', 'readonly');
+            repSerEl.setAttribute('readonly', 'readonly');
+            repProdEl.setAttribute('readonly', 'readonly');
+            repTypeEl.setAttribute('readonly', 'readonly');
+            repLocEl.setAttribute('readonly', 'readonly');
+            defActEl.setAttribute('readonly', 'readonly');
+          }
+
           if (s === 'archive') {
-            // readonly только базовые поля
-            // остальные скрыты
+            // только базовые поля, остальные скрыты
           }
         }
 
@@ -4744,21 +5010,30 @@
           const defectAct = document
             .getElementById('editDefectAct')
             .value.trim();
+          const originalRec = records.find(r => r.id === editingRecordId);
 
-          if ((s === 'repair' || s === 'replace') && !defectAct) {
+          const finalStatus = s === 'repair_done' ? 'repair' : s;
+          const isCompleted =
+            s === 'archive' || s === 'repair_done'
+              ? true
+              : originalRec?.completed || false;
+
+          if (
+            (s === 'repair' || s === 'replace' || s === 'repair_done') &&
+            !defectAct
+          ) {
             document.getElementById('editDefectAct').classList.add('error');
             alert('Заполните дефектовочную ведомость');
             return;
           }
 
-          const originalRec = records.find(r => r.id === editingRecordId);
           const data = {
             id: editingRecordId,
             requestNumber: document
               .getElementById('editRequestNumber')
               .value.trim(),
             importance: document.getElementById('editImportance').value,
-            status: s,
+            status: finalStatus,
             serialNumber: sn,
             newSerialNumber: '',
             product: document.getElementById('editProduct').value.trim(),
@@ -4772,13 +5047,23 @@
             description: document
               .getElementById('editDescription')
               .value.trim(),
-            newSPRequisites: '',
-            newLSIRequisites: '',
+            newSPRequisites:
+              s === 'repair_done'
+                ? document.getElementById('editReplaceSP')?.value.trim() || ''
+                : originalRec?.newSPRequisites || '',
+            newLSIRequisites:
+              s === 'repair_done'
+                ? document.getElementById('editReplaceLSI')?.value.trim() || ''
+                : originalRec?.newLSIRequisites || '',
             malfunctionDate: originalRec?.malfunctionDate || '',
             brokenLocation:
               originalRec?.brokenLocation ||
               document.getElementById('editBrokenLocation').value.trim(),
             recoveryDate: originalRec?.recoveryDate || '',
+            fullRecoveryDate:
+              s === 'repair_done'
+                ? document.getElementById('editFullRecoveryDate').value || ''
+                : originalRec?.fullRecoveryDate || '',
             replaceSerial:
               originalRec?.replaceSerial ||
               document.getElementById('editReplaceSerial').value.trim(),
@@ -4791,20 +5076,19 @@
             replaceLocation:
               originalRec?.replaceLocation ||
               document.getElementById('editReplaceLocation').value.trim(),
-            defectAct: defectAct,
-            completed: s === 'archive' ? true : originalRec?.completed || false,
+            defectAct: defectAct || originalRec?.defectAct || '',
+            completed: isCompleted,
             completedAt:
-              s === 'archive'
+              s === 'archive' || s === 'repair_done'
                 ? new Date().toISOString()
                 : originalRec?.completedAt || null,
           };
 
-          // Обновляем расположение устройств в базе при смене статуса
+          // Обновление расположения устройств
           if (s === 'repair' || s === 'replace') {
             const brokenLoc = originalRec?.brokenLocation || '';
             const repLoc = originalRec?.replaceLocation || '';
             const repSN = originalRec?.replaceSerial || '';
-
             if (brokenLoc && sn) {
               try {
                 await fetch(API.devices, {
@@ -4831,12 +5115,48 @@
             }
           }
 
+          // Для repair_done — обновляем реквизиты СП/ЛСИ у устройства
+          if (s === 'repair_done') {
+            const newSP =
+              document.getElementById('editReplaceSP')?.value.trim() || '';
+            const newLSI =
+              document.getElementById('editReplaceLSI')?.value.trim() || '';
+            const newRepLoc =
+              document.getElementById('editReplaceLocation')?.value.trim() ||
+              '';
+            const repSN = originalRec?.replaceSerial || '';
+            if (sn && (newSP || newLSI)) {
+              try {
+                const ud = { serialNumber: sn };
+                if (newSP) ud.spRequisites = newSP;
+                if (newLSI) ud.lsiRequisites = newLSI;
+                await fetch(API.devices, {
+                  method: 'PUT',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify(ud),
+                });
+              } catch (e) {}
+            }
+            if (repSN && newRepLoc) {
+              try {
+                await fetch(API.devices, {
+                  method: 'PUT',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({
+                    serialNumber: repSN,
+                    location: newRepLoc,
+                  }),
+                });
+              } catch (e) {}
+            }
+          }
+
           try {
             await apiPut(API.records, data);
             showToast('Изменения сохранены');
             closeEditModal();
             await loadRecordsPage(1, true);
-            if (s === 'repair' || s === 'replace')
+            if (s === 'repair' || s === 'replace' || s === 'repair_done')
               await loadDevicesPage(1, true);
           } catch (ex) {
             alert('Не удалось сохранить');
@@ -5011,7 +5331,7 @@
               devRecords.length +
               ')</h3><div class="timeline">';
             devRecords.forEach((r, i) => {
-              html += `<div class="timeline-item" style="margin-bottom:${i < devRecords.length - 1 ? '1.5rem' : '0'};"><button class="timeline-btn" onclick="toggleTimelineDetails(this, '${r.id}')"><span class="tl-status">${STATUS_LABELS[r.status] || r.status}</span><span class="tl-date">${new Date(r.createdAt).toLocaleDateString('ru-RU')}<br>${new Date(r.createdAt).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })}</span></button><div class="timeline-details" id="details_${r.id}"><table><tr><th>Пользователь</th><td>${escapeHtml(r.username)}</td></tr><tr><th>№ Заявки</th><td>${escapeHtml(r.requestNumber || '-')}</td></tr><tr><th>Важность</th><td>${IMPORTANCE_LABELS[r.importance] || r.importance}</td></tr><tr><th>Статус</th><td>${STATUS_LABELS[r.status] || r.status}</td></tr><tr><th>Серийный номер</th><td>${escapeHtml(r.serialNumber || '-')}</td></tr><tr><th>Изделие</th><td>${escapeHtml(r.product || '-')}</td></tr><tr><th>Тип техники</th><td>${escapeHtml(r.techType || '-')}</td></tr><tr><th>Расположение</th><td>${escapeHtml(r.location || '-')}</td></tr>${r.status === 'move' && r.newLocation ? `<tr><th>Новое расположение</th><td>${escapeHtml(r.newLocation)}</td></tr>` : ''}${r.status === 'malfunction' || r.status === 'repair' || r.status === 'replace' ? `${r.malfunctionDate ? `<tr><th>Дата обнаружения</th><td>${new Date(r.malfunctionDate).toLocaleString('ru-RU')}</td></tr>` : ''}${r.brokenLocation ? `<tr><th>Куда отнесли</th><td>${escapeHtml(r.brokenLocation)}</td></tr>` : ''}${r.recoveryDate ? `<tr><th>Дата восстановления</th><td>${new Date(r.recoveryDate).toLocaleString('ru-RU')}</td></tr>` : ''}${r.replaceSerial ? `<tr><th>Подменный Сер№</th><td>${escapeHtml(r.replaceSerial)}</td></tr>` : ''}${r.replaceProduct ? `<tr><th>Подменное изделие</th><td>${escapeHtml(r.replaceProduct)}</td></tr>` : ''}${r.replaceType ? `<tr><th>Подменный тип</th><td>${escapeHtml(r.replaceType)}</td></tr>` : ''}${r.replaceLocation ? `<tr><th>Выдано на подмену Расположение</th><td>${escapeHtml(r.replaceLocation)}</td></tr>` : ''}${r.defectAct ? `<tr><th>Дефектовочная ведомость</th><td>${escapeHtml(r.defectAct)}</td></tr>` : ''}` : ''}<tr><th>Описание</th><td>${escapeHtml(r.description || '-')}</td></tr><tr><th>Выполнено</th><td>${r.completed ? '✅ Да' : '⏳ В работе'}</td></tr></table></div></div>`;
+              html += `<div class="timeline-item" style="margin-bottom:${i < devRecords.length - 1 ? '1.5rem' : '0'};"><button class="timeline-btn" onclick="toggleTimelineDetails(this, '${r.id}')"><span class="tl-status">${STATUS_LABELS[r.status] || r.status}</span><span class="tl-date">${new Date(r.createdAt).toLocaleDateString('ru-RU')}<br>${new Date(r.createdAt).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })}</span></button><div class="timeline-details" id="details_${r.id}"><table><tr><th>Пользователь</th><td>${escapeHtml(r.username)}</td></tr><tr><th>№ Заявки</th><td>${escapeHtml(r.requestNumber || '-')}</td></tr><tr><th>Важность</th><td>${IMPORTANCE_LABELS[r.importance] || r.importance}</td></tr><tr><th>Статус</th><td>${STATUS_LABELS[r.status] || r.status}</td></tr><tr><th>Серийный номер</th><td>${escapeHtml(r.serialNumber || '-')}</td></tr><tr><th>Изделие</th><td>${escapeHtml(r.product || '-')}</td></tr><tr><th>Тип техники</th><td>${escapeHtml(r.techType || '-')}</td></tr><tr><th>Расположение</th><td>${escapeHtml(r.location || '-')}</td></tr>${r.status === 'move' && r.newLocation ? `<tr><th>Новое расположение</th><td>${escapeHtml(r.newLocation)}</td></tr>` : ''}${r.status === 'malfunction' || r.status === 'repair' || r.status === 'replace' ? `${r.malfunctionDate ? `<tr><th>Дата обнаружения</th><td>${new Date(r.malfunctionDate).toLocaleString('ru-RU')}</td></tr>` : ''}${r.brokenLocation ? `<tr><th>Куда отнесли</th><td>${escapeHtml(r.brokenLocation)}</td></tr>` : ''}${r.recoveryDate ? `<tr><th>Дата восстановления</th><td>${new Date(r.recoveryDate).toLocaleString('ru-RU')}</td></tr>` : ''}${r.replaceSerial ? `<tr><th>Подменный Сер№</th><td>${escapeHtml(r.replaceSerial)}</td></tr>` : ''}${r.replaceProduct ? `<tr><th>Подменное изделие</th><td>${escapeHtml(r.replaceProduct)}</td></tr>` : ''}${r.replaceType ? `<tr><th>Подменный тип</th><td>${escapeHtml(r.replaceType)}</td></tr>` : ''}${r.replaceLocation ? `<tr><th>Выдано на подмену Расположение</th><td>${escapeHtml(r.replaceLocation)}</td></tr>` : ''}${r.defectAct ? `<tr><th>Дефектовочная ведомость</th><td>${escapeHtml(r.defectAct)}</td></tr>` : ''}${r.fullRecoveryDate ? `<tr><th>Дата полного восстановления</th><td>${new Date(r.fullRecoveryDate).toLocaleString('ru-RU')}</td></tr>` : ''}` : ''}<tr><th>Описание</th><td>${escapeHtml(r.description || '-')}</td></tr><tr><th>Выполнено</th><td>${r.completed ? '✅ Да' : '⏳ В работе'}</td></tr></table></div></div>`;
             });
             html += '</div>';
             timelineCol.innerHTML = html;
@@ -5464,8 +5784,8 @@
                   st = '❌ Истекла';
                   tr.style.background = 'rgba(255,71,87,0.1)';
                 } else if (d.status === 'expiring') {
-                  st = '⚠️ Истекает';
                   tr.style.background = 'rgba(255,165,2,0.1)';
+                  st = '⚠️ Истекает';
                 }
                 tr.innerHTML = `<td>${escapeHtml(d.device)}</td><td>${escapeHtml(d.serialNumber)}</td><td>${new Date(d.warranty).toLocaleDateString('ru-RU')}</td><td>${st}</td>`;
                 wtb.appendChild(tr);
@@ -5474,9 +5794,9 @@
         }
 
         const instructionsContent = {
-          user_guide: `<div class="instructions-content"><h1>📖 Руководство пользователя</h1><h2>🔐 Вход в систему</h2><p>Откройте браузер и перейдите по адресу <strong>http://localhost:3000</strong>.</p><p>Введите логин и пароль, затем нажмите «Войти». Учётные данные по умолчанию:</p><ul><li><strong>Администратор:</strong> admin / admin123</li><li><strong>Пользователь:</strong> user / user123</li></ul><h2>📝 Добавление записи</h2><p>Нажмите кнопку <strong>«Добавить запись»</strong>. Выберите статус:</p><ul><li><strong>Информация</strong> — все поля необязательные, заявка сразу выполнена.</li><li><strong>Перемещение</strong> — обязательные: серийный номер, изделие, тип техники, новое расположение. Заявка сразу выполнена.</li><li><strong>Неисправность</strong> — обязательные: дата обнаружения, серийный номер, изделие, тип техники, расположение, описание. Расположение заполняется автоматически. Можно указать куда отнесли и данные подменного устройства.</li></ul></div>`,
-          admin_guide: `<div class="instructions-content"><h1>🔧 Руководство администратора</h1><h2>⚙️ Вся техника</h2><p>Добавление, редактирование, удаление устройств. Импорт/экспорт CSV, печать акта.</p><h2>📊 Статистика</h2><p>По изделиям, статусам, пользователям. Контроль гарантийных сроков.</p><h2>🏗️ Конструктор таблиц</h2><p>Создание пользовательских разделов с настраиваемыми полями.</p></div>`,
-          dev_guide: `<div class="instructions-content"><h1>💻 Руководство разработчика</h1><p>Стек: ванильный JS (SPA) + Node.js. Данные в JSON-файлах. Запуск: <code>node server.js</code> → http://localhost:3000</p></div>`,
+          user_guide: `<div class="instructions-content"><h1>📖 Руководство пользователя</h1><h2>🔐 Вход в систему</h2><p>Откройте браузер и перейдите по адресу <strong>http://localhost:3000</strong>.</p><p>Введите логин и пароль, затем нажмите «Войти». Учётные данные по умолчанию:</p><ul><li><strong>Администратор:</strong> admin / admin123</li><li><strong>Пользователь:</strong> user / user123</li></ul><h2>📝 Добавление записи</h2><p>Нажмите кнопку <strong>«Добавить запись»</strong>. Выберите статус: Информация, Перемещение или Неисправность.</p><h2>🔧 Решение по неисправности</h2><p>У заявки со статусом Неисправность есть кнопка <strong>«Решение ▼»</strong> с выбором: Ремонт, Замена, Архив.</p><p>У заявки со статусом Ремонт — кнопка «Решение ▼» с выбором: Выполнено, Замена, Архив.</p></div>`,
+          admin_guide: `<div class="instructions-content"><h1>🔧 Руководство администратора</h1><h2>⚙️ Вся техника</h2><p>Добавление, редактирование, удаление устройств. Импорт/экспорт CSV, печать акта.</p><h2>📊 Статистика</h2><p>По изделиям, статусам, пользователям. Контроль гарантийных сроков.</p></div>`,
+          dev_guide: `<div class="instructions-content"><h1>💻 Руководство разработчика</h1><p>Стек: ванильный JS (SPA) + Node.js. Данные в JSON-файлах.</p></div>`,
         };
         function switchInstructionTab(id) {
           if (

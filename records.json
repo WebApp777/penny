@@ -916,7 +916,7 @@
     "username": "admin",
     "requestNumber": "43",
     "importance": "2",
-    "status": "malfunction",
+    "status": "replace",
     "serialNumber": "фывап",
     "newSerialNumber": "",
     "product": "Тест",
@@ -936,13 +936,15 @@
     "replaceLocation": "632",
     "completed": false,
     "id": "rec_1790160080786",
-    "createdAt": "2026-09-23T10:41:20.786Z"
+    "createdAt": "2026-09-23T10:41:20.786Z",
+    "defectAct": "ываыва",
+    "completedAt": null
   },
   {
     "username": "admin",
     "requestNumber": "44",
     "importance": "2",
-    "status": "malfunction",
+    "status": "repair",
     "serialNumber": "йцуке",
     "newSerialNumber": "",
     "product": "Тест",
@@ -962,6 +964,34 @@
     "replaceLocation": "632",
     "completed": false,
     "id": "rec_1790160136558",
-    "createdAt": "2026-09-23T10:42:16.558Z"
+    "createdAt": "2026-09-23T10:42:16.558Z",
+    "defectAct": "фйауу",
+    "completedAt": null
+  },
+  {
+    "username": "admin",
+    "requestNumber": "46",
+    "importance": "2",
+    "status": "move",
+    "serialNumber": "фывап",
+    "newSerialNumber": "",
+    "product": "Тест",
+    "techType": "Ноутбук1",
+    "newTechType": "",
+    "location": "302",
+    "newLocation": "123",
+    "description": "",
+    "newSPRequisites": "",
+    "newLSIRequisites": "",
+    "malfunctionDate": "",
+    "brokenLocation": "",
+    "recoveryDate": "",
+    "replaceSerial": "",
+    "replaceProduct": "",
+    "replaceType": "",
+    "replaceLocation": "",
+    "completed": true,
+    "id": "rec_1790175813797",
+    "createdAt": "2026-09-23T15:03:33.797Z"
   }
 ]
