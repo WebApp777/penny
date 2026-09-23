@@ -227,5 +227,25 @@
     },
     "id": "hist_1786280554373",
     "timestamp": "2026-08-09T13:02:34.373Z"
+  },
+  {
+    "action": "update_device",
+    "serialNumber": "asdfg",
+    "changes": {
+      "serialNumber": "asdfg",
+      "location": "123"
+    },
+    "id": "hist_1790151976170",
+    "timestamp": "2026-09-23T08:26:16.170Z"
+  },
+  {
+    "action": "update_device",
+    "serialNumber": "TPX1-2023-101",
+    "changes": {
+      "serialNumber": "TPX1-2023-101",
+      "location": "4354"
+    },
+    "id": "hist_1790152103698",
+    "timestamp": "2026-09-23T08:28:23.698Z"
   }
 ]

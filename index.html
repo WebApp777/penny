@@ -110,7 +110,6 @@
         flex-direction: column;
         gap: 1rem;
       }
-
       .loading-screen.hidden {
         display: none;
       }
@@ -123,7 +122,6 @@
         border-radius: 50%;
         animation: spin 0.8s linear infinite;
       }
-
       @keyframes spin {
         to {
           transform: rotate(360deg);
@@ -145,7 +143,6 @@
         border-right: 1px solid var(--glass-border);
         overflow: hidden;
       }
-
       .side-panel.expanded {
         width: var(--panel-expanded-width);
       }
@@ -176,7 +173,6 @@
         white-space: nowrap;
         overflow: hidden;
       }
-
       .side-panel:not(.expanded) .logo span {
         display: none;
       }
@@ -188,7 +184,6 @@
         border-radius: 6px;
         animation: logoSpin 12s linear infinite;
       }
-
       @keyframes logoSpin {
         from {
           transform: rotate(0deg);
@@ -213,13 +208,11 @@
         flex-shrink: 0;
         color: var(--text-secondary);
       }
-
       .toggle-panel-btn:hover {
         background: var(--danger);
         border-color: var(--danger);
         color: white;
       }
-
       .toggle-panel-btn svg {
         width: 14px;
         height: 14px;
@@ -232,7 +225,6 @@
         overflow-y: auto;
         overflow-x: hidden;
       }
-
       .nav-item {
         margin-bottom: 0.2rem;
         position: relative;
@@ -258,16 +250,13 @@
         white-space: nowrap;
         overflow: hidden;
       }
-
       .side-panel:not(.expanded) .nav-link {
         justify-content: center;
         padding: 0.6rem 0;
       }
-
       .side-panel:not(.expanded) .nav-link span {
         display: none;
       }
-
       .nav-link svg {
         width: 18px;
         height: 18px;
@@ -275,22 +264,18 @@
         stroke: currentColor;
         flex-shrink: 0;
       }
-
       .nav-link:hover {
         background: var(--glass-bg);
         color: var(--text-primary);
       }
-
       .nav-link:hover svg {
         stroke: var(--accent-hover);
       }
-
       .nav-link.active {
         background: rgba(124, 92, 252, 0.15);
         color: var(--text-primary);
         font-weight: 600;
       }
-
       .nav-link.active svg {
         stroke: var(--accent);
       }
@@ -314,19 +299,15 @@
         z-index: 5;
         padding: 0;
       }
-
       .side-panel.expanded .nav-item.user-added .delete-nav-btn {
         display: flex;
       }
-
       .nav-item:hover .delete-nav-btn {
         background: rgba(255, 71, 87, 0.2);
       }
-
       .delete-nav-btn:hover {
         background: var(--danger) !important;
       }
-
       .delete-nav-btn svg {
         width: 14px;
         height: 14px;
@@ -339,7 +320,6 @@
         flex-shrink: 0;
         display: none;
       }
-
       .side-panel.expanded .add-nav-section {
         display: block;
       }
@@ -356,7 +336,6 @@
         white-space: nowrap;
         width: 100%;
       }
-
       .add-nav-btn:hover {
         background: var(--accent-hover);
       }
@@ -370,13 +349,11 @@
         flex-shrink: 0;
         align-items: center;
       }
-
       .side-panel.expanded .panel-footer {
         justify-content: space-between;
         align-items: center;
         padding: 0.6rem 0.8rem;
       }
-
       .side-panel:not(.expanded) .panel-actions {
         flex-direction: column;
       }
@@ -388,7 +365,6 @@
         font-size: 0.8rem;
         color: var(--text-secondary);
       }
-
       .side-panel:not(.expanded) .user-info {
         flex-direction: column;
         align-items: center;
@@ -415,7 +391,6 @@
         background: var(--badge-bg);
         color: var(--accent);
       }
-
       .user-role.admin {
         background: rgba(255, 165, 2, 0.15);
         color: var(--admin-badge);
@@ -440,18 +415,15 @@
         align-items: center;
         justify-content: center;
       }
-
       .theme-toggle:hover,
       .logout-btn:hover,
       .backup-btn:hover {
         background: var(--btn-hover);
       }
-
       .logout-btn:hover {
         background: rgba(255, 71, 87, 0.2);
         border-color: var(--danger);
       }
-
       .theme-toggle svg,
       .logout-btn svg,
       .backup-btn svg {
@@ -459,15 +431,12 @@
         height: 12px;
         stroke: var(--text-secondary);
       }
-
       .logout-btn:hover svg {
         stroke: var(--danger);
       }
-
       .logout-btn {
         display: none;
       }
-
       .logout-btn.visible {
         display: flex;
       }
@@ -483,7 +452,6 @@
         display: flex;
         flex-direction: column;
       }
-
       body.panel-expanded .main-content {
         padding: 1rem 1.5rem;
       }
@@ -507,11 +475,9 @@
           -webkit-backdrop-filter: blur(20px);
         }
       }
-
       [data-theme='light'] .content-card {
         background: rgba(255, 255, 255, 0.9);
       }
-
       @supports (backdrop-filter: blur(20px)) {
         [data-theme='light'] .content-card {
           background: rgba(255, 255, 255, 0.4);
@@ -526,13 +492,11 @@
         margin-bottom: 0.3rem;
         color: var(--text-primary);
       }
-
       h2 {
         font-size: 1.1rem;
         margin-bottom: 0.3rem;
         color: var(--text-primary);
       }
-
       .subtitle {
         color: var(--text-secondary);
         font-size: 0.85rem;
@@ -556,7 +520,6 @@
         gap: 0.3rem;
         position: relative;
       }
-
       .form-group label {
         font-size: 0.75rem;
         color: var(--text-secondary);
@@ -575,7 +538,6 @@
         outline: none;
         transition: border-color 0.2s;
       }
-
       .form-group textarea {
         resize: vertical;
         min-height: 60px;
@@ -600,16 +562,13 @@
         padding-right: 26px;
         cursor: pointer;
       }
-
       [data-theme='light'] .form-group select {
         background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%235a5a7a' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
       }
-
       .form-group select option {
         background: #1a1a3e;
         color: #e0e0e0;
       }
-
       [data-theme='light'] .form-group select option {
         background: #ffffff;
         color: #1a1a2e;
@@ -624,7 +583,6 @@
       .conditional-field {
         display: none;
       }
-
       .conditional-field.visible {
         display: flex;
       }
@@ -643,7 +601,6 @@
         display: none;
         box-shadow: var(--shadow);
       }
-
       .suggestions-container.visible {
         display: block;
       }
@@ -656,12 +613,10 @@
         transition: all 0.2s;
         border-bottom: 1px solid var(--glass-border);
       }
-
       .suggestion-item:hover {
         background: var(--suggest-hover);
         color: var(--text-primary);
       }
-
       .suggestion-item strong {
         color: var(--accent);
       }
@@ -678,7 +633,6 @@
         transition: all 0.2s;
         width: auto;
       }
-
       .submit-btn:hover {
         background: var(--accent-hover);
         transform: translateY(-1px);
@@ -695,11 +649,9 @@
         border-radius: 8px;
         border: 1px solid var(--glass-border);
       }
-
       .filter-bar > * {
         margin: 0.15rem;
       }
-
       .filter-bar select,
       .filter-bar input {
         padding: 0.4rem 0.6rem;
@@ -712,7 +664,6 @@
         outline: none;
         min-width: 130px;
       }
-
       .filter-bar select {
         -webkit-appearance: none;
         -moz-appearance: none;
@@ -723,21 +674,17 @@
         padding-right: 30px;
         cursor: pointer;
       }
-
       [data-theme='light'] .filter-bar select {
         background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%235a5a7a' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
       }
-
       .filter-bar select option {
         background: #1a1a3e;
         color: #e0e0e0;
       }
-
       [data-theme='light'] .filter-bar select option {
         background: #ffffff;
         color: #1a1a2e;
       }
-
       .filter-bar select:focus,
       .filter-bar input:focus {
         border-color: var(--accent);
@@ -753,7 +700,6 @@
         font-size: 0.75rem;
         white-space: nowrap;
       }
-
       .reset-filters-btn:hover {
         background: var(--btn-hover);
         color: var(--text-primary);
@@ -769,21 +715,17 @@
         flex: 1;
         border: 1px solid var(--glass-border);
       }
-
       .table-container::-webkit-scrollbar {
         width: 6px;
         height: 6px;
       }
-
       .table-container::-webkit-scrollbar-track {
         background: transparent;
       }
-
       .table-container::-webkit-scrollbar-thumb {
         background: var(--glass-border);
         border-radius: 3px;
       }
-
       .table-container::-webkit-scrollbar-thumb:hover {
         background: var(--accent);
       }
@@ -800,7 +742,6 @@
         z-index: 10;
         background: var(--bg-panel);
       }
-
       thead::after {
         content: '';
         position: absolute;
@@ -810,11 +751,9 @@
         height: 2px;
         background: var(--accent);
       }
-
       [data-theme='dark'] thead {
         background: #1a1a2e;
       }
-
       [data-theme='light'] thead {
         background: #f0f2f5;
       }
@@ -835,19 +774,15 @@
         border-bottom: 1px solid var(--glass-border);
         transition: background 0.15s;
       }
-
       tbody tr:last-child {
         border-bottom: none;
       }
-
       tbody tr:nth-child(even) {
         background: var(--table-stripe);
       }
-
       tbody tr:hover {
         background: var(--table-hover);
       }
-
       tbody tr.completed {
         background: var(--completed-bg) !important;
       }
@@ -860,7 +795,6 @@
         font-size: 0.75rem;
         white-space: nowrap;
       }
-
       td:nth-child(6),
       td:nth-child(10) {
         white-space: normal;
@@ -871,7 +805,6 @@
         max-height: 2.8em;
         overflow: hidden;
       }
-
       td:nth-child(9) {
         max-width: 120px;
         overflow: hidden;
@@ -904,32 +837,26 @@
         background: transparent;
         flex-shrink: 0;
       }
-
       .complete-btn {
         border-color: var(--success);
         color: var(--success);
       }
-
       .complete-btn:hover {
         background: var(--success);
         color: white;
       }
-
       .edit-btn {
         border-color: var(--warning);
         color: var(--warning);
       }
-
       .edit-btn:hover {
         background: var(--warning);
         color: white;
       }
-
       .delete-btn {
         border-color: var(--danger);
         color: var(--danger);
       }
-
       .delete-btn:hover {
         background: var(--danger);
         color: white;
@@ -949,7 +876,6 @@
         color: var(--text-secondary);
         font-size: 0.9rem;
       }
-
       .no-records td {
         padding: 3rem 2rem;
       }
@@ -961,7 +887,6 @@
         margin-bottom: 1.5rem;
         flex-shrink: 0;
       }
-
       .instruction-tab {
         padding: 0.8rem 1.2rem;
         cursor: pointer;
@@ -976,12 +901,10 @@
         margin-bottom: -2px;
         white-space: nowrap;
       }
-
       .instruction-tab:hover {
         color: var(--text-primary);
         background: var(--glass-bg);
       }
-
       .instruction-tab.active {
         color: var(--accent);
         border-bottom-color: var(--accent);
@@ -999,7 +922,6 @@
         align-items: center;
         justify-content: center;
       }
-
       .modal-overlay.active {
         display: flex;
       }
@@ -1018,11 +940,9 @@
         scrollbar-width: thin;
         scrollbar-color: var(--glass-border) transparent;
       }
-
       [data-theme='dark'] .modal-content {
         background: #1a1a2e;
       }
-
       [data-theme='light'] .modal-content {
         background: #ffffff;
       }
@@ -1046,7 +966,6 @@
         padding-bottom: 0.8rem;
         border-bottom: 1px solid var(--glass-border);
       }
-
       .modal-header h2 {
         margin: 0;
         font-size: 1.2rem;
@@ -1067,7 +986,6 @@
         color: var(--text-secondary);
         transition: all 0.2s;
       }
-
       .modal-close-btn:hover {
         background: var(--danger);
         color: white;
@@ -1079,13 +997,11 @@
         grid-template-columns: repeat(3, 1fr);
         gap: 0.8rem;
       }
-
       .modal-form .form-group {
         display: flex;
         flex-direction: column;
         gap: 0.25rem;
       }
-
       .modal-form label {
         font-size: 0.75rem;
         font-weight: 600;
@@ -1093,7 +1009,6 @@
         text-transform: uppercase;
         letter-spacing: 0.5px;
       }
-
       .modal-form input,
       .modal-form textarea {
         padding: 0.6rem 0.8rem;
@@ -1105,7 +1020,6 @@
         font-family: inherit;
         transition: all 0.2s;
       }
-
       .modal-form select {
         padding: 0.6rem 0.8rem;
         background: var(--bg-input);
@@ -1124,11 +1038,9 @@
         padding-right: 30px;
         cursor: pointer;
       }
-
       [data-theme='light'] .modal-form select {
         background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%235a5a7a' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
       }
-
       .modal-form input:focus,
       .modal-form select:focus,
       .modal-form textarea:focus {
@@ -1136,20 +1048,17 @@
         box-shadow: 0 0 0 3px rgba(124, 92, 252, 0.1);
         outline: none;
       }
-
       .modal-form input[readonly] {
-        opacity: 0.6;
+        opacity: 0.7;
         cursor: not-allowed;
+        background: var(--btn-bg);
       }
-
       .modal-form .conditional-field {
         display: none;
       }
-
       .modal-form .conditional-field.visible {
         display: flex;
       }
-
       .modal-form input.error,
       .modal-form select.error,
       .modal-form textarea.error {
@@ -1166,7 +1075,6 @@
         padding-top: 0.8rem;
         border-top: 1px solid var(--glass-border);
       }
-
       .modal-cancel-btn {
         padding: 0.6rem 1.2rem;
         background: var(--btn-bg);
@@ -1178,12 +1086,10 @@
         font-weight: 500;
         transition: all 0.2s;
       }
-
       .modal-cancel-btn:hover {
         background: var(--btn-hover);
         color: var(--text-primary);
       }
-
       .modal-save-btn {
         padding: 0.6rem 1.5rem;
         background: var(--accent);
@@ -1195,7 +1101,6 @@
         font-weight: 600;
         transition: all 0.2s;
       }
-
       .modal-save-btn:hover {
         background: var(--accent-hover);
         transform: translateY(-1px);
@@ -1214,7 +1119,6 @@
         align-items: center;
         justify-content: center;
       }
-
       .auth-container.hidden {
         display: none;
       }
@@ -1229,7 +1133,6 @@
         box-shadow: var(--shadow);
         animation: slideUp 0.3s ease;
       }
-
       @supports (backdrop-filter: blur(20px)) {
         .auth-card {
           background: rgba(15, 15, 35, 0.6);
@@ -1237,11 +1140,9 @@
           -webkit-backdrop-filter: blur(20px);
         }
       }
-
       [data-theme='light'] .auth-card {
         background: rgba(255, 255, 255, 0.9);
       }
-
       @supports (backdrop-filter: blur(20px)) {
         [data-theme='light'] .auth-card {
           background: rgba(255, 255, 255, 0.6);
@@ -1266,7 +1167,6 @@
         font-size: 1.8rem;
         margin-bottom: 0.5rem;
       }
-
       .auth-info {
         text-align: center;
         color: var(--text-secondary);
@@ -1280,7 +1180,6 @@
         margin-bottom: 1.5rem;
         border-bottom: 2px solid var(--glass-border);
       }
-
       .auth-tab {
         padding: 0.5rem 1rem;
         cursor: pointer;
@@ -1295,7 +1194,6 @@
         text-align: center;
         font-family: inherit;
       }
-
       .auth-tab.active {
         color: var(--accent);
         border-bottom-color: var(--accent);
@@ -1319,7 +1217,6 @@
         margin-top: 0.5rem;
         transition: all 0.2s;
       }
-
       .auth-submit:hover {
         background: var(--accent-hover);
         transform: translateY(-1px);
@@ -1331,12 +1228,10 @@
         display: none;
         text-align: center;
       }
-
       .auth-error.visible {
         display: block;
         color: var(--danger);
       }
-
       .auth-success.visible {
         display: block;
         color: var(--success);
@@ -1345,15 +1240,12 @@
       .main-interface {
         display: none;
       }
-
       .main-interface.visible {
         display: block;
       }
-
       .page-content {
         display: none;
       }
-
       .page-content.active {
         display: flex;
         flex-direction: column;
@@ -1364,7 +1256,6 @@
       .suggestions-container::-webkit-scrollbar {
         width: 4px;
       }
-
       .nav-menu::-webkit-scrollbar-thumb,
       .suggestions-container::-webkit-scrollbar-thumb {
         background: var(--glass-border);
@@ -1378,7 +1269,6 @@
         gap: 1rem;
         margin-bottom: 1rem;
       }
-
       .stat-card {
         background: rgba(124, 92, 252, 0.1);
         border: 1px solid var(--glass-border);
@@ -1387,19 +1277,16 @@
         text-align: center;
         transition: all 0.3s;
       }
-
       .stat-card:hover {
         background: rgba(124, 92, 252, 0.2);
         transform: translateY(-2px);
         box-shadow: var(--shadow);
       }
-
       .stat-card h3 {
         font-size: 0.8rem;
         color: var(--text-secondary);
         margin-bottom: 0.3rem;
       }
-
       .stat-value {
         font-size: 1.5rem;
         font-weight: 700;
@@ -1420,23 +1307,19 @@
         transition: all 0.2s;
         font-family: inherit;
       }
-
       .constructor-tab:hover {
         background: var(--btn-hover);
         color: var(--text-primary);
       }
-
       .constructor-tab.active {
         background: rgba(124, 92, 252, 0.15);
         color: var(--accent);
         border-color: var(--accent);
         font-weight: 600;
       }
-
       .constructor-content {
         display: none;
       }
-
       .constructor-content.active {
         display: block;
       }
@@ -1447,7 +1330,6 @@
         border-radius: 10px;
         padding: 0.8rem;
       }
-
       .field-config-card .field-header {
         display: flex;
         justify-content: space-between;
@@ -1455,7 +1337,6 @@
         margin-bottom: 0.5rem;
         gap: 0.5rem;
       }
-
       .field-config-card .field-name-input {
         flex: 1;
         padding: 0.4rem 0.6rem;
@@ -1468,11 +1349,9 @@
         outline: none;
         font-weight: 500;
       }
-
       .field-config-card .field-name-input:focus {
         border-color: var(--accent);
       }
-
       .field-config-card .field-type-select {
         padding: 0.4rem 0.5rem;
         border: 1px solid var(--input-border);
@@ -1483,14 +1362,12 @@
         font-family: inherit;
         outline: none;
       }
-
       .field-config-card .field-options {
         display: flex;
         gap: 0.5rem;
         flex-wrap: wrap;
         align-items: center;
       }
-
       .field-config-card label {
         display: flex;
         align-items: center;
@@ -1499,7 +1376,6 @@
         color: var(--text-secondary);
         cursor: pointer;
       }
-
       .field-config-card input[type='checkbox'] {
         width: 16px;
         height: 16px;
@@ -1518,7 +1394,6 @@
         white-space: nowrap;
         transition: all 0.2s;
       }
-
       .remove-field-btn:hover {
         background: var(--danger);
         color: white;
@@ -1536,7 +1411,6 @@
         transition: all 0.2s;
         font-family: inherit;
       }
-
       .add-field-btn:hover {
         background: var(--btn-hover);
         color: var(--text-primary);
@@ -1555,27 +1429,22 @@
         transition: all 0.2s;
         width: auto;
       }
-
       .export-btn:hover {
         background: var(--success);
         color: white;
       }
-
       .export-btn.import-btn {
         border-color: var(--warning);
         color: var(--warning);
       }
-
       .export-btn.import-btn:hover {
         background: var(--warning);
         color: white;
       }
-
       .export-btn.act-btn {
         border-color: var(--accent);
         color: var(--accent);
       }
-
       .export-btn.act-btn:hover {
         background: var(--accent);
         color: white;
@@ -1591,7 +1460,6 @@
         font-size: 0.8rem;
         table-layout: auto;
       }
-
       #deviceInfoContent th {
         padding: 0.4rem 0.5rem;
         text-align: left;
@@ -1603,7 +1471,6 @@
         width: 35%;
         vertical-align: top;
       }
-
       #deviceInfoContent td {
         padding: 0.35rem 0.5rem;
         border-bottom: 1px solid var(--glass-border);
@@ -1612,7 +1479,6 @@
         word-break: break-word;
         vertical-align: top;
       }
-
       #deviceInfoModalOverlay .modal-content {
         max-height: 95vh;
         overflow-y: auto;
@@ -1621,16 +1487,13 @@
       .modal-content::-webkit-scrollbar {
         width: 6px;
       }
-
       .modal-content::-webkit-scrollbar-track {
         background: transparent;
       }
-
       .modal-content::-webkit-scrollbar-thumb {
         background: var(--glass-border);
         border-radius: 3px;
       }
-
       .modal-content::-webkit-scrollbar-thumb:hover {
         background: var(--accent);
       }
@@ -1639,7 +1502,6 @@
         position: relative;
         padding-left: 30px;
       }
-
       .timeline::before {
         content: '';
         position: absolute;
@@ -1650,16 +1512,13 @@
         background: var(--accent);
         opacity: 0.3;
       }
-
       .timeline-item {
         position: relative;
         margin-bottom: 0;
       }
-
       .timeline-item .timeline-btn {
         margin-bottom: 0.3rem;
       }
-
       .timeline-btn {
         display: flex;
         flex-direction: column;
@@ -1678,7 +1537,6 @@
         text-align: center;
         position: relative;
       }
-
       .timeline-btn::before {
         content: '';
         position: absolute;
@@ -1691,34 +1549,20 @@
         background: var(--accent);
         border: 2px solid var(--bg-primary);
       }
-
       .timeline-btn:hover {
         background: var(--btn-hover);
         border-color: var(--accent);
       }
-
       .timeline-btn .tl-status {
         font-weight: 600;
         font-size: 0.75rem;
         white-space: nowrap;
       }
-
       .timeline-btn .tl-date {
         font-size: 0.7rem;
         color: var(--text-secondary);
         white-space: nowrap;
       }
-
-      .timeline-dot-connector {
-        position: absolute;
-        left: 15px;
-        top: 0;
-        bottom: 0;
-        width: 2px;
-        background: var(--accent);
-        opacity: 0.3;
-      }
-
       .timeline-details {
         display: none;
         padding: 1rem;
@@ -1729,16 +1573,13 @@
         font-size: 0.8rem;
         line-height: 1.6;
       }
-
       .timeline-details.open {
         display: block;
       }
-
       .timeline-details table {
         width: 100%;
         border-collapse: collapse;
       }
-
       .timeline-details th {
         text-align: left;
         padding: 0.3rem 0.5rem;
@@ -1748,7 +1589,6 @@
         vertical-align: top;
         white-space: nowrap;
       }
-
       .timeline-details td {
         padding: 0.3rem 0.5rem;
         font-size: 0.78rem;
@@ -1756,13 +1596,11 @@
         white-space: normal;
         word-break: break-word;
       }
-
       .timeline-btn.active {
         background: var(--accent);
         color: white;
         border-color: var(--accent);
       }
-
       .timeline-btn.active .tl-date {
         color: rgba(255, 255, 255, 0.8);
       }
@@ -1788,12 +1626,10 @@
         opacity: 0;
         transform: translateY(20px);
       }
-
       .toast.show {
         opacity: 1;
         transform: translateY(0);
       }
-
       @keyframes toastIn {
         from {
           opacity: 0;
@@ -1804,7 +1640,6 @@
           transform: translateY(0);
         }
       }
-
       @keyframes toastOut {
         from {
           opacity: 1;
@@ -2325,21 +2160,22 @@
             type="hidden"
             id="recordUser"
           /><input type="hidden" id="recordRequest" />
+
+          <div class="form-group">
+            <label for="recordStatus">📌 Статус</label
+            ><select id="recordStatus">
+              <option value="">Выберите статус...</option>
+              <option value="info">Информация</option>
+              <option value="move">Перемещение</option>
+              <option value="malfunction">Неисправность</option>
+            </select>
+          </div>
           <div class="form-group">
             <label for="recordImportance">⚠️ Важность</label
             ><select id="recordImportance">
               <option value="1">1 - Низкая</option>
               <option value="2" selected>2 - Средняя</option>
               <option value="3">3 - Высокая</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label for="recordStatus">📌 Статус</label
-            ><select id="recordStatus">
-              <option value="">Выберите статус...</option>
-              <option value="malfunction">Неисправность</option>
-              <option value="info">Информация</option>
-              <option value="move">Перемещение</option>
             </select>
           </div>
           <div class="form-group" style="position: relative">
@@ -2395,11 +2231,6 @@
               placeholder="Куда отнесли"
             />
           </div>
-          <div class="form-group conditional-field" id="recoveryDateField">
-            <label for="recordRecoveryDate"
-              >📅 Дата и время оперативного восстановления</label
-            ><input type="datetime-local" id="recordRecoveryDate" />
-          </div>
           <div
             class="form-group conditional-field"
             id="replaceTitleField"
@@ -2438,31 +2269,6 @@
               type="text"
               id="recordReplaceType"
               placeholder="Тип техники подменного"
-            />
-          </div>
-          <div class="form-group conditional-field" id="replaceLocationField">
-            <label for="recordReplaceLocation"
-              >📍 Куда поставили на подмену</label
-            ><input
-              type="text"
-              id="recordReplaceLocation"
-              placeholder="Куда поставили"
-            />
-          </div>
-          <div class="form-group conditional-field" id="newSPField">
-            <label for="recordNewSP">📄 Новые реквизиты СП</label
-            ><input
-              type="text"
-              id="recordNewSP"
-              placeholder="Новые реквизиты СП (необязательно)"
-            />
-          </div>
-          <div class="form-group conditional-field" id="newLSIField">
-            <label for="recordNewLSI">📑 Новые реквизиты ЛСИ</label
-            ><input
-              type="text"
-              id="recordNewLSI"
-              placeholder="Новые реквизиты ЛСИ (необязательно)"
             />
           </div>
           <div class="form-group" style="grid-column: 1/-1">
@@ -2656,11 +2462,6 @@
               <label for="editBrokenLocation">🔧 Куда отнесли сломанное</label
               ><input type="text" id="editBrokenLocation" />
             </div>
-            <div class="form-group">
-              <label for="editRecoveryDate"
-                >📅 Дата и время оперативного восстановления</label
-              ><input type="datetime-local" id="editRecoveryDate" />
-            </div>
             <div style="grid-column: 1/-1; margin-top: 0.5rem">
               <h3 style="margin-bottom: 0.5rem">🔄 Выдано на подмену</h3>
             </div>
@@ -2676,19 +2477,6 @@
               <label for="editReplaceType">⚙️ Тип техники</label
               ><input type="text" id="editReplaceType" />
             </div>
-            <div class="form-group">
-              <label for="editReplaceLocation"
-                >📍 Куда поставили на подмену</label
-              ><input type="text" id="editReplaceLocation" />
-            </div>
-          </div>
-          <div class="form-group" id="editNewSPGroup" style="display: none">
-            <label for="editNewSP">📄 Новые реквизиты СП</label
-            ><input type="text" id="editNewSP" />
-          </div>
-          <div class="form-group" id="editNewLSIGroup" style="display: none">
-            <label for="editNewLSI">📑 Новые реквизиты ЛСИ</label
-            ><input type="text" id="editNewLSI" />
           </div>
           <div class="form-group" style="grid-column: 1/-1">
             <label for="editDescription">📝 Описание</label
@@ -2961,7 +2749,6 @@
           editingRecordId = null,
           dateTimeInterval = null;
 
-        // Пагинация
         let recordsTotal = 0,
           devicesTotal = 0;
         let recordsPage = 1,
@@ -3005,6 +2792,18 @@
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(data),
           });
+        }
+
+        function showToast(message, type = 'success') {
+          const toast = document.createElement('div');
+          toast.className = 'toast';
+          toast.innerHTML = type === 'success' ? '✅ ' + message : message;
+          document.body.appendChild(toast);
+          requestAnimationFrame(() => toast.classList.add('show'));
+          setTimeout(() => {
+            toast.classList.remove('show');
+            setTimeout(() => toast.remove(), 300);
+          }, 3000);
         }
 
         async function loadData() {
@@ -3176,9 +2975,22 @@
         function setupAllSuggestions() {
           setupSuggestions('recordSerial', 'serialSuggestions', d => {
             document.getElementById('recordSerial').value = d.serialNumber;
-            document.getElementById('recordProduct').value = d.product;
             document.getElementById('recordType').value = d.device;
             document.getElementById('recordLocation').value = d.location || '';
+
+            // Подтягиваем изделие
+            const productSelect = document.getElementById('recordProduct');
+            // Если изделия нет в выпадающем списке — добавляем
+            if (
+              d.product &&
+              ![...productSelect.options].some(o => o.value === d.product)
+            ) {
+              const o = document.createElement('option');
+              o.value = d.product;
+              o.textContent = d.product;
+              productSelect.appendChild(o);
+            }
+            productSelect.value = d.product;
           });
           setupSuggestions(
             'recordReplaceSerial',
@@ -3186,8 +2998,23 @@
             d => {
               document.getElementById('recordReplaceSerial').value =
                 d.serialNumber;
-              document.getElementById('recordReplaceProduct').value = d.product;
               document.getElementById('recordReplaceType').value = d.device;
+
+              const replaceProductSelect = document.getElementById(
+                'recordReplaceProduct'
+              );
+              if (
+                d.product &&
+                ![...replaceProductSelect.options].some(
+                  o => o.value === d.product
+                )
+              ) {
+                const o = document.createElement('option');
+                o.value = d.product;
+                o.textContent = d.product;
+                replaceProductSelect.appendChild(o);
+              }
+              replaceProductSelect.value = d.product;
             }
           );
         }
@@ -3619,6 +3446,7 @@
             document.getElementById('homePage').classList.add('active');
           }
         }
+
         let tempSectionConfig = { tableColumns: [], fields: [], filters: [] };
         function openCreateSectionModal() {
           document.getElementById('createSectionModal').classList.add('active');
@@ -3965,6 +3793,7 @@
                 const result = await r.json();
                 form.reset();
                 renderCustomTableBody(section, result.record);
+                showToast('Запись успешно добавлена');
               } catch (ex) {
                 alert('Ошибка');
               }
@@ -4049,26 +3878,36 @@
         function setupStatusChange() {
           const statusSelect = document.getElementById('recordStatus');
           if (!statusSelect) return;
+
           const allConditionalFields = [
             'newLocationField',
-            'newSPField',
-            'newLSIField',
             'malfunctionDateField',
             'brokenLocationField',
-            'recoveryDateField',
+            'replaceTitleField',
             'replaceSerialField',
             'replaceProductField',
             'replaceTypeField',
-            'replaceLocationField',
           ];
+
           statusSelect.addEventListener('change', function () {
             const st = this.value;
+
             allConditionalFields.forEach(id => {
               const el = document.getElementById(id);
               if (el) el.classList.remove('visible');
             });
             const replaceTitle = document.getElementById('replaceTitleField');
             if (replaceTitle) replaceTitle.style.display = 'none';
+
+            const locationInput = document.getElementById('recordLocation');
+
+            // Всегда доступно для редактирования по умолчанию
+            if (locationInput) {
+              locationInput.removeAttribute('readonly');
+              locationInput.style.opacity = '';
+              locationInput.style.cursor = '';
+            }
+
             if (st === 'move') {
               document
                 .getElementById('newLocationField')
@@ -4076,19 +3915,18 @@
             }
             if (st === 'malfunction') {
               [
-                'newSPField',
-                'newLSIField',
                 'malfunctionDateField',
                 'brokenLocationField',
-                'recoveryDateField',
                 'replaceSerialField',
                 'replaceProductField',
                 'replaceTypeField',
-                'replaceLocationField',
               ].forEach(id => {
                 document.getElementById(id)?.classList.add('visible');
               });
               if (replaceTitle) replaceTitle.style.display = 'block';
+              if (locationInput) {
+                locationInput.setAttribute('readonly', 'readonly');
+              }
             }
           });
         }
@@ -4165,7 +4003,7 @@
 
         async function addRecord(data) {
           try {
-            const r = await apiPost(API.records, data);
+            await apiPost(API.records, data);
             await loadRecordsPage(1, true);
             await loadStatistics();
             return true;
@@ -4232,22 +4070,8 @@
         async function completeRecord(id) {
           const rec = records.find(r => r.id === id);
           if (!rec) return;
-          if (rec.status === 'malfunction') {
-            const hasSP = rec.newSPRequisites?.trim(),
-              hasLSI = rec.newLSIRequisites?.trim();
-            if (hasSP || hasLSI) {
-              try {
-                const ud = { serialNumber: rec.serialNumber };
-                if (hasSP) ud.spRequisites = rec.newSPRequisites;
-                if (hasLSI) ud.lsiRequisites = rec.newLSIRequisites;
-                await fetch(API.devices, {
-                  method: 'PUT',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify(ud),
-                });
-              } catch (e) {}
-            }
-          }
+          rec.completed = true;
+          rec.completedAt = new Date().toISOString();
           try {
             await fetch(API.records, {
               method: 'PUT',
@@ -4255,10 +4079,10 @@
               body: JSON.stringify({
                 id,
                 completed: true,
-                completedAt: new Date().toISOString(),
+                completedAt: rec.completedAt,
               }),
             });
-            showToast('Неисправность отмечена как выполненная');
+            showToast('Заявка отмечена как выполненная');
             await loadRecordsPage(1, true);
             await loadStatistics();
           } catch (e) {}
@@ -4275,9 +4099,6 @@
             .getElementById('closeAddRecordModal')
             ?.addEventListener('click', closeAddRecordModal);
           document
-            .getElementById('cancelAddRecordBtn')
-            ?.addEventListener('click', closeAddRecordModal);
-          document
             .getElementById('addRecordModalOverlay')
             ?.addEventListener('click', function (e) {
               if (e.target === this) closeAddRecordModal();
@@ -4286,6 +4107,9 @@
           if (form) {
             const newForm = form.cloneNode(true);
             form.parentNode.replaceChild(newForm, form);
+            document
+              .getElementById('cancelAddRecordBtn')
+              ?.addEventListener('click', closeAddRecordModal);
             newForm.addEventListener('submit', async e => {
               e.preventDefault();
               newForm
@@ -4305,14 +4129,6 @@
               const desc = document
                 .getElementById('recordDescription')
                 .value.trim();
-              const sp =
-                st === 'malfunction'
-                  ? document.getElementById('recordNewSP')?.value.trim() || ''
-                  : '';
-              const lsi =
-                st === 'malfunction'
-                  ? document.getElementById('recordNewLSI')?.value.trim() || ''
-                  : '';
               const mDate =
                 st === 'malfunction'
                   ? document.getElementById('recordMalfunctionDate')?.value ||
@@ -4323,10 +4139,6 @@
                   ? document
                       .getElementById('recordBrokenLocation')
                       ?.value.trim() || ''
-                  : '';
-              const recDate =
-                st === 'malfunction'
-                  ? document.getElementById('recordRecoveryDate')?.value || ''
                   : '';
               const repSN =
                 st === 'malfunction'
@@ -4344,26 +4156,22 @@
                       .getElementById('recordReplaceType')
                       ?.value.trim() || ''
                   : '';
-              const repLoc =
-                st === 'malfunction'
-                  ? document
-                      .getElementById('recordReplaceLocation')
-                      ?.value.trim() || ''
-                  : '';
+
               if (!st) {
                 alert('Выберите статус');
                 return;
               }
+
               if (sn && pr) {
                 const dev = devices.find(d => d.serialNumber === sn);
-                if (!dev && pr) {
+                if (!dev) {
                   alert(`Серийный номер "${sn}" не найден в базе.`);
                   document
                     .getElementById('recordSerial')
                     .classList.add('error');
                   return;
                 }
-                if (dev && dev.product !== pr) {
+                if (dev.product !== pr) {
                   alert(
                     `Серийный номер "${sn}" принадлежит изделию "${dev.product}", а не "${pr}".`
                   );
@@ -4376,7 +4184,9 @@
                   return;
                 }
               }
+
               let hasError = false;
+
               if (st === 'move') {
                 if (!sn) {
                   document
@@ -4416,6 +4226,7 @@
                   });
                 } catch (e) {}
               }
+
               if (st === 'malfunction') {
                 if (!mDate) {
                   document
@@ -4445,6 +4256,12 @@
                     .classList.add('error');
                   hasError = true;
                 }
+                if (!loc) {
+                  document
+                    .getElementById('recordLocation')
+                    .classList.add('error');
+                  hasError = true;
+                }
                 if (hasError) {
                   alert('Заполните обязательные поля (выделены красным)');
                   return;
@@ -4465,23 +4282,8 @@
                     });
                   } catch (e) {}
                 }
-                if (repSN && repLoc) {
-                  if (!devices.some(d => d.serialNumber === repSN)) {
-                    alert(`Подменный серийный номер "${repSN}" не найден!`);
-                    return;
-                  }
-                  try {
-                    await fetch(API.devices, {
-                      method: 'PUT',
-                      headers: { 'Content-Type': 'application/json' },
-                      body: JSON.stringify({
-                        serialNumber: repSN,
-                        location: repLoc,
-                      }),
-                    });
-                  } catch (e) {}
-                }
               }
+
               const data = {
                 username: currentUser,
                 requestNumber: document
@@ -4497,17 +4299,18 @@
                 location: loc,
                 newLocation: nl,
                 description: desc,
-                newSPRequisites: sp,
-                newLSIRequisites: lsi,
+                newSPRequisites: '',
+                newLSIRequisites: '',
                 malfunctionDate: mDate,
                 brokenLocation: brokenLoc,
-                recoveryDate: recDate,
+                recoveryDate: '',
                 replaceSerial: repSN,
                 replaceProduct: repPr,
                 replaceType: repTT,
-                replaceLocation: repLoc,
+                replaceLocation: '',
                 completed: st === 'info' || st === 'move',
               };
+
               if (await addRecord(data)) {
                 showToast('Запись успешно добавлена');
                 document.getElementById('recordSerial').value = '';
@@ -4520,35 +4323,23 @@
                   getNextRequestNumber();
                 document.getElementById('recordStatus').value = '';
                 document.getElementById('recordImportance').value = '2';
-                if (document.getElementById('recordNewSP'))
-                  document.getElementById('recordNewSP').value = '';
-                if (document.getElementById('recordNewLSI'))
-                  document.getElementById('recordNewLSI').value = '';
                 if (document.getElementById('recordMalfunctionDate'))
                   document.getElementById('recordMalfunctionDate').value = '';
                 if (document.getElementById('recordBrokenLocation'))
                   document.getElementById('recordBrokenLocation').value = '';
-                if (document.getElementById('recordRecoveryDate'))
-                  document.getElementById('recordRecoveryDate').value = '';
                 if (document.getElementById('recordReplaceSerial'))
                   document.getElementById('recordReplaceSerial').value = '';
                 if (document.getElementById('recordReplaceProduct'))
                   document.getElementById('recordReplaceProduct').value = '';
                 if (document.getElementById('recordReplaceType'))
                   document.getElementById('recordReplaceType').value = '';
-                if (document.getElementById('recordReplaceLocation'))
-                  document.getElementById('recordReplaceLocation').value = '';
                 [
                   'newLocationField',
-                  'newSPField',
-                  'newLSIField',
                   'malfunctionDateField',
                   'brokenLocationField',
-                  'recoveryDateField',
                   'replaceSerialField',
                   'replaceProductField',
                   'replaceTypeField',
-                  'replaceLocationField',
                 ].forEach(id => {
                   const el = document.getElementById(id);
                   if (el) el.classList.remove('visible');
@@ -4556,13 +4347,15 @@
                 const replaceTitle =
                   document.getElementById('replaceTitleField');
                 if (replaceTitle) replaceTitle.style.display = 'none';
+                document
+                  .getElementById('recordLocation')
+                  .removeAttribute('readonly');
                 updateDateTime();
+                if (st === 'move' || st === 'malfunction')
+                  await loadDevicesPage(1, true);
                 closeAddRecordModal();
               }
             });
-            document
-              .getElementById('cancelAddRecordBtn')
-              ?.addEventListener('click', closeAddRecordModal);
             setupAllSuggestions();
             setupStatusChange();
           }
@@ -4595,9 +4388,6 @@
             .getElementById('closeAddDeviceModal')
             ?.addEventListener('click', closeAddDeviceModal);
           document
-            .getElementById('cancelAddDeviceBtn')
-            ?.addEventListener('click', closeAddDeviceModal);
-          document
             .getElementById('addDeviceModalOverlay')
             ?.addEventListener('click', function (e) {
               if (e.target === this) closeAddDeviceModal();
@@ -4606,6 +4396,9 @@
           if (form) {
             const newForm = form.cloneNode(true);
             form.parentNode.replaceChild(newForm, form);
+            document
+              .getElementById('cancelAddDeviceBtn')
+              ?.addEventListener('click', closeAddDeviceModal);
             newForm.addEventListener('submit', async e => {
               e.preventDefault();
               const p = document.getElementById('deviceProduct').value.trim(),
@@ -4657,9 +4450,6 @@
               }
             });
           }
-          document
-            .getElementById('cancelAddDeviceBtn')
-            ?.addEventListener('click', closeAddDeviceModal);
         }
         function openAddDeviceModal() {
           document
@@ -4725,15 +4515,11 @@
           sv('editLocation', rec.location || '');
           sv('editNewLocation', rec.newLocation || '');
           sv('editDescription', rec.description || '');
-          sv('editNewSP', rec.newSPRequisites || '');
-          sv('editNewLSI', rec.newLSIRequisites || '');
           sv('editMalfunctionDate', rec.malfunctionDate || '');
           sv('editBrokenLocation', rec.brokenLocation || '');
-          sv('editRecoveryDate', rec.recoveryDate || '');
           sv('editReplaceSerial', rec.replaceSerial || '');
           sv('editReplaceProduct', rec.replaceProduct || '');
           sv('editReplaceType', rec.replaceType || '');
-          sv('editReplaceLocation', rec.replaceLocation || '');
           updateEditModalConditionalFields();
           document.getElementById('editModalOverlay').classList.add('active');
         }
@@ -4749,10 +4535,6 @@
             s === 'move' ? 'block' : 'none';
           document.getElementById('editMalfunctionGroup').style.display =
             s === 'malfunction' ? 'flex' : 'none';
-          document.getElementById('editNewSPGroup').style.display =
-            s === 'malfunction' ? 'block' : 'none';
-          document.getElementById('editNewLSIGroup').style.display =
-            s === 'malfunction' ? 'block' : 'none';
         }
         async function saveEditRecord(e) {
           e.preventDefault();
@@ -4786,14 +4568,8 @@
             description: document
               .getElementById('editDescription')
               .value.trim(),
-            newSPRequisites:
-              s === 'malfunction'
-                ? document.getElementById('editNewSP')?.value.trim() || ''
-                : '',
-            newLSIRequisites:
-              s === 'malfunction'
-                ? document.getElementById('editNewLSI')?.value.trim() || ''
-                : '',
+            newSPRequisites: '',
+            newLSIRequisites: '',
             malfunctionDate:
               s === 'malfunction'
                 ? document.getElementById('editMalfunctionDate')?.value || ''
@@ -4803,10 +4579,7 @@
                 ? document.getElementById('editBrokenLocation')?.value.trim() ||
                   ''
                 : '',
-            recoveryDate:
-              s === 'malfunction'
-                ? document.getElementById('editRecoveryDate')?.value || ''
-                : '',
+            recoveryDate: '',
             replaceSerial:
               s === 'malfunction'
                 ? document.getElementById('editReplaceSerial')?.value.trim() ||
@@ -4821,12 +4594,7 @@
               s === 'malfunction'
                 ? document.getElementById('editReplaceType')?.value.trim() || ''
                 : '',
-            replaceLocation:
-              s === 'malfunction'
-                ? document
-                    .getElementById('editReplaceLocation')
-                    ?.value.trim() || ''
-                : '',
+            replaceLocation: '',
           };
           try {
             await apiPut(API.records, data);
@@ -4838,7 +4606,6 @@
           }
         }
         function getNextRequestNumber() {
-          if (!records.length) return '1';
           let m = 0;
           records.forEach(r => {
             const n = parseInt(r.requestNumber);
@@ -5006,7 +4773,7 @@
               devRecords.length +
               ')</h3><div class="timeline">';
             devRecords.forEach((r, i) => {
-              html += `<div class="timeline-item" style="margin-bottom:${i < devRecords.length - 1 ? '1.5rem' : '0'};"><button class="timeline-btn" onclick="toggleTimelineDetails(this, '${r.id}')"><span class="tl-status">${STATUS_LABELS[r.status] || r.status}</span><span class="tl-date">${new Date(r.createdAt).toLocaleDateString('ru-RU')}<br>${new Date(r.createdAt).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })}</span></button><div class="timeline-details" id="details_${r.id}"><table><tr><th>Пользователь</th><td>${escapeHtml(r.username)}</td></tr><tr><th>№ Заявки</th><td>${escapeHtml(r.requestNumber || '-')}</td></tr><tr><th>Важность</th><td>${IMPORTANCE_LABELS[r.importance] || r.importance}</td></tr><tr><th>Статус</th><td>${STATUS_LABELS[r.status] || r.status}</td></tr><tr><th>Серийный номер</th><td>${escapeHtml(r.serialNumber || '-')}</td></tr><tr><th>Изделие</th><td>${escapeHtml(r.product || '-')}</td></tr><tr><th>Тип техники</th><td>${escapeHtml(r.techType || '-')}</td></tr><tr><th>Расположение</th><td>${escapeHtml(r.location || '-')}</td></tr>${r.status === 'move' && r.newLocation ? `<tr><th>Новое расположение</th><td>${escapeHtml(r.newLocation)}</td></tr>` : ''}${r.status === 'malfunction' ? `${r.malfunctionDate ? `<tr><th>Дата обнаружения</th><td>${new Date(r.malfunctionDate).toLocaleString('ru-RU')}</td></tr>` : ''}${r.brokenLocation ? `<tr><th>Куда отнесли</th><td>${escapeHtml(r.brokenLocation)}</td></tr>` : ''}${r.recoveryDate ? `<tr><th>Дата восстановления</th><td>${new Date(r.recoveryDate).toLocaleString('ru-RU')}</td></tr>` : ''}${r.newSPRequisites ? `<tr><th>Новые реквизиты СП</th><td>${escapeHtml(r.newSPRequisites)}</td></tr>` : ''}${r.newLSIRequisites ? `<tr><th>Новые реквизиты ЛСИ</th><td>${escapeHtml(r.newLSIRequisites)}</td></tr>` : ''}${r.replaceSerial ? `<tr><th>Подменный Сер№</th><td>${escapeHtml(r.replaceSerial)}</td></tr>` : ''}${r.replaceProduct ? `<tr><th>Подменное изделие</th><td>${escapeHtml(r.replaceProduct)}</td></tr>` : ''}${r.replaceType ? `<tr><th>Подменный тип</th><td>${escapeHtml(r.replaceType)}</td></tr>` : ''}${r.replaceLocation ? `<tr><th>Куда поставили подмену</th><td>${escapeHtml(r.replaceLocation)}</td></tr>` : ''}` : ''}<tr><th>Описание</th><td>${escapeHtml(r.description || '-')}</td></tr><tr><th>Выполнено</th><td>${r.completed ? '✅ Да' : '⏳ В работе'}</td></tr></table></div></div>`;
+              html += `<div class="timeline-item" style="margin-bottom:${i < devRecords.length - 1 ? '1.5rem' : '0'};"><button class="timeline-btn" onclick="toggleTimelineDetails(this, '${r.id}')"><span class="tl-status">${STATUS_LABELS[r.status] || r.status}</span><span class="tl-date">${new Date(r.createdAt).toLocaleDateString('ru-RU')}<br>${new Date(r.createdAt).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })}</span></button><div class="timeline-details" id="details_${r.id}"><table><tr><th>Пользователь</th><td>${escapeHtml(r.username)}</td></tr><tr><th>№ Заявки</th><td>${escapeHtml(r.requestNumber || '-')}</td></tr><tr><th>Важность</th><td>${IMPORTANCE_LABELS[r.importance] || r.importance}</td></tr><tr><th>Статус</th><td>${STATUS_LABELS[r.status] || r.status}</td></tr><tr><th>Серийный номер</th><td>${escapeHtml(r.serialNumber || '-')}</td></tr><tr><th>Изделие</th><td>${escapeHtml(r.product || '-')}</td></tr><tr><th>Тип техники</th><td>${escapeHtml(r.techType || '-')}</td></tr><tr><th>Расположение</th><td>${escapeHtml(r.location || '-')}</td></tr>${r.status === 'move' && r.newLocation ? `<tr><th>Новое расположение</th><td>${escapeHtml(r.newLocation)}</td></tr>` : ''}${r.status === 'malfunction' ? `${r.malfunctionDate ? `<tr><th>Дата обнаружения</th><td>${new Date(r.malfunctionDate).toLocaleString('ru-RU')}</td></tr>` : ''}${r.brokenLocation ? `<tr><th>Куда отнесли</th><td>${escapeHtml(r.brokenLocation)}</td></tr>` : ''}${r.replaceSerial ? `<tr><th>Подменный Сер№</th><td>${escapeHtml(r.replaceSerial)}</td></tr>` : ''}${r.replaceProduct ? `<tr><th>Подменное изделие</th><td>${escapeHtml(r.replaceProduct)}</td></tr>` : ''}${r.replaceType ? `<tr><th>Подменный тип</th><td>${escapeHtml(r.replaceType)}</td></tr>` : ''}` : ''}<tr><th>Описание</th><td>${escapeHtml(r.description || '-')}</td></tr><tr><th>Выполнено</th><td>${r.completed ? '✅ Да' : '⏳ В работе'}</td></tr></table></div></div>`;
             });
             html += '</div>';
             timelineCol.innerHTML = html;
@@ -5061,7 +4828,7 @@
 
         async function addDevice(data) {
           try {
-            const r = await apiPost(API.devices, data);
+            await apiPost(API.devices, data);
             await loadDevicesPage(1, true);
             updateProductSelect();
             return true;
@@ -5465,7 +5232,7 @@
         }
 
         const instructionsContent = {
-          user_guide: `<div class="instructions-content"><h1>📖 Руководство пользователя</h1><h2>🔐 Вход в систему</h2><p>Откройте браузер и перейдите по адресу <strong>http://localhost:3000</strong>.</p><p>Введите логин и пароль, затем нажмите «Войти». Учётные данные по умолчанию:</p><ul><li><strong>Администратор:</strong> admin / admin123</li><li><strong>Пользователь:</strong> user / user123</li></ul><p>Если у вас нет учётной записи, перейдите на вкладку «Регистрация», придумайте логин (от 3 символов) и пароль (от 4 символов).</p><h2>🧭 Навигация</h2><p>Слева расположена боковая панель с разделами. Чтобы развернуть/свернуть панель, нажмите кнопку ✕ в верхней части панели.</p><h2>📝 Добавление записи</h2><p>Нажмите кнопку <strong>«Добавить запись»</strong>. Выберите статус:</p><ul><li><strong>Информация</strong> — все поля необязательные, подтягиваются по серийному номеру. Заявка сразу выполнена.</li><li><strong>Перемещение</strong> — обязательные: серийный номер, изделие, тип техники, новое расположение. Заявка сразу выполнена.</li><li><strong>Неисправность</strong> — обязательные: дата обнаружения, серийный номер, изделие, тип техники, описание. Можно указать новые реквизиты СП и ЛСИ, куда отнесли сломанное, дату восстановления и данные подменного устройства. Заявка создаётся в работе.</li></ul><h2>📊 Таблица записей</h2><p>Фильтры и экспорт CSV. Действия: ✏️ редактировать, 🗑️ удалить, ✅ отметить неисправность выполненной.</p></div>`,
+          user_guide: `<div class="instructions-content"><h1>📖 Руководство пользователя</h1><h2>🔐 Вход в систему</h2><p>Откройте браузер и перейдите по адресу <strong>http://localhost:3000</strong>.</p><p>Введите логин и пароль, затем нажмите «Войти». Учётные данные по умолчанию:</p><ul><li><strong>Администратор:</strong> admin / admin123</li><li><strong>Пользователь:</strong> user / user123</li></ul><h2>📝 Добавление записи</h2><p>Нажмите кнопку <strong>«Добавить запись»</strong>. Выберите статус:</p><ul><li><strong>Информация</strong> — все поля необязательные, заявка сразу выполнена.</li><li><strong>Перемещение</strong> — обязательные: серийный номер, изделие, тип техники, новое расположение. Заявка сразу выполнена.</li><li><strong>Неисправность</strong> — обязательные: дата обнаружения, серийный номер, изделие, тип техники, расположение, описание. Расположение заполняется автоматически. Можно указать куда отнесли и данные подменного устройства.</li></ul></div>`,
           admin_guide: `<div class="instructions-content"><h1>🔧 Руководство администратора</h1><h2>⚙️ Вся техника</h2><p>Добавление, редактирование, удаление устройств. Импорт/экспорт CSV, печать акта.</p><h2>📊 Статистика</h2><p>По изделиям, статусам, пользователям. Контроль гарантийных сроков.</p><h2>🏗️ Конструктор таблиц</h2><p>Создание пользовательских разделов с настраиваемыми полями.</p></div>`,
           dev_guide: `<div class="instructions-content"><h1>💻 Руководство разработчика</h1><p>Стек: ванильный JS (SPA) + Node.js. Данные в JSON-файлах. Запуск: <code>node server.js</code> → http://localhost:3000</p></div>`,
         };
@@ -5512,7 +5279,7 @@
           ?.addEventListener('click', async () => {
             try {
               const r = await fetch(API.backup, { method: 'POST' });
-              if (r.ok) alert('✅ Резервная копия создана');
+              if (r.ok) showToast('Резервная копия создана');
               else alert('❌ Ошибка');
             } catch (e) {
               alert('❌ Ошибка');
@@ -5529,18 +5296,6 @@
               loadMoreFn();
             }
           });
-        }
-
-        function showToast(message, type = 'success') {
-          const toast = document.createElement('div');
-          toast.className = 'toast';
-          toast.innerHTML = type === 'success' ? '✅ ' + message : message;
-          document.body.appendChild(toast);
-          requestAnimationFrame(() => toast.classList.add('show'));
-          setTimeout(() => {
-            toast.classList.remove('show');
-            setTimeout(() => toast.remove(), 300);
-          }, 3000);
         }
 
         async function init() {
