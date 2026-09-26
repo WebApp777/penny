@@ -461,5 +461,62 @@
     },
     "id": "hist_1790175813792",
     "timestamp": "2026-09-23T15:03:33.792Z"
+  },
+  {
+    "action": "update_device",
+    "serialNumber": "йцуке",
+    "changes": {
+      "serialNumber": "йцуке",
+      "location": "302"
+    },
+    "id": "hist_1790409084448",
+    "timestamp": "2026-09-26T07:51:24.448Z"
+  },
+  {
+    "action": "update_device",
+    "serialNumber": "фывап",
+    "changes": {
+      "serialNumber": "фывап",
+      "location": "632"
+    },
+    "id": "hist_1790409084466",
+    "timestamp": "2026-09-26T07:51:24.466Z"
+  },
+  {
+    "action": "create_device",
+    "serialNumber": "asdfа",
+    "created": true,
+    "id": "hist_1790409832608",
+    "timestamp": "2026-09-26T08:03:52.608Z"
+  },
+  {
+    "action": "update_device",
+    "serialNumber": "qwerty",
+    "changes": {
+      "serialNumber": "qwerty",
+      "location": "632"
+    },
+    "id": "hist_1790409832625",
+    "timestamp": "2026-09-26T08:03:52.625Z"
+  },
+  {
+    "action": "update_device",
+    "serialNumber": "asdfg",
+    "changes": {
+      "serialNumber": "asdfg",
+      "location": "302"
+    },
+    "id": "hist_1790411814131",
+    "timestamp": "2026-09-26T08:36:54.131Z"
+  },
+  {
+    "action": "update_device",
+    "serialNumber": "qwerty",
+    "changes": {
+      "serialNumber": "qwerty",
+      "location": "632"
+    },
+    "id": "hist_1790411814148",
+    "timestamp": "2026-09-26T08:36:54.148Z"
   }
 ]

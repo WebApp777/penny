@@ -42493,7 +42493,7 @@
     "supplyBasis": "Договор №47",
     "spRequisites": "12321",
     "lsiRequisites": "ЛСИ-458",
-    "location": "123",
+    "location": "632",
     "specs": "",
     "notes": "",
     "warranty": "",
@@ -42507,11 +42507,17 @@
     "supplyBasis": "Договор №47",
     "spRequisites": "12321",
     "lsiRequisites": "ЛСИ-458",
-    "location": "632",
+    "location": "302",
     "specs": "",
     "notes": "",
     "warranty": "",
     "id": "dev_1790160039210",
     "createdAt": "2026-09-23T10:40:39.210Z"
+  },
+  {
+    "serialNumber": "asdfа",
+    "location": "302",
+    "id": "dev_1790409832600",
+    "createdAt": "2026-09-26T08:03:52.600Z"
   }
 ]

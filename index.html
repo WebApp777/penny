@@ -1728,6 +1728,48 @@
           transform: translateY(20px);
         }
       }
+
+      .edit-readonly-block {
+        display: none;
+        margin-bottom: 1rem;
+        padding: 0.8rem 1rem;
+        background: var(--glass-bg);
+        border: 1px solid var(--glass-border);
+        border-radius: 8px;
+        font-size: 0.82rem;
+      }
+      .edit-readonly-block.visible {
+        display: block;
+      }
+      .edit-readonly-block h4 {
+        margin: 0 0 0.5rem 0;
+        font-size: 0.85rem;
+        color: var(--accent);
+        font-weight: 600;
+      }
+      .edit-readonly-block table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+      .edit-readonly-block th {
+        text-align: left;
+        padding: 0.3rem 0.6rem 0.3rem 0;
+        font-size: 0.75rem;
+        color: var(--text-secondary);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        width: 35%;
+        vertical-align: top;
+        font-weight: 600;
+        white-space: nowrap;
+      }
+      .edit-readonly-block td {
+        padding: 0.3rem 0;
+        font-size: 0.82rem;
+        color: var(--text-primary);
+        vertical-align: top;
+        word-break: break-word;
+      }
     </style>
   </head>
 
@@ -2496,6 +2538,7 @@
           <h2>Редактирование записи</h2>
           <button class="modal-close-btn" id="closeEditModal">&times;</button>
         </div>
+        <div id="editReadonlyBlock" class="edit-readonly-block"></div>
         <form class="modal-form" id="editRecordForm">
           <div class="form-group">
             <label for="editRequestNumber">📋 № Заявки</label
@@ -2614,7 +2657,7 @@
             id="editDefectActGroup"
             style="display: none; grid-column: 1/-1"
           >
-            <label for="editDefectAct">📋 Дефектовочная ведомость *</label
+            <label for="editDefectAct">📋 Дефектовочная ведомость</label
             ><textarea
               id="editDefectAct"
               rows="2"
@@ -2872,6 +2915,7 @@
         </div>
       </div>
     </div>
+
     <script>
       (function () {
         'use strict';
@@ -4772,7 +4816,6 @@
 
           const statusSelect = document.getElementById('editStatus');
           let options = [];
-
           if (rec.status === 'malfunction') {
             options = [
               { value: 'malfunction', label: 'Неисправность' },
@@ -4802,7 +4845,6 @@
               { value: 'archive', label: 'Архив' },
             ];
           }
-
           statusSelect.innerHTML = '';
           options.forEach(o => {
             const opt = document.createElement('option');
@@ -4849,6 +4891,7 @@
 
         function updateEditModalConditionalFields() {
           const s = document.getElementById('editStatus').value;
+
           [
             'editNewLocationGroup',
             'editBrokenLocationGroup',
@@ -4868,6 +4911,16 @@
             if (el) el.style.display = 'none';
           });
 
+          ['editSerialNumber', 'editProduct', 'editTechType'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.closest('.form-group').style.display = '';
+          });
+
+          const baseFields = [
+            'editSerialNumber',
+            'editProduct',
+            'editTechType',
+          ];
           const brokenEl = document.getElementById('editBrokenLocation');
           const repSerEl = document.getElementById('editReplaceSerial');
           const repProdEl = document.getElementById('editReplaceProduct');
@@ -4875,7 +4928,9 @@
           const repLocEl = document.getElementById('editReplaceLocation');
           const defActEl = document.getElementById('editDefectAct');
 
-          // Сброс readonly по умолчанию
+          baseFields.forEach(id =>
+            document.getElementById(id)?.removeAttribute('readonly')
+          );
           [
             brokenEl,
             repSerEl,
@@ -4886,6 +4941,16 @@
           ].forEach(el => {
             if (el) el.removeAttribute('readonly');
           });
+
+          const roBlock = document.getElementById('editReadonlyBlock');
+          let roDeviceRows = [];
+          let roReplaceRows = [];
+          const addDeviceRow = (label, value) => {
+            if (value) roDeviceRows.push([label, value]);
+          };
+          const addReplaceRow = (label, value) => {
+            if (value) roReplaceRows.push([label, value]);
+          };
 
           if (s === 'move') {
             document.getElementById('editNewLocationGroup').style.display =
@@ -4916,56 +4981,73 @@
             repLocEl.setAttribute('readonly', 'readonly');
           }
 
+          if (
+            s === 'repair' ||
+            s === 'repair_done' ||
+            s === 'replace' ||
+            s === 'archive'
+          ) {
+            ['editSerialNumber', 'editProduct', 'editTechType'].forEach(id => {
+              const el = document.getElementById(id);
+              if (el) el.closest('.form-group').style.display = 'none';
+            });
+            addDeviceRow(
+              'Серийный номер',
+              document.getElementById('editSerialNumber').value
+            );
+            addDeviceRow(
+              'Изделие',
+              document.getElementById('editProduct').value
+            );
+            addDeviceRow(
+              'Тип техники',
+              document.getElementById('editTechType').value
+            );
+
+            if (s === 'repair' || s === 'repair_done' || s === 'replace') {
+              addDeviceRow(
+                'Куда отнесли',
+                document.getElementById('editBrokenLocation').value
+              );
+              addReplaceRow(
+                'Серийный номер',
+                document.getElementById('editReplaceSerial').value
+              );
+              addReplaceRow(
+                'Изделие',
+                document.getElementById('editReplaceProduct').value
+              );
+              addReplaceRow(
+                'Тип техники',
+                document.getElementById('editReplaceType').value
+              );
+              if (s === 'replace' || s === 'repair_done') {
+                addReplaceRow(
+                  'Расположение',
+                  document.getElementById('editReplaceLocation').value
+                );
+              }
+            }
+          }
+
           if (s === 'repair') {
             document.getElementById('editDefectActGroup').style.display =
               'flex';
-            document.getElementById('editBrokenLocationGroup').style.display =
-              'flex';
-            document.getElementById('editReplaceTitleGroup').style.display =
-              'block';
-            document.getElementById('editReplaceSerialGroup').style.display =
-              'flex';
-            document.getElementById('editReplaceProductGroup').style.display =
-              'flex';
-            document.getElementById('editReplaceTypeGroup').style.display =
-              'flex';
-            document.getElementById('editReplaceLocationGroup').style.display =
-              'flex';
-            brokenEl.setAttribute('readonly', 'readonly');
-            repSerEl.setAttribute('readonly', 'readonly');
-            repProdEl.setAttribute('readonly', 'readonly');
-            repTypeEl.setAttribute('readonly', 'readonly');
-            repLocEl.setAttribute('readonly', 'readonly');
-            defActEl.setAttribute('readonly', 'readonly');
           }
 
           if (s === 'repair_done') {
             document.getElementById('editDefectActGroup').style.display =
               'flex';
-            document.getElementById('editBrokenLocationGroup').style.display =
-              'flex';
-            document.getElementById('editReplaceTitleGroup').style.display =
-              'block';
-            document.getElementById('editReplaceSerialGroup').style.display =
-              'flex';
-            document.getElementById('editReplaceProductGroup').style.display =
-              'flex';
-            document.getElementById('editReplaceTypeGroup').style.display =
-              'flex';
-            document.getElementById('editReplaceLocationGroup').style.display =
-              'flex';
             document.getElementById('editReplaceSPGroup').style.display =
               'flex';
             document.getElementById('editReplaceLSIGroup').style.display =
               'flex';
+            document.getElementById('editReplaceLocationGroup').style.display =
+              'flex';
             document.getElementById('editFullRecoveryDateGroup').style.display =
               'flex';
-            brokenEl.setAttribute('readonly', 'readonly');
-            repSerEl.setAttribute('readonly', 'readonly');
-            repProdEl.setAttribute('readonly', 'readonly');
-            repTypeEl.setAttribute('readonly', 'readonly');
-            repLocEl.removeAttribute('readonly');
             defActEl.setAttribute('readonly', 'readonly');
+            repLocEl.removeAttribute('readonly');
             document
               .getElementById('editReplaceSP')
               .removeAttribute('readonly');
@@ -4977,28 +5059,37 @@
           if (s === 'replace') {
             document.getElementById('editDefectActGroup').style.display =
               'flex';
-            document.getElementById('editBrokenLocationGroup').style.display =
-              'flex';
-            document.getElementById('editReplaceTitleGroup').style.display =
-              'block';
-            document.getElementById('editReplaceSerialGroup').style.display =
-              'flex';
-            document.getElementById('editReplaceProductGroup').style.display =
-              'flex';
-            document.getElementById('editReplaceTypeGroup').style.display =
-              'flex';
-            document.getElementById('editReplaceLocationGroup').style.display =
-              'flex';
-            brokenEl.setAttribute('readonly', 'readonly');
-            repSerEl.setAttribute('readonly', 'readonly');
-            repProdEl.setAttribute('readonly', 'readonly');
-            repTypeEl.setAttribute('readonly', 'readonly');
-            repLocEl.setAttribute('readonly', 'readonly');
-            defActEl.setAttribute('readonly', 'readonly');
           }
 
-          if (s === 'archive') {
-            // только базовые поля, остальные скрыты
+          let roHtml = '';
+          if (roDeviceRows.length) {
+            roHtml +=
+              '<h4>Информация о неисправном устройстве</h4><table>' +
+              roDeviceRows
+                .map(
+                  ([l, v]) =>
+                    `<tr><th>${l}</th><td>${escapeHtml(v || '-')}</td></tr>`
+                )
+                .join('') +
+              '</table>';
+          }
+          if (roReplaceRows.length) {
+            roHtml +=
+              '<h4 style="margin-top:1rem;">🔄 Выдано на подмену</h4><table>' +
+              roReplaceRows
+                .map(
+                  ([l, v]) =>
+                    `<tr><th>${l}</th><td>${escapeHtml(v || '-')}</td></tr>`
+                )
+                .join('') +
+              '</table>';
+          }
+          if (roHtml) {
+            roBlock.innerHTML = roHtml;
+            roBlock.classList.add('visible');
+          } else {
+            roBlock.innerHTML = '';
+            roBlock.classList.remove('visible');
           }
         }
 
@@ -5018,10 +5109,7 @@
               ? true
               : originalRec?.completed || false;
 
-          if (
-            (s === 'repair' || s === 'replace' || s === 'repair_done') &&
-            !defectAct
-          ) {
+          if ((s === 'replace' || s === 'repair_done') && !defectAct) {
             document.getElementById('editDefectAct').classList.add('error');
             alert('Заполните дефектовочную ведомость');
             return;
@@ -5084,7 +5172,6 @@
                 : originalRec?.completedAt || null,
           };
 
-          // Обновление расположения устройств
           if (s === 'repair' || s === 'replace') {
             const brokenLoc = originalRec?.brokenLocation || '';
             const repLoc = originalRec?.replaceLocation || '';
@@ -5115,7 +5202,6 @@
             }
           }
 
-          // Для repair_done — обновляем реквизиты СП/ЛСИ у устройства
           if (s === 'repair_done') {
             const newSP =
               document.getElementById('editReplaceSP')?.value.trim() || '';
@@ -5784,8 +5870,8 @@
                   st = '❌ Истекла';
                   tr.style.background = 'rgba(255,71,87,0.1)';
                 } else if (d.status === 'expiring') {
-                  tr.style.background = 'rgba(255,165,2,0.1)';
                   st = '⚠️ Истекает';
+                  tr.style.background = 'rgba(255,165,2,0.1)';
                 }
                 tr.innerHTML = `<td>${escapeHtml(d.device)}</td><td>${escapeHtml(d.serialNumber)}</td><td>${new Date(d.warranty).toLocaleDateString('ru-RU')}</td><td>${st}</td>`;
                 wtb.appendChild(tr);
@@ -5794,7 +5880,7 @@
         }
 
         const instructionsContent = {
-          user_guide: `<div class="instructions-content"><h1>📖 Руководство пользователя</h1><h2>🔐 Вход в систему</h2><p>Откройте браузер и перейдите по адресу <strong>http://localhost:3000</strong>.</p><p>Введите логин и пароль, затем нажмите «Войти». Учётные данные по умолчанию:</p><ul><li><strong>Администратор:</strong> admin / admin123</li><li><strong>Пользователь:</strong> user / user123</li></ul><h2>📝 Добавление записи</h2><p>Нажмите кнопку <strong>«Добавить запись»</strong>. Выберите статус: Информация, Перемещение или Неисправность.</p><h2>🔧 Решение по неисправности</h2><p>У заявки со статусом Неисправность есть кнопка <strong>«Решение ▼»</strong> с выбором: Ремонт, Замена, Архив.</p><p>У заявки со статусом Ремонт — кнопка «Решение ▼» с выбором: Выполнено, Замена, Архив.</p></div>`,
+          user_guide: `<div class="instructions-content"><h1>📖 Руководство пользователя</h1><h2>🔐 Вход в систему</h2><p>Откройте браузер и перейдите по адресу <strong>http://localhost:3000</strong>.</p><p>Введите логин и пароль. Учётные данные по умолчанию:</p><ul><li><strong>Администратор:</strong> admin / admin123</li><li><strong>Пользователь:</strong> user / user123</li></ul><h2>📝 Добавление записи</h2><p>Нажмите кнопку <strong>«Добавить запись»</strong>. Выберите статус: Информация, Перемещение или Неисправность.</p><h2>🔧 Решение по неисправности</h2><p>У заявки со статусом Неисправность есть кнопка <strong>«Решение ▼»</strong> с выбором: Ремонт, Замена, Архив.</p><p>У заявки со статусом Ремонт — кнопка «Решение ▼» с выбором: Выполнено, Замена, Архив.</p></div>`,
           admin_guide: `<div class="instructions-content"><h1>🔧 Руководство администратора</h1><h2>⚙️ Вся техника</h2><p>Добавление, редактирование, удаление устройств. Импорт/экспорт CSV, печать акта.</p><h2>📊 Статистика</h2><p>По изделиям, статусам, пользователям. Контроль гарантийных сроков.</p></div>`,
           dev_guide: `<div class="instructions-content"><h1>💻 Руководство разработчика</h1><p>Стек: ванильный JS (SPA) + Node.js. Данные в JSON-файлах.</p></div>`,
         };
