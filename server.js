@@ -80,11 +80,31 @@ if (!fs.existsSync(HISTORY_FILE))
 function addHistoryEntry(entry) {
   try {
     const history = JSON.parse(fs.readFileSync(HISTORY_FILE, 'utf-8'));
-    entry.id = 'hist_' + Date.now();
-    entry.timestamp = new Date().toISOString();
+    entry.id =
+      entry.id ||
+      'hist_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6);
+    entry.timestamp = entry.timestamp || new Date().toISOString();
     history.push(entry);
     fs.writeFileSync(HISTORY_FILE, JSON.stringify(history, null, 2));
   } catch (e) {}
+}
+
+function getHistoryForSerial(serialNumber) {
+  if (!serialNumber) return [];
+  try {
+    const history = JSON.parse(fs.readFileSync(HISTORY_FILE, 'utf-8'));
+    return history.filter(h => {
+      if (!h) return false;
+      return (
+        h.serialNumber === serialNumber ||
+        h.newSerialNumber === serialNumber ||
+        h.replaceSerial === serialNumber ||
+        h.newDeviceSerial === serialNumber
+      );
+    });
+  } catch (e) {
+    return [];
+  }
 }
 
 function createBackup() {
@@ -427,6 +447,36 @@ const server = http.createServer((req, res) => {
           d.createdAt = new Date().toISOString();
           records.push(d);
           writeJSON(RECORDS_FILE, records);
+          addHistoryEntry({
+            action: 'create_record',
+            recordId: d.id,
+            username: d.username,
+            requestNumber: d.requestNumber,
+            importance: d.importance,
+            serialNumber: d.serialNumber,
+            newSerialNumber: d.newSerialNumber,
+            replaceSerial: d.replaceSerial,
+            newDeviceSerial: d.newDeviceSerial,
+            newDeviceType: d.newDeviceType,
+            product: d.product,
+            techType: d.techType,
+            location: d.location,
+            newLocation: d.newLocation,
+            description: d.description,
+            malfunctionDate: d.malfunctionDate,
+            brokenLocation: d.brokenLocation,
+            recoveryDate: d.recoveryDate,
+            fullRecoveryDate: d.fullRecoveryDate,
+            replaceProduct: d.replaceProduct,
+            replaceType: d.replaceType,
+            replaceLocation: d.replaceLocation,
+            defectAct: d.defectAct,
+            newSPRequisites: d.newSPRequisites,
+            newLSIRequisites: d.newLSIRequisites,
+            status: d.status,
+            newStatus: d.status,
+            changes: d,
+          });
           res.writeHead(200);
           res.end(JSON.stringify({ success: true, record: d }));
         } catch (e) {
@@ -445,8 +495,49 @@ const server = http.createServer((req, res) => {
           const d = JSON.parse(body);
           const idx = records.findIndex(r => r.id === d.id);
           if (idx >= 0) {
+            const oldRecord = { ...records[idx] };
             records[idx] = { ...records[idx], ...d };
             writeJSON(RECORDS_FILE, records);
+            const oldStatus = oldRecord.status || '';
+            const newStatus = records[idx].status || '';
+            const statusChanged = oldStatus !== newStatus;
+            const completedChanged =
+              Boolean(oldRecord.completed) !== Boolean(records[idx].completed);
+            addHistoryEntry({
+              action: 'update_record',
+              recordId: records[idx].id,
+              username: records[idx].username,
+              requestNumber: records[idx].requestNumber,
+              importance: records[idx].importance,
+              serialNumber: records[idx].serialNumber,
+              newSerialNumber: records[idx].newSerialNumber,
+              replaceSerial: records[idx].replaceSerial,
+              newDeviceSerial: records[idx].newDeviceSerial,
+              newDeviceType: records[idx].newDeviceType,
+              product: records[idx].product,
+              techType: records[idx].techType,
+              location: records[idx].location,
+              newLocation: records[idx].newLocation,
+              description: records[idx].description,
+              malfunctionDate: records[idx].malfunctionDate,
+              brokenLocation: records[idx].brokenLocation,
+              recoveryDate: records[idx].recoveryDate,
+              fullRecoveryDate: records[idx].fullRecoveryDate,
+              replaceProduct: records[idx].replaceProduct,
+              replaceType: records[idx].replaceType,
+              replaceLocation: records[idx].replaceLocation,
+              defectAct: records[idx].defectAct,
+              newSPRequisites: records[idx].newSPRequisites,
+              newLSIRequisites: records[idx].newLSIRequisites,
+              oldStatus: oldStatus,
+              newStatus: newStatus,
+              status: newStatus,
+              oldCompleted: Boolean(oldRecord.completed),
+              newCompleted: Boolean(records[idx].completed),
+              statusChanged: statusChanged,
+              completedChanged: completedChanged,
+              changes: d,
+            });
             res.writeHead(200);
             res.end(JSON.stringify({ success: true, record: records[idx] }));
           } else {
@@ -467,8 +558,35 @@ const server = http.createServer((req, res) => {
         try {
           const { id } = JSON.parse(body);
           let records = readJSON(RECORDS_FILE);
+          const deletedRecord = records.find(r => r.id === id);
           records = records.filter(r => r.id !== id);
           writeJSON(RECORDS_FILE, records);
+
+          // Удаляем из истории все события, относящиеся к этой записи
+          if (deletedRecord) {
+            try {
+              let history = readJSON(HISTORY_FILE);
+              history = history.filter(h => {
+                if (!h) return false;
+                // Основная связь — по recordId
+                if (h.recordId && h.recordId === id) return false;
+                // Fallback для старых записей без recordId:
+                // совпадение по serialNumber + requestNumber
+                if (
+                  !h.recordId &&
+                  deletedRecord.serialNumber &&
+                  deletedRecord.requestNumber &&
+                  h.serialNumber === deletedRecord.serialNumber &&
+                  h.requestNumber === deletedRecord.requestNumber
+                ) {
+                  return false;
+                }
+                return true;
+              });
+              writeJSON(HISTORY_FILE, history);
+            } catch (e) {}
+          }
+
           res.writeHead(200);
           res.end(JSON.stringify({ success: true }));
         } catch (e) {
@@ -525,14 +643,30 @@ const server = http.createServer((req, res) => {
           const idx = devices.findIndex(
             dev => dev.serialNumber === d.serialNumber
           );
+
+          // Проверяем: это «техническое» обновление только расположения
+          // (приходит из процесса заявки — move/malfunction) или полноценное
+          // редактирование устройства из интерфейса?
+          const keys = Object.keys(d);
+          const isLocationOnly =
+            keys.length === 2 &&
+            keys.includes('serialNumber') &&
+            keys.includes('location');
+
           if (idx >= 0) {
             devices[idx] = { ...devices[idx], ...d };
             writeJSON(DEVICES_FILE, devices);
-            addHistoryEntry({
-              action: 'update_device',
-              serialNumber: d.serialNumber,
-              changes: d,
-            });
+
+            // В историю пишем только полноценные изменения устройства,
+            // не технические PUT-ы на расположение
+            if (!isLocationOnly) {
+              addHistoryEntry({
+                action: 'update_device',
+                serialNumber: d.serialNumber,
+                changes: d,
+              });
+            }
+
             res.writeHead(200);
             res.end(JSON.stringify({ success: true, device: devices[idx] }));
           } else {
@@ -606,6 +740,12 @@ const server = http.createServer((req, res) => {
   // === HISTORY ===
   if (pathname === '/penny/history') {
     if (req.method === 'GET') {
+      if (query.serialNumber) {
+        const result = getHistoryForSerial(query.serialNumber);
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify(result));
+        return;
+      }
       res.writeHead(200, { 'Content-Type': 'application/json' });
       res.end(fs.readFileSync(HISTORY_FILE, 'utf-8'));
       return;
