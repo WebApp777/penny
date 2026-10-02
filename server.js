@@ -85,7 +85,7 @@ function addHistoryEntry(entry) {
       'hist_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6);
     entry.timestamp = entry.timestamp || new Date().toISOString();
     history.push(entry);
-    fs.writeFileSync(HISTORY_FILE, JSON.stringify(history, null, 2));
+    writeJSON(HISTORY_FILE, history);
   } catch (e) {}
 }
 
@@ -166,8 +166,20 @@ function readJSON(filePath) {
   }
 }
 
+// Атомарная запись: данные пишутся во временный файл рядом с основным,
+// сбрасываются на диск и только потом переименовываются в основной файл.
+// Если сервер упадёт посреди записи, останется целая предыдущая версия.
 function writeJSON(filePath, data) {
-  fs.writeFileSync(filePath, JSON.stringify(data, null, 2));
+  const tmpPath = filePath + '.tmp';
+  const content = JSON.stringify(data, null, 2);
+  const fd = fs.openSync(tmpPath, 'w');
+  try {
+    fs.writeFileSync(fd, content);
+    fs.fsyncSync(fd);
+  } finally {
+    fs.closeSync(fd);
+  }
+  fs.renameSync(tmpPath, filePath);
 }
 
 function paginateAndFilter(data, query) {
@@ -232,15 +244,20 @@ function searchDevices(query) {
   const devices = readJSON(DEVICES_FILE);
   const q = (query || '').toLowerCase();
   if (!q) return devices.slice(0, 20);
-  const results = [];
+  // Точные совпадения серийного номера — всегда первыми
+  // (сначала устройства с изделием), чтобы не потерялись из-за лимита
+  const results = devices
+    .filter(d => d.serialNumber && d.serialNumber.toLowerCase() === q)
+    .sort((a, b) => (b.product ? 1 : 0) - (a.product ? 1 : 0));
   for (const d of devices) {
+    if (results.length >= 20) break;
+    if (results.includes(d)) continue;
     if (
       d.serialNumber?.toLowerCase().includes(q) ||
       d.device?.toLowerCase().includes(q) ||
       d.product?.toLowerCase().includes(q)
     ) {
       results.push(d);
-      if (results.length >= 20) break;
     }
   }
   return results;
@@ -475,6 +492,8 @@ const server = http.createServer((req, res) => {
             newLSIRequisites: d.newLSIRequisites,
             status: d.status,
             newStatus: d.status,
+            oldCompleted: false,
+            newCompleted: Boolean(d.completed),
             changes: d,
           });
           res.writeHead(200);
@@ -601,7 +620,11 @@ const server = http.createServer((req, res) => {
   // === DEVICES (с пагинацией) ===
   if (pathname === '/penny/devices') {
     if (req.method === 'GET') {
-      const devices = readJSON(DEVICES_FILE);
+      // Устройства без изделия (созданные из заявок «Перемещение»)
+      // в таблицу «Вся техника» не попадают
+      const devices = readJSON(DEVICES_FILE).filter(
+        d => d.product && String(d.product).trim()
+      );
       const result = paginateAndFilter(devices, query);
       res.writeHead(200, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify(result));

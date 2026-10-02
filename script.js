@@ -136,7 +136,8 @@
       const ftt = document.getElementById('filterTechType')?.value?.trim();
       const fl = document.getElementById('filterLocation')?.value?.trim();
 
-      // Виртуальные статусы: repair_done → repair + completed, replace_done → replace + completed
+      // Виртуальные статусы: repair_done → repair + completed,
+      // replace_done → replace + completed
       const isVirtualDone = fs === 'repair_done' || fs === 'replace_done';
       const serverStatus =
         fs === 'repair_done'
@@ -239,27 +240,30 @@
 
   async function findDeviceBySerial(serialNumber) {
     if (!serialNumber) return null;
-    // Сначала пробуем найти в уже загруженных
-    let dev = devices.find(d => d.serialNumber === serialNumber);
-    if (dev) return dev;
-    // Если нет — идём на сервер
+    // Из нескольких устройств с одним серийником берём то, у которого есть изделие
+    const pickBest = list => list.find(d => d.product) || list[0] || null;
+    // Сначала ищем в уже загруженных
+    let dev = pickBest(devices.filter(d => d.serialNumber === serialNumber));
+    if (dev && dev.product) return dev;
+    // Если нет (или в загруженных нет изделия) — идём на сервер
     try {
       const r = await fetch(
         API.devices + '/search?q=' + encodeURIComponent(serialNumber)
       );
       if (r.ok) {
         const results = await r.json();
-        dev = results.find(d => d.serialNumber === serialNumber);
-        if (dev) {
-          // Кэшируем, чтобы следующий раз не ходить на сервер
+        const found = pickBest(
+          results.filter(d => d.serialNumber === serialNumber)
+        );
+        if (found) {
           if (!devices.find(d => d.serialNumber === serialNumber)) {
-            devices.push(dev);
+            devices.push(found);
           }
-          return dev;
+          return found;
         }
       }
     } catch (e) {}
-    return null;
+    return dev;
   }
 
   function setupSuggestions(inpId, sugId, cb) {
@@ -1396,51 +1400,168 @@
     }
   }
 
+  // Актуальное устройство с сервера (не из кэша браузера)
+  async function getDeviceFresh(serial) {
+    const r = await fetch(
+      API.devices + '/search?q=' + encodeURIComponent(serial)
+    );
+    if (!r.ok) throw new Error('Ошибка поиска устройства');
+    const list = (await r.json()).filter(d => d.serialNumber === serial);
+    return list.find(d => d.product) || list[0] || null;
+  }
+
+  // Изменения устройств и сохранение заявки — одна операция.
+  // changes: { serialNumber, fields } — изменить поля устройства
+  //          { create } — создать устройство
+  // Сначала применяются изменения устройств, потом сохраняется заявка.
+  // Если что-то не удалось, уже сделанные изменения устройств откатываются,
+  // и пользователь видит сообщение — расхождений между заявкой и устройством нет.
+  async function saveWithDeviceChanges(changes, saveRecord) {
+    const undo = [];
+    const rollback = async () => {
+      let failed = false;
+      for (const fn of undo.reverse()) {
+        try {
+          await fn();
+        } catch (e) {
+          failed = true;
+        }
+      }
+      return !failed;
+    };
+    const jsonHeaders = { 'Content-Type': 'application/json' };
+    try {
+      for (const ch of changes) {
+        if (ch.create) {
+          const r = await fetch(API.devices, {
+            method: 'POST',
+            headers: jsonHeaders,
+            body: JSON.stringify(ch.create),
+          });
+          const j = await r.json().catch(() => ({}));
+          if (!r.ok) throw new Error('Не удалось создать устройство');
+          const newId = j.device && j.device.id;
+          if (newId) undo.push(() => apiDelete(API.devices, { id: newId }));
+        } else {
+          const cur = await getDeviceFresh(ch.serialNumber);
+          if (!cur) continue; // устройства нет — менять нечего
+          const prev = { serialNumber: ch.serialNumber };
+          Object.keys(ch.fields).forEach(k => (prev[k] = cur[k] || ''));
+          const r = await fetch(API.devices, {
+            method: 'PUT',
+            headers: jsonHeaders,
+            body: JSON.stringify({
+              serialNumber: ch.serialNumber,
+              ...ch.fields,
+            }),
+          });
+          if (!r.ok) throw new Error('Не удалось обновить устройство');
+          undo.push(async () => {
+            const rr = await fetch(API.devices, {
+              method: 'PUT',
+              headers: jsonHeaders,
+              body: JSON.stringify(prev),
+            });
+            if (!rr.ok) throw new Error('rollback');
+          });
+        }
+      }
+    } catch (e) {
+      const ok = await rollback();
+      alert(
+        'Не удалось обновить данные устройства. Заявка не сохранена.' +
+          (ok ? '' : ' Проверьте данные устройства в «Вся техника».')
+      );
+      return false;
+    }
+    let saved = false;
+    try {
+      saved = await saveRecord();
+    } catch (e) {
+      saved = false;
+    }
+    if (!saved) {
+      const ok = await rollback();
+      if (!ok)
+        alert(
+          'Заявка не сохранена, но данные устройства могли измениться. Проверьте «Вся техника».'
+        );
+      return false;
+    }
+    return true;
+  }
+
+  // Все заявки по серийному номеру — с сервера, а не из списка в браузере
+  // (там только загруженная страница и с учётом выбранных фильтров)
+  async function fetchAllRecordsBySerial(serial) {
+    const all = [];
+    for (let page = 1; ; page++) {
+      const r = await apiGet(
+        `${API.records}?serialNumber=${encodeURIComponent(serial)}&limit=500&page=${page}&sort=createdAt&order=asc`
+      );
+      all.push(...r.data);
+      if (page >= r.totalPages) break;
+    }
+    return all.filter(x => x.serialNumber === serial);
+  }
+
+  // Расположение, которое устройству задаёт заявка:
+  // Перемещение — новое расположение, Неисправность и её продолжения — brokenLocation
+  function recordSetsLocation(r) {
+    if (r.status === 'move') return r.newLocation || '';
+    return r.brokenLocation || '';
+  }
+
   async function deleteRecord(id) {
     if (!confirm('Удалить?')) return;
     const rec = records.find(r => r.id === id);
-    if (rec && rec.status === 'move' && rec.serialNumber) {
-      const prevRecords = records
-        .filter(
-          r =>
-            r.serialNumber === rec.serialNumber && r.createdAt < rec.createdAt
-        )
-        .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-      const lastMove = prevRecords.find(
-        r => r.status === 'move' && r.newLocation
-      );
-      const lastMalf = prevRecords.find(
-        r => r.status === 'malfunction' && r.brokenLocation
-      );
-      let prevLocation = '';
-      if (lastMove && lastMalf)
-        prevLocation =
-          new Date(lastMove.createdAt) > new Date(lastMalf.createdAt)
-            ? lastMove.newLocation
-            : lastMalf.brokenLocation;
-      else if (lastMove) prevLocation = lastMove.newLocation;
-      else if (lastMalf) prevLocation = lastMalf.brokenLocation;
-      else {
-        const firstRecord = records
-          .filter(r => r.serialNumber === rec.serialNumber)
-          .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt))[0];
-        prevLocation = firstRecord ? firstRecord.location : '';
+    const deletedLocation = rec ? recordSetsLocation(rec) : '';
+
+    // Расположение пересчитываем по полному списку заявок устройства
+    // (до удаления, пока сервер доступен для чтения)
+    let restoreTo = null;
+    if (rec && rec.serialNumber && deletedLocation) {
+      try {
+        const others = (await fetchAllRecordsBySerial(rec.serialNumber)).filter(
+          r => r.id !== id
+        );
+        const at = r => new Date(r.createdAt).getTime();
+        const events = others
+          .filter(r => recordSetsLocation(r))
+          .sort((a, b) => at(a) - at(b));
+        // Если есть более поздняя заявка, задающая расположение, — устройство
+        // уже находится там, откатывать нечего
+        const hasLater = events.some(r => at(r) > at(rec));
+        if (!hasLater) {
+          const before = events.filter(r => at(r) < at(rec));
+          if (before.length) {
+            restoreTo = recordSetsLocation(before[before.length - 1]);
+          } else if (others.length) {
+            // Заявок с расположением раньше нет — берём расположение
+            // из самой ранней заявки устройства
+            const first = [...others].sort((a, b) => at(a) - at(b))[0];
+            restoreTo = first.location || null;
+          }
+        }
+      } catch (e) {
+        showToast('Расположение устройства не пересчитано', 'error');
       }
-      if (prevLocation) {
+    }
+
+    try {
+      await apiDelete(API.records, { id });
+      if (restoreTo) {
         try {
           await fetch(API.devices, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               serialNumber: rec.serialNumber,
-              location: prevLocation,
+              location: restoreTo,
             }),
           });
         } catch (e) {}
       }
-    }
-    try {
-      await apiDelete(API.records, { id });
       await loadRecordsPage(1, true);
       await loadDevicesPage(1, true);
       await loadStatistics();
@@ -1540,32 +1661,82 @@
           return;
         }
 
-        // Проверяем серийник — ищем устройство на сервере, а не только в локальном массиве
-        let dev = null;
-        if (sn && pr) {
-          dev = await findDeviceBySerial(sn);
-          if (!dev) {
-            alert(`Серийный номер "${sn}" не найден в базе.`);
-            document.getElementById('recordSerial').classList.add('error');
-            return;
-          }
-          if (dev.product !== pr) {
+        // Для Перемещения с новым серийником изделие не участвует.
+        // Определяем, найден ли серийник в базе заранее.
+        let existingDevice = null;
+        if (sn) {
+          existingDevice = await findDeviceBySerial(sn);
+        }
+        const isNewSerialForMove = st === 'move' && sn && !existingDevice;
+        const isNewSerialForInfo = st === 'info' && sn && !existingDevice;
+
+        // Проверка серийника/изделия:
+        // - Серийник есть в базе → изделие обязано совпадать (для всех статусов).
+        // - Серийника нет в базе (устройство не наше):
+        //   * Неисправность → ошибка «не найден в базе».
+        //   * Перемещение / Информация → допускается только БЕЗ изделия.
+        if (sn && existingDevice) {
+          if (pr && existingDevice.product && existingDevice.product !== pr) {
             alert(
-              `Серийный номер "${sn}" принадлежит изделию "${dev.product}", а не "${pr}".`
+              `Серийный номер "${sn}" принадлежит изделию "${existingDevice.product}", а не "${pr}".`
             );
             document.getElementById('recordSerial').classList.add('error');
             document.getElementById('recordProduct').classList.add('error');
             return;
           }
+        } else if (sn && !existingDevice) {
+          if (st === 'malfunction') {
+            alert(`Серийный номер "${sn}" не найден в базе.`);
+            document.getElementById('recordSerial').classList.add('error');
+            return;
+          }
+          // Для move/info с новым серийником изделие не допускается
+          // (проверка ниже).
         }
 
+        // Устройство считается «в базе», только если оно есть в «Вся техника»
+        // (у него указано изделие). Устройства не из базы («левые») можно
+        // вести в заявках только без изделия.
+        const existingInBase = Boolean(
+          existingDevice &&
+          existingDevice.product &&
+          String(existingDevice.product).trim()
+        );
+        if (sn && !existingInBase && pr && (st === 'info' || st === 'move')) {
+          alert(
+            `Серийного номера "${sn}" нет в базе (Вся техника). Для устройств не из базы изделие не выбирается.`
+          );
+          document.getElementById('recordSerial').classList.add('error');
+          document.getElementById('recordProduct').classList.add('error');
+          return;
+        }
+        if (st === 'malfunction' && sn && existingDevice && !existingInBase) {
+          alert(`Серийный номер "${sn}" не найден в базе.`);
+          document.getElementById('recordSerial').classList.add('error');
+          return;
+        }
+
+        // Серийник, который есть в базе «Вся техника» (у устройства указано
+        // изделие), нельзя использовать в заявке Информация/Перемещение
+        // без выбора изделия.
+        if ((st === 'info' || st === 'move') && sn && existingInBase && !pr) {
+          alert(
+            `Серийный номер "${sn}" есть в базе (изделие "${existingDevice.product}"). Выберите изделие.`
+          );
+          document.getElementById('recordSerial').classList.add('error');
+          document.getElementById('recordProduct').classList.add('error');
+          return;
+        }
+
+        const deviceChanges = [];
         let hasError = false;
         if (st === 'move') {
           if (!sn) {
             document.getElementById('recordSerial').classList.add('error');
             hasError = true;
           }
-          if (!pr) {
+          // pr обязателен ТОЛЬКО если серийник есть в базе «Вся техника»
+          if (existingInBase && !pr) {
             document.getElementById('recordProduct').classList.add('error');
             hasError = true;
           }
@@ -1581,18 +1752,30 @@
             alert('Заполните обязательные поля (выделены красным)');
             return;
           }
-          const moveDev = await findDeviceBySerial(sn);
-          if (!moveDev) {
-            alert(`Серийный номер "${sn}" не найден в базе!`);
-            return;
-          }
-          try {
-            await fetch(API.devices, {
-              method: 'PUT',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ serialNumber: sn, location: nl }),
+
+          if (existingDevice) {
+            // Устройство есть — обновляем расположение
+            deviceChanges.push({
+              serialNumber: sn,
+              fields: { location: nl },
             });
-          } catch (e) {}
+          } else {
+            // Серийник новый — создаём устройство с пустым product
+            deviceChanges.push({
+              create: {
+                product: '',
+                device: tt,
+                serialNumber: sn,
+                supplyBasis: '',
+                spRequisites: '',
+                lsiRequisites: '',
+                location: nl,
+                specs: '',
+                notes: '',
+                warranty: '',
+              },
+            });
+          }
         }
         if (st === 'malfunction') {
           if (!mDate) {
@@ -1625,39 +1808,22 @@
             alert('Заполните обязательные поля (выделены красным)');
             return;
           }
-          const malfDev = await findDeviceBySerial(sn);
-          if (!malfDev) {
-            alert(`Серийный номер "${sn}" не найден в базе!`);
-            return;
-          }
+
+          // Серийник гарантированно в базе (проверено выше).
           if (brokenLoc) {
-            try {
-              await fetch(API.devices, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                  serialNumber: sn,
-                  location: brokenLoc,
-                }),
-              });
-            } catch (e) {}
+            deviceChanges.push({
+              serialNumber: sn,
+              fields: { location: brokenLoc },
+            });
           }
           if (repSN && repLoc) {
             const repDev = await findDeviceBySerial(repSN);
-            if (!repDev) {
-              alert(`Серийный номер подменного "${repSN}" не найден в базе!`);
-              return;
-            }
-            try {
-              await fetch(API.devices, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                  serialNumber: repSN,
-                  location: repLoc,
-                }),
+            if (repDev) {
+              deviceChanges.push({
+                serialNumber: repSN,
+                fields: { location: repLoc },
               });
-            } catch (e) {}
+            }
           }
         }
         const data = {
@@ -1684,7 +1850,7 @@
           replaceLocation: repLoc,
           completed: st === 'info' || st === 'move',
         };
-        if (await addRecord(data)) {
+        if (await saveWithDeviceChanges(deviceChanges, () => addRecord(data))) {
           showToast('Запись успешно добавлена');
           document.getElementById('recordSerial').value = '';
           document.getElementById('recordProduct').value = '';
@@ -1887,6 +2053,10 @@
       ];
     } else if (rec.status === 'archive') {
       options = [{ value: 'archive', label: 'Архив' }];
+    } else if (rec.status === 'info') {
+      options = [{ value: 'info', label: 'Информация' }];
+    } else if (rec.status === 'move') {
+      options = [{ value: 'move', label: 'Перемещение' }];
     } else {
       options = [
         { value: 'malfunction', label: 'Неисправность' },
@@ -2146,6 +2316,84 @@
     const defectAct = document.getElementById('editDefectAct').value.trim();
     const originalRec = records.find(r => r.id === editingRecordId);
 
+    // Информация и Перемещение можно редактировать только в тот же статус
+    if (
+      originalRec &&
+      (originalRec.status === 'info' || originalRec.status === 'move') &&
+      s !== originalRec.status
+    ) {
+      alert(
+        `Статус «${STATUS_LABELS[originalRec.status]}» можно изменить только на «${STATUS_LABELS[originalRec.status]}».`
+      );
+      return;
+    }
+
+    // Те же проверки, что и при добавлении заявки
+    if (s === 'info' || s === 'move') {
+      document
+        .getElementById('editRecordForm')
+        ?.querySelectorAll('.error')
+        .forEach(el => el.classList.remove('error'));
+      const markError = id =>
+        document.getElementById(id)?.classList.add('error');
+      const pr = document.getElementById('editProduct').value.trim();
+      const tt = document.getElementById('editTechType').value.trim();
+      const nl =
+        s === 'move'
+          ? document.getElementById('editNewLocation').value.trim()
+          : '';
+      const existingDevice = sn ? await findDeviceBySerial(sn) : null;
+      const existingInBase = Boolean(
+        existingDevice &&
+        existingDevice.product &&
+        String(existingDevice.product).trim()
+      );
+
+      if (sn && existingInBase && pr && existingDevice.product !== pr) {
+        alert(
+          `Серийный номер "${sn}" принадлежит изделию "${existingDevice.product}", а не "${pr}".`
+        );
+        markError('editSerialNumber');
+        markError('editProduct');
+        return;
+      }
+      if (sn && !existingInBase && pr) {
+        alert(
+          `Серийного номера "${sn}" нет в базе (Вся техника). Для устройств не из базы изделие не указывается.`
+        );
+        markError('editSerialNumber');
+        markError('editProduct');
+        return;
+      }
+      if (sn && existingInBase && !pr) {
+        alert(
+          `Серийный номер "${sn}" есть в базе (изделие "${existingDevice.product}"). Укажите изделие.`
+        );
+        markError('editSerialNumber');
+        markError('editProduct');
+        return;
+      }
+      if (s === 'move') {
+        let hasError = false;
+        if (!sn) {
+          markError('editSerialNumber');
+          hasError = true;
+        }
+        if (!tt) {
+          markError('editTechType');
+          hasError = true;
+        }
+        if (!nl) {
+          markError('editNewLocation');
+          hasError = true;
+        }
+        if (hasError) {
+          alert('Заполните обязательные поля (выделены красным)');
+          return;
+        }
+      }
+    }
+
     const finalStatus =
       s === 'repair_done' ? 'repair' : s === 'replace_done' ? 'replace' : s;
     const isCompleted =
@@ -2263,33 +2511,23 @@
       newDeviceType: newDeviceType || originalRec?.newDeviceType || '',
     };
 
+    const deviceChanges = [];
+
     if (s === 'repair' || s === 'replace') {
       const brokenLoc = originalRec?.brokenLocation || '';
       const repLoc = originalRec?.replaceLocation || '';
       const repSN = originalRec?.replaceSerial || '';
       if (brokenLoc && sn) {
-        try {
-          await fetch(API.devices, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              serialNumber: sn,
-              location: brokenLoc,
-            }),
-          });
-        } catch (e) {}
+        deviceChanges.push({
+          serialNumber: sn,
+          fields: { location: brokenLoc },
+        });
       }
       if (repSN && repLoc) {
-        try {
-          await fetch(API.devices, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              serialNumber: repSN,
-              location: repLoc,
-            }),
-          });
-        } catch (e) {}
+        deviceChanges.push({
+          serialNumber: repSN,
+          fields: { location: repLoc },
+        });
       }
     }
 
@@ -2302,28 +2540,16 @@
         document.getElementById('editReplaceLocation')?.value.trim() || '';
       const repSN = originalRec?.replaceSerial || '';
       if (sn && (newSP || newLSI)) {
-        try {
-          const ud = { serialNumber: sn };
-          if (newSP) ud.spRequisites = newSP;
-          if (newLSI) ud.lsiRequisites = newLSI;
-          await fetch(API.devices, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(ud),
-          });
-        } catch (e) {}
+        const fields = {};
+        if (newSP) fields.spRequisites = newSP;
+        if (newLSI) fields.lsiRequisites = newLSI;
+        deviceChanges.push({ serialNumber: sn, fields });
       }
       if (repSN && newRepLoc) {
-        try {
-          await fetch(API.devices, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              serialNumber: repSN,
-              location: newRepLoc,
-            }),
-          });
-        } catch (e) {}
+        deviceChanges.push({
+          serialNumber: repSN,
+          fields: { location: newRepLoc },
+        });
       }
     }
 
@@ -2331,46 +2557,41 @@
       const repSN = originalRec?.replaceSerial || '';
       const newRepLoc =
         document.getElementById('editReplaceLocation')?.value.trim() || '';
-      try {
-        const ud = { serialNumber: newDeviceSerial };
-        if (newDeviceSP) ud.spRequisites = newDeviceSP;
-        if (newDeviceLSI) ud.lsiRequisites = newDeviceLSI;
-        if (newDeviceType) ud.device = newDeviceType;
-        await fetch(API.devices, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(ud),
-        });
-      } catch (e) {}
+      const fields = {};
+      if (newDeviceSP) fields.spRequisites = newDeviceSP;
+      if (newDeviceLSI) fields.lsiRequisites = newDeviceLSI;
+      if (newDeviceType) fields.device = newDeviceType;
+      if (Object.keys(fields).length) {
+        deviceChanges.push({ serialNumber: newDeviceSerial, fields });
+      }
       if (repSN && newRepLoc) {
-        try {
-          await fetch(API.devices, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              serialNumber: repSN,
-              location: newRepLoc,
-            }),
-          });
-        } catch (e) {}
+        deviceChanges.push({
+          serialNumber: repSN,
+          fields: { location: newRepLoc },
+        });
       }
     }
 
-    try {
-      await apiPut(API.records, data);
-      showToast('Изменения сохранены');
-      closeEditModal();
-      await loadRecordsPage(1, true);
-      if (
-        s === 'repair' ||
-        s === 'replace' ||
-        s === 'repair_done' ||
-        s === 'replace_done'
-      )
-        await loadDevicesPage(1, true);
-    } catch (ex) {
-      alert('Не удалось сохранить');
-    }
+    const saved = await saveWithDeviceChanges(deviceChanges, async () => {
+      try {
+        await apiPut(API.records, data);
+        return true;
+      } catch (ex) {
+        alert('Не удалось сохранить');
+        return false;
+      }
+    });
+    if (!saved) return;
+    showToast('Изменения сохранены');
+    closeEditModal();
+    await loadRecordsPage(1, true);
+    if (
+      s === 'repair' ||
+      s === 'replace' ||
+      s === 'repair_done' ||
+      s === 'replace_done'
+    )
+      await loadDevicesPage(1, true);
   }
 
   function getNextRequestNumber() {
@@ -2590,7 +2811,11 @@
         'Статус',
         STATUS_LABELS[h.newStatus] || STATUS_LABELS[h.status] || h.status
       );
-      addRow('Выполнено', h.newCompleted ? '✅ Да' : '⏳ Нет');
+      const isCompleted =
+        h.newCompleted !== undefined
+          ? h.newCompleted
+          : h.changes && h.changes.completed;
+      addRow('Выполнено', isCompleted ? '✅ Да' : '⏳ Нет');
       addRow('Серийный номер', h.serialNumber);
       addRow('Изделие', h.product);
       addRow('Тип техники', h.techType);
@@ -2726,7 +2951,6 @@
     }
     document.getElementById('deviceInfoModalOverlay').classList.add('active');
   }
-
   window.openDeviceInfoModal = openDeviceInfoModal;
 
   function toggleTimelineDetails(btn, recordId) {
@@ -2797,7 +3021,10 @@
     tb.innerHTML = '';
     const isAdmin = currentUserRole === 'admin';
     const colSpan = isAdmin ? 11 : 10;
-    if (!devices.length) {
+    const visibleDevices = devices.filter(
+      d => d.product && String(d.product).trim()
+    );
+    if (!visibleDevices.length) {
       tb.innerHTML = `<tr><td colspan="${colSpan}" class="no-records">Нет устройств</td></tr>`;
       return;
     }
@@ -2807,7 +3034,7 @@
         '<th>Изделие</th><th>Устройство</th><th>Серийный номер</th><th>Основание поставки</th><th>Реквизиты СП</th><th>Реквизиты ЛСИ</th><th>Расположение</th><th>Характеристики</th><th>Примечание</th><th>Дата добавления</th>' +
         (isAdmin ? '<th>Действия</th>' : '');
     }
-    devices.forEach(d => {
+    visibleDevices.forEach(d => {
       const tr = document.createElement('tr');
       tr.innerHTML = `<td>${escapeHtml(d.product)}</td><td>${escapeHtml(d.device)}</td><td><a href="javascript:void(0)" onclick="openDeviceInfoModal('${escapeHtml(d.serialNumber)}')" style="color:var(--accent);text-decoration:underline;cursor:pointer;">${escapeHtml(d.serialNumber)}</a></td><td>${escapeHtml(d.supplyBasis || '-')}</td><td>${escapeHtml(d.spRequisites || '-')}</td><td>${escapeHtml(d.lsiRequisites || '-')}</td><td>${escapeHtml(d.location || '-')}</td><td style="max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${escapeHtml(d.specs || '')}">${escapeHtml(d.specs || '-')}</td><td style="max-width:150px;overflow:hidden;text-overflow:ellipsis" title="${escapeHtml(d.notes || '')}">${escapeHtml(d.notes || '-')}</td><td>${new Date(d.createdAt).toLocaleDateString('ru-RU')}</td>${isAdmin ? `<td><div class="action-buttons"><button class="edit-btn" title="Редактировать">✏️</button><button class="delete-btn" title="Удалить">🗑️</button></div></td>` : ''}`;
       if (isAdmin) {
