@@ -2392,6 +2392,87 @@
           return;
         }
       }
+    } else if (s) {
+      // Неисправность, Ремонт, Замена, их «выполнено», Архив:
+      // серийный номер должен быть в базе «Вся техника»
+      // (как при добавлении Неисправности)
+      document
+        .getElementById('editRecordForm')
+        ?.querySelectorAll('.error')
+        .forEach(el => el.classList.remove('error'));
+      const markError = id =>
+        document.getElementById(id)?.classList.add('error');
+      if (!sn) {
+        markError('editSerialNumber');
+        alert('Укажите серийный номер');
+        return;
+      }
+      const pr = document.getElementById('editProduct').value.trim();
+      const dev = await findDeviceBySerial(sn);
+      const inBase = Boolean(dev && dev.product && String(dev.product).trim());
+      if (!inBase) {
+        alert(`Серийный номер "${sn}" не найден в базе.`);
+        markError('editSerialNumber');
+        return;
+      }
+      if (pr && dev.product !== pr) {
+        alert(
+          `Серийный номер "${sn}" принадлежит изделию "${dev.product}", а не "${pr}".`
+        );
+        markError('editSerialNumber');
+        markError('editProduct');
+        return;
+      }
+    }
+
+    // Неисправность и её продолжения (ремонт, замена, архив): серийный номер
+    // и изделие проверяются так же, как при добавлении неисправности.
+    // Проверка выполняется, если серийный номер или изделие были изменены.
+    if (s !== 'info' && s !== 'move') {
+      const pr = document.getElementById('editProduct').value.trim();
+      const changed =
+        !originalRec ||
+        sn !== (originalRec.serialNumber || '') ||
+        pr !== (originalRec.product || '');
+      if (changed) {
+        document
+          .getElementById('editRecordForm')
+          ?.querySelectorAll('.error')
+          .forEach(el => el.classList.remove('error'));
+        const markError = id =>
+          document.getElementById(id)?.classList.add('error');
+        if (!sn) {
+          markError('editSerialNumber');
+          alert('Укажите серийный номер');
+          return;
+        }
+        const existingDevice = await findDeviceBySerial(sn);
+        const existingInBase = Boolean(
+          existingDevice &&
+          existingDevice.product &&
+          String(existingDevice.product).trim()
+        );
+        if (!existingInBase) {
+          markError('editSerialNumber');
+          alert(`Серийный номер "${sn}" не найден в базе.`);
+          return;
+        }
+        if (!pr) {
+          markError('editProduct');
+          alert(
+            `Укажите изделие (серийный номер "${sn}" принадлежит изделию "${existingDevice.product}").`
+          );
+          return;
+        }
+        if (existingDevice.product !== pr) {
+          markError('editSerialNumber');
+          markError('editProduct');
+          alert(
+            `Серийный номер "${sn}" принадлежит изделию "${existingDevice.product}", а не "${pr}".`
+          );
+          return;
+        }
+      }
     }
 
     const finalStatus =
