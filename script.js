@@ -1054,7 +1054,7 @@
       flds = config.fields || [],
       flts = config.filters || [];
     const div = document.createElement('div');
-    div.className = 'page-content active';
+    div.className = 'page-content active' + (tc.length ? ' fill-page' : '');
     div.id = 'page_' + section.id;
     let fh = '';
     flds.forEach(f => {

@@ -444,9 +444,6 @@ body.panel-expanded {
   display: flex;
   flex-direction: column;
 }
-body.panel-expanded .main-content {
-  padding: 1rem 1.5rem;
-}
 
 .content-card {
   background: rgba(15, 15, 35, 0.85);
@@ -1319,6 +1316,21 @@ td:nth-child(9) {
   display: flex;
   flex-direction: column;
   flex: 1;
+}
+/* Страницы с таблицей: страница по высоте равна окну (минус отступы
+   .main-content), таблица занимает всё оставшееся место и скроллится сама */
+.page-content.fill-page.active {
+  height: calc(100vh - 2rem);
+  min-height: 0;
+  flex: none;
+}
+.fill-page > .content-card {
+  min-height: 0;
+}
+.fill-page .table-container {
+  flex: 1 1 0;
+  min-height: 140px;
+  max-height: none;
 }
 
 .nav-menu::-webkit-scrollbar,
