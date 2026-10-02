@@ -18,6 +18,10 @@
     replace: 'Замена',
     archive: 'Архив',
   };
+  // Встроенные SVG-иконки (спрайт лежит в index.html)
+  const ICON = name =>
+    `<svg class="icon" aria-hidden="true"><use href="#i-${name}"/></svg>`;
+
   const IMPORTANCE_LABELS = {
     1: '1 - Низкая',
     2: '2 - Средняя',
@@ -94,7 +98,8 @@
   function showToast(message, type = 'success') {
     const toast = document.createElement('div');
     toast.className = 'toast';
-    toast.innerHTML = type === 'success' ? '✅ ' + message : message;
+    toast.innerHTML =
+      type === 'success' ? ICON('check-circle') + ' ' + message : message;
     document.body.appendChild(toast);
     requestAnimationFrame(() => toast.classList.add('show'));
     setTimeout(() => {
@@ -174,6 +179,7 @@
       recordsTotal = isVirtualDone ? data.length : result.total;
       recordsAllLoaded = records.length >= recordsTotal;
       recordsLoading = false;
+      updateFilterSummary('records');
       if (reset) {
         renderRecordsTable();
         updateUserFilter();
@@ -212,6 +218,7 @@
       devicesTotal = result.total;
       devicesAllLoaded = devices.length >= devicesTotal;
       devicesLoading = false;
+      updateFilterSummary('devices');
       if (reset) {
         renderDevicesTable();
         updateProductSelect();
@@ -526,6 +533,7 @@
     initAddRecordModal();
     initAddDeviceModal();
     initDeviceInfoModal();
+    initFilterSummary();
     document.getElementById('recordRequest').value = getNextRequestNumber();
     document.getElementById('homePage').classList.add('active');
     if (dateTimeInterval) clearInterval(dateTimeInterval);
@@ -533,6 +541,7 @@
   }
 
   function logout() {
+    filtersRestored = { records: false, devices: false };
     currentUser = null;
     currentUserRole = null;
     updateUserUI();
@@ -1063,17 +1072,21 @@
       if (f.type === 'select')
         flh += `<select class="custom-filter" data-field="${f.columnId}"><option value="">${f.label}</option></select>`;
       else
-        flh += `<input type="text" class="custom-filter" data-field="${f.columnId}" placeholder="🔍 ${f.label}...">`;
+        flh += `<input type="text" class="custom-filter" data-field="${f.columnId}" placeholder="${f.label}...">`;
     });
     if (flts.length)
       flh +=
-        '<button class="reset-filters-btn custom-reset-filters">🔄 Сбросить</button>';
+        '<button class="reset-filters-btn custom-reset-filters">' +
+        ICON('refresh') +
+        ' Сбросить</button>';
     flh +=
-      '<button class="export-btn custom-export-btn">📥 Экспорт CSV</button>';
+      '<button class="export-btn custom-export-btn">' +
+      ICON('download') +
+      ' Экспорт CSV</button>';
     let th = '';
     tc.forEach(c => (th += `<th>${c.label}</th>`));
     th += '<th>Действ.</th>';
-    div.innerHTML = `<div class="content-card"><span class="badge">📋 ${escapeHtml(section.createdBy)}</span><h1>${escapeHtml(section.label)}</h1>${flds.length ? `<form class="record-form custom-record-form">${fh}<button type="submit" class="submit-btn">Добавить</button></form>` : ''}${tc.length ? `<h2>Таблица</h2>${flts.length ? `<div class="filter-bar custom-filter-bar">${flh}</div>` : ''}<div class="table-container"><table><thead><tr>${th}</tr></thead><tbody class="custom-table-body" id="tbody_${section.id}"><tr><td colspan="${tc.length + 1}" class="no-records">Нет записей</td></tr></tbody></table></div>` : ''}</div>`;
+    div.innerHTML = `<div class="content-card"><span class="badge">${ICON('clipboard')} ${escapeHtml(section.createdBy)}</span><h1>${escapeHtml(section.label)}</h1>${flds.length ? `<form class="record-form custom-record-form">${fh}<button type="submit" class="submit-btn">Добавить</button></form>` : ''}${tc.length ? `<h2>Таблица</h2>${flts.length ? `<div class="filter-bar custom-filter-bar">${flh}</div>` : ''}<div class="table-container"><table><thead><tr>${th}</tr></thead><tbody class="custom-table-body" id="tbody_${section.id}"><tr><td colspan="${tc.length + 1}" class="no-records">Нет записей</td></tr></tbody></table></div>` : ''}</div>`;
     document.querySelector('.main-content').appendChild(div);
     const form = div.querySelector('.custom-record-form');
     if (form)
@@ -1165,7 +1178,7 @@
         v = new Date(record.createdAt).toLocaleString('ru-RU');
       rh += `<td>${v}</td>`;
     });
-    rh += '<td><button class="delete-btn">🗑️</button></td>';
+    rh += '<td><button class="delete-btn">' + ICON('trash') + '</button></td>';
     tr.innerHTML = rh;
     tr.querySelector('.delete-btn')?.addEventListener('click', async () => {
       if (confirm('Удалить?')) {
@@ -1290,8 +1303,15 @@
         : r.completed && r.status === 'replace'
           ? 'Замена (выполнено)'
           : STATUS_LABELS[r.status] || r.status || '-';
+    const statusKey =
+      r.completed && (r.status === 'repair' || r.status === 'replace')
+        ? r.status + '_done'
+        : r.status || 'info';
+    const impKey = [1, 2, 3].includes(Number(r.importance))
+      ? Number(r.importance)
+      : 2;
     const completedDateSrc = r.fullRecoveryDate || r.completedAt || r.createdAt;
-    tr.innerHTML = `<td>${new Date(r.createdAt).toLocaleDateString('ru-RU')}<br>${new Date(r.createdAt).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}</td><td>${escapeHtml(r.username)}</td><td>${escapeHtml(r.requestNumber || '-')}</td><td>${IMPORTANCE_LABELS[r.importance] || '2-Средняя'}</td><td>${statusLabel}</td><td><a href="javascript:void(0)" onclick="openDeviceInfoModal('${escapeHtml(r.serialNumber)}')" style="color:var(--accent);text-decoration:underline;cursor:pointer;">${getSerialDisplay(r)}</a></td><td>${escapeHtml(r.product || '-')}</td><td>${getTypeDisplay(r)}</td><td>${getLocationDisplay(r)}</td><td title="${escapeHtml(r.description || '')}"><div style="max-width:150px;max-height:2.8em;overflow:hidden;text-align:center;margin:0 auto;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;">${escapeHtml(r.description || '-')}</div></td><td><div class="action-buttons">${hasSolution ? `<button class="solution-btn" title="Решение">Решение ▼</button>` : ''}${r.completed && r.status !== 'repair' && r.status !== 'replace' ? `<span class="completed-time">✅ ${new Date(completedDateSrc).toLocaleDateString('ru-RU')}<br>${new Date(completedDateSrc).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}</span>` : r.completed && (r.status === 'repair' || r.status === 'replace') ? `<span class="completed-time">✅ ${new Date(completedDateSrc).toLocaleDateString('ru-RU')}<br>${new Date(completedDateSrc).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}</span>` : showComplete ? `<button class="complete-btn" title="Выполнено">✅</button>` : ''}<button class="edit-btn" title="Редактировать">✏️</button><button class="delete-btn" title="Удалить">🗑️</button></div></td>`;
+    tr.innerHTML = `<td>${new Date(r.createdAt).toLocaleDateString('ru-RU')}<br>${new Date(r.createdAt).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}</td><td>${escapeHtml(r.username)}</td><td>${escapeHtml(r.requestNumber || '-')}</td><td><span class="imp-badge imp-${impKey}">${IMPORTANCE_LABELS[r.importance] || '2-Средняя'}</span></td><td><span class="status-badge status-${statusKey}">${statusLabel}</span></td><td><a href="javascript:void(0)" onclick="openDeviceInfoModal('${escapeHtml(r.serialNumber)}')" class="serial-link">${getSerialDisplay(r)}</a></td><td>${escapeHtml(r.product || '-')}</td><td>${getTypeDisplay(r)}</td><td>${getLocationDisplay(r)}</td><td title="${escapeHtml(r.description || '')}"><div class="cell-clamp">${escapeHtml(r.description || '-')}</div></td><td><div class="action-buttons">${hasSolution ? `<button class="solution-btn" title="Решение">Решение ▼</button>` : ''}${r.completed && r.status !== 'repair' && r.status !== 'replace' ? `<span class="completed-time">${ICON('check')} ${new Date(completedDateSrc).toLocaleDateString('ru-RU')}<br>${new Date(completedDateSrc).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}</span>` : r.completed && (r.status === 'repair' || r.status === 'replace') ? `<span class="completed-time">${ICON('check')} ${new Date(completedDateSrc).toLocaleDateString('ru-RU')}<br>${new Date(completedDateSrc).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}</span>` : showComplete ? `<button class="complete-btn" title="Выполнено">${ICON('check')}</button>` : ''}<button class="edit-btn" title="Редактировать">${ICON('pencil')}</button><button class="delete-btn" title="Удалить">${ICON('trash')}</button></div></td>`;
     if (showComplete)
       tr.querySelector('.complete-btn')?.addEventListener('click', () => {
         if (r.status === 'replace') {
@@ -1989,6 +2009,126 @@
     document.getElementById('addDeviceModalOverlay').classList.remove('active');
   }
 
+  // ===== Сводка фильтров: счётчик «Найдено», метки активных фильтров,
+  // запоминание выбранных фильтров в браузере (для каждого пользователя) =====
+  const FILTER_DEFS = {
+    records: [
+      { id: 'filterImportance', label: 'Важность' },
+      { id: 'filterProduct', label: 'Изделие' },
+      { id: 'filterStatus', label: 'Статус' },
+      { id: 'filterUser', label: 'Пользователь' },
+      { id: 'filterTechType', label: 'Тип техники' },
+      { id: 'filterLocation', label: 'Расположение' },
+      { id: 'filterSerial', label: 'Серийный номер' },
+    ],
+    // Только поля, которые реально отправляются на сервер
+    devices: [
+      { id: 'filterDevProduct', label: 'Изделие' },
+      { id: 'filterDevDevice', label: 'Устройство' },
+      { id: 'filterDevSerial', label: 'Серийный номер' },
+      { id: 'filterDevLocation', label: 'Расположение' },
+    ],
+  };
+  let filtersRestored = { records: false, devices: false };
+  const filterStorageKey = () => 'penny_filters_' + (currentUser || '');
+
+  function getActiveFilters(kind) {
+    return FILTER_DEFS[kind]
+      .map(def => {
+        const el = document.getElementById(def.id);
+        const value = el ? String(el.value || '').trim() : '';
+        if (!el || !value) return null;
+        const text =
+          el.tagName === 'SELECT'
+            ? (el.options[el.selectedIndex] || {}).text || value
+            : value;
+        return { id: def.id, label: def.label, value, text };
+      })
+      .filter(Boolean);
+  }
+
+  function saveFilters(kind) {
+    if (!filtersRestored[kind] || !currentUser) return;
+    try {
+      const all = JSON.parse(localStorage.getItem(filterStorageKey()) || '{}');
+      const vals = {};
+      getActiveFilters(kind).forEach(f => (vals[f.id] = f.value));
+      all[kind] = vals;
+      localStorage.setItem(filterStorageKey(), JSON.stringify(all));
+    } catch (e) {}
+  }
+
+  function updateFilterSummary(kind) {
+    const active = getActiveFilters(kind);
+    const total = kind === 'records' ? recordsTotal : devicesTotal;
+    const countEl = document.getElementById(kind + 'FoundCount');
+    if (countEl)
+      countEl.innerHTML =
+        (active.length ? 'Найдено: ' : 'Всего: ') + '<b>' + total + '</b>';
+    const chipsEl = document.getElementById(kind + 'FilterChips');
+    if (chipsEl)
+      chipsEl.innerHTML = active
+        .map(
+          f =>
+            `<span class="filter-chip"><span class="chip-label">${escapeHtml(f.label)}:</span> ${escapeHtml(f.text)}<button type="button" title="Убрать фильтр" data-filter-id="${f.id}">${ICON('x')}</button></span>`
+        )
+        .join('');
+    saveFilters(kind);
+  }
+
+  function restoreFilters() {
+    let saved = {};
+    try {
+      saved = JSON.parse(localStorage.getItem(filterStorageKey()) || '{}');
+    } catch (e) {}
+    ['records', 'devices'].forEach(kind => {
+      if (filtersRestored[kind]) return;
+      filtersRestored[kind] = true;
+      const vals = saved[kind] || {};
+      let changed = false;
+      FILTER_DEFS[kind].forEach(def => {
+        const el = document.getElementById(def.id);
+        if (!el) return;
+        const nv = vals[def.id] || '';
+        if (
+          nv &&
+          el.tagName === 'SELECT' &&
+          !Array.from(el.options).some(o => o.value === nv)
+        ) {
+          const o = document.createElement('option');
+          o.value = nv;
+          o.textContent = nv;
+          el.appendChild(o);
+        }
+        if (el.value !== nv) {
+          el.value = nv;
+          changed = true;
+        }
+      });
+      if (changed) {
+        if (kind === 'records') loadRecordsPage(1, true);
+        else loadDevicesPage(1, true);
+      } else updateFilterSummary(kind);
+    });
+  }
+
+  function initFilterSummary() {
+    ['records', 'devices'].forEach(kind => {
+      const chipsEl = document.getElementById(kind + 'FilterChips');
+      if (!chipsEl || chipsEl._bound) return;
+      chipsEl._bound = true;
+      chipsEl.addEventListener('click', e => {
+        const btn = e.target.closest('button[data-filter-id]');
+        if (!btn) return;
+        const el = document.getElementById(btn.dataset.filterId);
+        if (el) el.value = '';
+        if (kind === 'records') loadRecordsPage(1, true);
+        else loadDevicesPage(1, true);
+      });
+    });
+    restoreFilters();
+  }
+
   function initFilters() {
     ['filterImportance', 'filterProduct', 'filterStatus', 'filterUser'].forEach(
       id =>
@@ -2291,7 +2431,9 @@
     }
     if (roReplaceRows.length) {
       roHtml +=
-        '<h4 style="margin-top:1rem;">🔄 Выдано на подмену</h4><table>' +
+        '<h4 style="margin-top:1rem;">' +
+        ICON('refresh') +
+        ' Выдано на подмену</h4><table>' +
         roReplaceRows
           .map(
             ([l, v]) => `<tr><th>${l}</th><td>${escapeHtml(v || '-')}</td></tr>`
@@ -2847,7 +2989,7 @@
     }
 
     const dataCol = document.getElementById('deviceDataColumn');
-    dataCol.innerHTML = `<h3 style="margin-bottom:0.8rem;">📦 ${escapeHtml(dev.device)}</h3><table><tr><th>Изделие</th><td>${escapeHtml(dev.product)}</td></tr><tr><th>Серийный номер</th><td>${escapeHtml(dev.serialNumber)}</td></tr><tr><th>Основание поставки</th><td>${escapeHtml(dev.supplyBasis || '-')}</td></tr><tr><th>Реквизиты СП</th><td>${escapeHtml(dev.spRequisites || '-')}</td></tr><tr><th>Реквизиты ЛСИ</th><td>${escapeHtml(dev.lsiRequisites || '-')}</td></tr><tr><th>Расположение</th><td>${escapeHtml(dev.location || '-')}</td></tr><tr><th>Характеристики</th><td>${escapeHtml(dev.specs || '-')}</td></tr><tr><th>Гарантия до</th><td>${dev.warranty ? new Date(dev.warranty).toLocaleDateString('ru-RU') : '-'}</td></tr><tr><th>Примечание</th><td>${escapeHtml(dev.notes || '-')}</td></tr><tr><th>Дата добавления</th><td>${new Date(dev.createdAt).toLocaleString('ru-RU')}</td></tr></table>`;
+    dataCol.innerHTML = `<h3 style="margin-bottom:0.8rem;">${ICON('package')} ${escapeHtml(dev.device)}</h3><table><tr><th>Изделие</th><td>${escapeHtml(dev.product)}</td></tr><tr><th>Серийный номер</th><td>${escapeHtml(dev.serialNumber)}</td></tr><tr><th>Основание поставки</th><td>${escapeHtml(dev.supplyBasis || '-')}</td></tr><tr><th>Реквизиты СП</th><td>${escapeHtml(dev.spRequisites || '-')}</td></tr><tr><th>Реквизиты ЛСИ</th><td>${escapeHtml(dev.lsiRequisites || '-')}</td></tr><tr><th>Расположение</th><td>${escapeHtml(dev.location || '-')}</td></tr><tr><th>Характеристики</th><td>${escapeHtml(dev.specs || '-')}</td></tr><tr><th>Гарантия до</th><td>${dev.warranty ? new Date(dev.warranty).toLocaleDateString('ru-RU') : '-'}</td></tr><tr><th>Примечание</th><td>${escapeHtml(dev.notes || '-')}</td></tr><tr><th>Дата добавления</th><td>${new Date(dev.createdAt).toLocaleString('ru-RU')}</td></tr></table>`;
 
     const timelineCol = document.getElementById('deviceTimelineColumn');
 
@@ -2896,7 +3038,7 @@
         h.newCompleted !== undefined
           ? h.newCompleted
           : h.changes && h.changes.completed;
-      addRow('Выполнено', isCompleted ? '✅ Да' : '⏳ Нет');
+      addRow('Выполнено', isCompleted ? 'Да' : 'Нет');
       addRow('Серийный номер', h.serialNumber);
       addRow('Изделие', h.product);
       addRow('Тип техники', h.techType);
@@ -2938,7 +3080,9 @@
         '<p style="color:var(--text-secondary);text-align:center;padding:2rem;">Нет записей</p>';
     } else {
       let html =
-        '<h3 style="margin-bottom:1rem;">📋 История операций (' +
+        '<h3 style="margin-bottom:1rem;">' +
+        ICON('clipboard') +
+        ' История операций (' +
         historyEvents.length +
         ')</h3><div class="timeline">';
       historyEvents.forEach((h, i) => {
@@ -2953,9 +3097,13 @@
 
         let title = '';
         let details = '';
+        let kind = 'record';
+        let iconName = 'clipboard';
 
         if (h.action === 'create_device') {
-          title = '➕ Добавлено устройство';
+          title = 'Добавлено устройство';
+          kind = 'create';
+          iconName = 'plus';
           details = `
             <tr><th>Действие</th><td>Создание устройства</td></tr>
             <tr><th>Серийный номер</th><td>${escapeHtml(h.serialNumber || '-')}</td></tr>
@@ -2963,7 +3111,9 @@
             <tr><th>Устройство</th><td>${escapeHtml(h.device || '-')}</td></tr>
           `;
         } else if (h.action === 'update_device') {
-          title = '✏️ Изменено устройство';
+          title = 'Изменено устройство';
+          kind = 'edit';
+          iconName = 'pencil';
           const changes = h.changes || {};
           let changeRows = '';
           if (changes.serialNumber)
@@ -2992,14 +3142,18 @@
             ${changeRows}
           `;
         } else if (h.action === 'delete_device') {
-          title = '🗑️ Удалено устройство';
+          title = 'Удалено устройство';
+          kind = 'delete';
+          iconName = 'trash';
           details = `
             <tr><th>Действие</th><td>Удаление устройства</td></tr>
             <tr><th>Серийный номер</th><td>${escapeHtml(h.serialNumber || '-')}</td></tr>
           `;
         } else if (h.action === 'create_record') {
           const statusLabel = STATUS_LABELS[h.status] || h.status || '—';
-          title = `📝 Создана: ${statusLabel}`;
+          title = `Создана: ${statusLabel}`;
+          kind = 'record';
+          iconName = 'clipboard';
           details =
             `<tr><th>Действие</th><td>Создание заявки</td></tr>` +
             buildRecordRows(h);
@@ -3007,11 +3161,17 @@
           const oldLabel = STATUS_LABELS[h.oldStatus] || h.oldStatus || '—';
           const newLabel = STATUS_LABELS[h.newStatus] || h.newStatus || '—';
           if (h.statusChanged) {
-            title = `🔄 ${oldLabel} → ${newLabel}`;
+            title = `${oldLabel} → ${newLabel}`;
+            kind = 'status';
+            iconName = 'refresh';
           } else if (h.completedChanged && h.newCompleted) {
-            title = `✅ ${newLabel} (выполнено)`;
+            title = `${newLabel} (выполнено)`;
+            kind = 'done';
+            iconName = 'check-circle';
           } else {
-            title = `✏️ Изменение: ${newLabel}`;
+            title = `Изменение: ${newLabel}`;
+            kind = 'edit';
+            iconName = 'pencil';
           }
           details =
             `<tr><th>Действие</th><td>Изменение заявки</td></tr>` +
@@ -3019,13 +3179,14 @@
             buildRecordRows(h);
         } else {
           title = h.action || 'Событие';
+          iconName = 'info';
           details = `
             <tr><th>Действие</th><td>${escapeHtml(h.action || '-')}</td></tr>
             <tr><th>Серийный номер</th><td>${escapeHtml(h.serialNumber || '-')}</td></tr>
           `;
         }
 
-        html += `<div class="timeline-item" style="margin-bottom:${i < historyEvents.length - 1 ? '1.5rem' : '0'};"><button class="timeline-btn" onclick="toggleTimelineDetails(this, '${h.id}')"><span class="tl-status">${escapeHtml(title)}</span><span class="tl-date">${dt}</span></button><div class="timeline-details" id="details_${h.id}"><table>${details}</table></div></div>`;
+        html += `<div class="timeline-item tl-${kind}" style="margin-bottom:${i < historyEvents.length - 1 ? '1.5rem' : '0'};"><span class="tl-marker">${ICON(iconName)}</span><button class="timeline-btn" onclick="toggleTimelineDetails(this, '${h.id}')"><span class="tl-status">${escapeHtml(title)}</span><span class="tl-date">${dt}</span></button><div class="timeline-details" id="details_${h.id}"><table>${details}</table></div></div>`;
       });
       html += '</div>';
       timelineCol.innerHTML = html;
@@ -3117,7 +3278,7 @@
     }
     visibleDevices.forEach(d => {
       const tr = document.createElement('tr');
-      tr.innerHTML = `<td>${escapeHtml(d.product)}</td><td>${escapeHtml(d.device)}</td><td><a href="javascript:void(0)" onclick="openDeviceInfoModal('${escapeHtml(d.serialNumber)}')" style="color:var(--accent);text-decoration:underline;cursor:pointer;">${escapeHtml(d.serialNumber)}</a></td><td>${escapeHtml(d.supplyBasis || '-')}</td><td>${escapeHtml(d.spRequisites || '-')}</td><td>${escapeHtml(d.lsiRequisites || '-')}</td><td>${escapeHtml(d.location || '-')}</td><td style="max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${escapeHtml(d.specs || '')}">${escapeHtml(d.specs || '-')}</td><td style="max-width:150px;overflow:hidden;text-overflow:ellipsis" title="${escapeHtml(d.notes || '')}">${escapeHtml(d.notes || '-')}</td><td>${new Date(d.createdAt).toLocaleDateString('ru-RU')}</td>${isAdmin ? `<td><div class="action-buttons"><button class="edit-btn" title="Редактировать">✏️</button><button class="delete-btn" title="Удалить">🗑️</button></div></td>` : ''}`;
+      tr.innerHTML = `<td>${escapeHtml(d.product)}</td><td>${escapeHtml(d.device)}</td><td><a href="javascript:void(0)" onclick="openDeviceInfoModal('${escapeHtml(d.serialNumber)}')" class="serial-link">${escapeHtml(d.serialNumber)}</a></td><td>${escapeHtml(d.supplyBasis || '-')}</td><td>${escapeHtml(d.spRequisites || '-')}</td><td>${escapeHtml(d.lsiRequisites || '-')}</td><td>${escapeHtml(d.location || '-')}</td><td class="cell-ellipsis-120" title="${escapeHtml(d.specs || '')}">${escapeHtml(d.specs || '-')}</td><td class="cell-ellipsis-150" title="${escapeHtml(d.notes || '')}">${escapeHtml(d.notes || '-')}</td><td>${new Date(d.createdAt).toLocaleDateString('ru-RU')}</td>${isAdmin ? `<td><div class="action-buttons"><button class="edit-btn" title="Редактировать">${ICON('pencil')}</button><button class="delete-btn" title="Удалить">${ICON('trash')}</button></div></td>` : ''}`;
       if (isAdmin) {
         tr.querySelector('.delete-btn')?.addEventListener('click', () =>
           deleteDevice(d.id)
@@ -3143,7 +3304,7 @@
     const isAdmin = currentUserRole === 'admin';
     newDevices.forEach(d => {
       const tr = document.createElement('tr');
-      tr.innerHTML = `<td>${escapeHtml(d.product)}</td><td>${escapeHtml(d.device)}</td><td><a href="javascript:void(0)" onclick="openDeviceInfoModal('${escapeHtml(d.serialNumber)}')" style="color:var(--accent);text-decoration:underline;cursor:pointer;">${escapeHtml(d.serialNumber)}</a></td><td>${escapeHtml(d.supplyBasis || '-')}</td><td>${escapeHtml(d.spRequisites || '-')}</td><td>${escapeHtml(d.lsiRequisites || '-')}</td><td>${escapeHtml(d.location || '-')}</td><td style="max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${escapeHtml(d.specs || '')}">${escapeHtml(d.specs || '-')}</td><td style="max-width:150px;overflow:hidden;text-overflow:ellipsis" title="${escapeHtml(d.notes || '')}">${escapeHtml(d.notes || '-')}</td><td>${new Date(d.createdAt).toLocaleDateString('ru-RU')}</td>${isAdmin ? `<td><div class="action-buttons"><button class="edit-btn" title="Редактировать">✏️</button><button class="delete-btn" title="Удалить">🗑️</button></div></td>` : ''}`;
+      tr.innerHTML = `<td>${escapeHtml(d.product)}</td><td>${escapeHtml(d.device)}</td><td><a href="javascript:void(0)" onclick="openDeviceInfoModal('${escapeHtml(d.serialNumber)}')" class="serial-link">${escapeHtml(d.serialNumber)}</a></td><td>${escapeHtml(d.supplyBasis || '-')}</td><td>${escapeHtml(d.spRequisites || '-')}</td><td>${escapeHtml(d.lsiRequisites || '-')}</td><td>${escapeHtml(d.location || '-')}</td><td class="cell-ellipsis-120" title="${escapeHtml(d.specs || '')}">${escapeHtml(d.specs || '-')}</td><td class="cell-ellipsis-150" title="${escapeHtml(d.notes || '')}">${escapeHtml(d.notes || '-')}</td><td>${new Date(d.createdAt).toLocaleDateString('ru-RU')}</td>${isAdmin ? `<td><div class="action-buttons"><button class="edit-btn" title="Редактировать">${ICON('pencil')}</button><button class="delete-btn" title="Удалить">${ICON('trash')}</button></div></td>` : ''}`;
       if (isAdmin) {
         tr.querySelector('.delete-btn')?.addEventListener('click', () =>
           deleteDevice(d.id)
@@ -3466,12 +3627,12 @@
       else
         stats.warrantyAlerts.forEach(d => {
           const tr = document.createElement('tr');
-          let st = '✅ Действует';
+          let st = ICON('check-circle') + ' Действует';
           if (d.status === 'expired') {
-            st = '❌ Истекла';
+            st = ICON('x-circle') + ' Истекла';
             tr.style.background = 'rgba(255,71,87,0.1)';
           } else if (d.status === 'expiring') {
-            st = '⚠️ Истекает';
+            st = ICON('alert-triangle') + ' Истекает';
             tr.style.background = 'rgba(255,165,2,0.1)';
           }
           tr.innerHTML = `<td>${escapeHtml(d.device)}</td><td>${escapeHtml(d.serialNumber)}</td><td>${new Date(d.warranty).toLocaleDateString('ru-RU')}</td><td>${st}</td>`;
@@ -3481,9 +3642,9 @@
   }
 
   const instructionsContent = {
-    user_guide: `<div class="instructions-content"><h1>📖 Руководство пользователя</h1><h2>🔐 Вход в систему</h2><p>Откройте браузер и перейдите по адресу <strong>http://localhost:3000</strong>.</p><p>Введите логин и пароль. Учётные данные по умолчанию:</p><ul><li><strong>Администратор:</strong> admin / admin123</li><li><strong>Пользователь:</strong> user / user123</li></ul><h2>📝 Добавление записи</h2><p>Нажмите кнопку <strong>«Добавить запись»</strong>. Выберите статус: Информация, Перемещение или Неисправность.</p><h2>🔧 Решение по неисправности</h2><p>У заявки со статусом Неисправность есть кнопка <strong>«Решение ▼»</strong> с выбором: Ремонт, Замена, Архив.</p><p>У заявки со статусом Ремонт — кнопка «Решение ▼» с выбором: Выполнено, Замена, Архив.</p><p>У заявки со статусом Замена — кнопка «Выполнено» для перевода в Замена (выполнено).</p></div>`,
-    admin_guide: `<div class="instructions-content"><h1>🔧 Руководство администратора</h1><h2>⚙️ Вся техника</h2><p>Добавление, редактирование, удаление устройств. Импорт/экспорт CSV, печать акта.</p><h2>📊 Статистика</h2><p>По изделиям, статусам, пользователям. Контроль гарантийных сроков.</p></div>`,
-    dev_guide: `<div class="instructions-content"><h1>💻 Руководство разработчика</h1><p>Стек: ванильный JS (SPA) + Node.js. Данные в JSON-файлах.</p></div>`,
+    user_guide: `<div class="instructions-content"><h1><svg class="icon" aria-hidden="true"><use href="#i-book"/></svg> Руководство пользователя</h1><h2><svg class="icon" aria-hidden="true"><use href="#i-lock"/></svg> Вход в систему</h2><p>Откройте браузер и перейдите по адресу <strong>http://localhost:3000</strong>.</p><p>Введите логин и пароль. Учётные данные по умолчанию:</p><ul><li><strong>Администратор:</strong> admin / admin123</li><li><strong>Пользователь:</strong> user / user123</li></ul><h2><svg class="icon" aria-hidden="true"><use href="#i-edit"/></svg> Добавление записи</h2><p>Нажмите кнопку <strong>«Добавить запись»</strong>. Выберите статус: Информация, Перемещение или Неисправность.</p><h2><svg class="icon" aria-hidden="true"><use href="#i-tool"/></svg> Решение по неисправности</h2><p>У заявки со статусом Неисправность есть кнопка <strong>«Решение ▼»</strong> с выбором: Ремонт, Замена, Архив.</p><p>У заявки со статусом Ремонт — кнопка «Решение ▼» с выбором: Выполнено, Замена, Архив.</p><p>У заявки со статусом Замена — кнопка «Выполнено» для перевода в Замена (выполнено).</p></div>`,
+    admin_guide: `<div class="instructions-content"><h1><svg class="icon" aria-hidden="true"><use href="#i-tool"/></svg> Руководство администратора</h1><h2><svg class="icon" aria-hidden="true"><use href="#i-settings"/></svg> Вся техника</h2><p>Добавление, редактирование, удаление устройств. Импорт/экспорт CSV, печать акта.</p><h2><svg class="icon" aria-hidden="true"><use href="#i-bar-chart"/></svg> Статистика</h2><p>По изделиям, статусам, пользователям. Контроль гарантийных сроков.</p></div>`,
+    dev_guide: `<div class="instructions-content"><h1><svg class="icon" aria-hidden="true"><use href="#i-monitor"/></svg> Руководство разработчика</h1><p>Стек: ванильный JS (SPA) + Node.js. Данные в JSON-файлах.</p></div>`,
   };
   function switchInstructionTab(id) {
     if (
@@ -3525,9 +3686,9 @@
     try {
       const r = await fetch(API.backup, { method: 'POST' });
       if (r.ok) showToast('Резервная копия создана');
-      else alert('❌ Ошибка');
+      else alert('Ошибка');
     } catch (e) {
-      alert('❌ Ошибка');
+      alert('Ошибка');
     }
   });
 

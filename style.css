@@ -630,10 +630,10 @@ h2 {
 }
 
 .filter-bar {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 0.4rem;
   align-items: center;
-  justify-content: center;
   margin-bottom: 0.6rem;
   padding: 0.5rem;
   background: var(--glass-bg);
@@ -641,7 +641,7 @@ h2 {
   border: 1px solid var(--glass-border);
 }
 .filter-bar > * {
-  margin: 0.15rem;
+  margin: 0;
 }
 .filter-bar select,
 .filter-bar input {
@@ -653,7 +653,9 @@ h2 {
   font-size: 0.75rem;
   font-family: inherit;
   outline: none;
-  min-width: 130px;
+  min-width: 0;
+  width: 100%;
+  box-sizing: border-box;
 }
 .filter-bar select {
   -webkit-appearance: none;
@@ -1758,4 +1760,348 @@ td:nth-child(9) {
   color: var(--text-primary);
   vertical-align: top;
   word-break: break-word;
+}
+
+/* ===== Иконки (встроенные SVG, работают без интернета и шрифтов) ===== */
+.icon {
+  width: 1em;
+  height: 1em;
+  vertical-align: -0.15em;
+  flex: none;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  pointer-events: none;
+  overflow: visible;
+}
+.complete-btn .icon,
+.edit-btn .icon,
+.delete-btn .icon {
+  width: 14px;
+  height: 14px;
+}
+.completed-time .icon {
+  width: 12px;
+  height: 12px;
+  vertical-align: -0.1em;
+}
+.modal-form label .icon {
+  color: var(--accent);
+}
+
+/* ===== Метки статуса и важности ===== */
+.status-badge,
+.imp-badge {
+  display: inline-block;
+  padding: 0.15rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  line-height: 1.4;
+  white-space: nowrap;
+  border: 1px solid rgba(var(--b), 0.45);
+  background: rgba(var(--b), 0.16);
+  color: rgb(var(--bt));
+}
+.status-malfunction {
+  --b: 255, 71, 87;
+  --bt: 255, 140, 150;
+}
+[data-theme='light'] .status-malfunction {
+  --bt: 190, 30, 50;
+}
+.status-info {
+  --b: 52, 152, 219;
+  --bt: 120, 190, 240;
+}
+[data-theme='light'] .status-info {
+  --bt: 25, 100, 160;
+}
+.status-move {
+  --b: 124, 92, 252;
+  --bt: 175, 155, 255;
+}
+[data-theme='light'] .status-move {
+  --bt: 90, 60, 210;
+}
+.status-repair {
+  --b: 255, 165, 2;
+  --bt: 255, 200, 90;
+}
+[data-theme='light'] .status-repair {
+  --bt: 170, 100, 0;
+}
+.status-repair_done {
+  --b: 46, 213, 115;
+  --bt: 110, 235, 160;
+}
+[data-theme='light'] .status-repair_done {
+  --bt: 20, 130, 70;
+}
+.status-replace {
+  --b: 230, 126, 34;
+  --bt: 255, 170, 100;
+}
+[data-theme='light'] .status-replace {
+  --bt: 170, 80, 10;
+}
+.status-replace_done {
+  --b: 46, 213, 115;
+  --bt: 110, 235, 160;
+}
+[data-theme='light'] .status-replace_done {
+  --bt: 20, 130, 70;
+}
+.status-archive {
+  --b: 150, 155, 170;
+  --bt: 190, 195, 210;
+}
+[data-theme='light'] .status-archive {
+  --bt: 90, 95, 110;
+}
+.imp-1 {
+  --b: 46, 213, 115;
+  --bt: 110, 235, 160;
+}
+[data-theme='light'] .imp-1 {
+  --bt: 20, 130, 70;
+}
+.imp-2 {
+  --b: 255, 165, 2;
+  --bt: 255, 200, 90;
+}
+[data-theme='light'] .imp-2 {
+  --bt: 170, 100, 0;
+}
+.imp-3 {
+  --b: 255, 71, 87;
+  --bt: 255, 140, 150;
+}
+[data-theme='light'] .imp-3 {
+  --bt: 190, 30, 50;
+}
+
+/* ===== Ячейки таблиц (бывшие inline-стили) ===== */
+.serial-link {
+  color: var(--accent) !important;
+  text-decoration: underline !important;
+  cursor: pointer !important;
+}
+.cell-clamp {
+  max-width: 150px;
+  max-height: 2.8em;
+  overflow: hidden;
+  text-align: center;
+  margin: 0 auto;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+.cell-ellipsis-120 {
+  max-width: 120px !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+.cell-ellipsis-150 {
+  max-width: 150px !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+/* ===== Сводка фильтров: счётчик и активные фильтры ===== */
+.filter-summary {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 0 0 0.5rem;
+  min-height: 1.6rem;
+}
+.found-count {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+.found-count b {
+  color: var(--text-primary);
+}
+.filter-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+.filter-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.1rem 0.25rem 0.1rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  color: var(--text-primary);
+  background: var(--badge-bg);
+  border: 1px solid var(--glass-border);
+}
+.filter-chip .chip-label {
+  color: var(--text-secondary);
+}
+.filter-chip button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+.filter-chip button:hover {
+  background: var(--btn-hover);
+  color: var(--danger);
+}
+.filter-chip button .icon {
+  width: 11px;
+  height: 11px;
+}
+
+/* ===== История устройства: шкала с иконками событий ===== */
+.timeline-item {
+  --tl: 124, 92, 252;
+}
+.timeline-item.tl-create {
+  --tl: 46, 213, 115;
+}
+.timeline-item.tl-edit {
+  --tl: 255, 165, 2;
+}
+.timeline-item.tl-delete {
+  --tl: 255, 71, 87;
+}
+.timeline-item.tl-record {
+  --tl: 124, 92, 252;
+}
+.timeline-item.tl-status {
+  --tl: 52, 152, 219;
+}
+.timeline-item.tl-done {
+  --tl: 46, 213, 115;
+}
+.timeline-item .timeline-btn::before {
+  display: none;
+}
+.tl-marker {
+  position: absolute;
+  left: -26px;
+  top: 0.4rem;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  z-index: 1;
+  background: var(--bg-secondary);
+  border: 2px solid rgb(var(--tl));
+  color: rgb(var(--tl));
+}
+.tl-marker .icon {
+  width: 11px;
+  height: 11px;
+}
+.timeline-btn.active {
+  box-shadow: 0 0 0 2px rgba(var(--tl), 0.35);
+}
+
+/* ===== Бывшие inline-стили разметки (сохранён приоритет inline) ===== */
+.loading-text {
+  color: var(--text-secondary) !important;
+}
+.w-full {
+  width: 100% !important;
+}
+.toolbar-row {
+  display: flex !important;
+  align-items: center !important;
+  gap: 0.5rem !important;
+  margin-bottom: 0.5rem !important;
+}
+.mb-0 {
+  margin-bottom: 0 !important;
+}
+.mb-1 {
+  margin-bottom: 1rem !important;
+}
+.mt-1 {
+  margin-top: 1rem !important;
+}
+.mt-15 {
+  margin-top: 1.5rem !important;
+}
+.jc-center {
+  justify-content: center !important;
+}
+.col-span-all {
+  grid-column: 1 / -1 !important;
+}
+.pos-rel {
+  position: relative !important;
+}
+.subhead-accent {
+  margin: 0.5rem 0 !important;
+  color: var(--accent) !important;
+}
+.fs-sm {
+  font-size: 0.8rem !important;
+}
+.stack-05 {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 0.5rem !important;
+}
+.stack-03 {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 0.3rem !important;
+}
+.modal-w-1200 {
+  max-width: 1200px !important;
+}
+.modal-w-900 {
+  max-width: 900px !important;
+}
+.modal-w-1000 {
+  max-width: 1000px !important;
+  max-height: 90vh !important;
+}
+.device-info-layout {
+  display: flex !important;
+  gap: 2rem !important;
+}
+.device-data-col {
+  flex: 0 0 350px !important;
+}
+.device-history-col {
+  flex: 1 !important;
+  overflow-y: auto !important;
+  max-height: 60vh !important;
+}
+.constructor-layout {
+  display: grid !important;
+  grid-template-columns: 250px 1fr !important;
+  gap: 1.5rem !important;
+}
+.constructor-side {
+  border-right: 1px solid var(--glass-border) !important;
+  padding-right: 1rem !important;
+}
+.constructor-body {
+  overflow-y: auto !important;
+  max-height: 60vh !important;
+  padding-right: 0.5rem !important;
 }
