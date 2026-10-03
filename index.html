@@ -403,17 +403,17 @@
               <input
                 type="text"
                 id="filterTechType"
-                placeholder="Поиск по типу техники..."
+                placeholder="Тип техники"
               />
               <input
                 type="text"
                 id="filterLocation"
-                placeholder="Поиск по расположению..."
+                placeholder="Расположение"
               />
               <input
                 type="text"
                 id="filterSerial"
-                placeholder="Поиск по серийному номеру..."
+                placeholder="Серийный номер"
               />
               <button id="resetFiltersBtn" class="reset-filters-btn">
                 <svg class="icon" aria-hidden="true">
@@ -421,9 +421,9 @@
                 </svg>
                 Сбросить
               </button>
+              <span class="found-count" id="recordsFoundCount"></span>
             </div>
             <div class="filter-summary" id="recordsFilterSummary">
-              <span class="found-count" id="recordsFoundCount"></span>
               <div class="filter-chips" id="recordsFilterChips"></div>
             </div>
             <div class="table-container">
@@ -492,6 +492,17 @@
                 </svg>
                 Акт
               </button>
+              <span class="selection-info" id="devicesSelectionInfo">
+                Выбрано: <b id="devicesSelectedCount">0</b> — экспорт и акт
+                только для них
+                <button
+                  type="button"
+                  id="devicesClearSelection"
+                  class="selection-clear"
+                >
+                  Снять выбор
+                </button>
+              </span>
             </div>
             <div class="filter-bar jc-center" id="devicesFilterBar">
               <select id="filterDevProduct">
@@ -500,33 +511,33 @@
               <input
                 type="text"
                 id="filterDevDevice"
-                placeholder="Поиск по устройству..."
+                placeholder="Устройство"
               />
               <input
                 type="text"
                 id="filterDevSerial"
-                placeholder="Поиск по серийному номеру..."
+                placeholder="Серийный номер"
                 autocomplete="off"
               />
               <input
                 type="text"
                 id="filterDevLocation"
-                placeholder="Поиск по расположению..."
+                placeholder="Расположение"
               />
               <input
                 type="text"
                 id="filterDevSupplyBasis"
-                placeholder="Поиск по основанию поставки..."
+                placeholder="Основание поставки"
               />
               <input
                 type="text"
                 id="filterDevSPRequisites"
-                placeholder="Поиск по реквизитам СП..."
+                placeholder="Реквизиты СП"
               />
               <input
                 type="text"
                 id="filterDevLSIRequisites"
-                placeholder="Поиск по реквизитам ЛСИ..."
+                placeholder="Реквизиты ЛСИ"
               />
               <button id="resetDevFiltersBtn" class="reset-filters-btn">
                 <svg class="icon" aria-hidden="true">
@@ -534,15 +545,22 @@
                 </svg>
                 Сбросить
               </button>
+              <span class="found-count" id="devicesFoundCount"></span>
             </div>
             <div class="filter-summary" id="devicesFilterSummary">
-              <span class="found-count" id="devicesFoundCount"></span>
               <div class="filter-chips" id="devicesFilterChips"></div>
             </div>
             <div class="table-container">
               <table id="devicesTable">
                 <thead>
                   <tr>
+                    <th class="col-select">
+                      <input
+                        type="checkbox"
+                        id="devicesSelectAll"
+                        title="Выбрать все устройства в таблице"
+                      />
+                    </th>
                     <th>Изделие</th>
                     <th>Устройство</th>
                     <th>Серийный номер</th>
@@ -558,7 +576,7 @@
                 </thead>
                 <tbody id="devicesTableBody">
                   <tr>
-                    <td colspan="11" class="no-records">Нет устройств</td>
+                    <td colspan="12" class="no-records">Нет устройств</td>
                   </tr>
                 </tbody>
               </table>

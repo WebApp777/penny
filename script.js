@@ -566,6 +566,7 @@
     initAddDeviceModal();
     initDeviceInfoModal();
     initFilterSummary();
+    initDevicesSelection();
     document.getElementById('recordRequest').value = getNextRequestNumber();
     document.getElementById('homePage').classList.add('active');
     if (dateTimeInterval) clearInterval(dateTimeInterval);
@@ -574,6 +575,7 @@
 
   function logout() {
     clearSession();
+    selectedDevices.clear();
     filtersRestored = { records: false, devices: false };
     currentUser = null;
     currentUserRole = null;
@@ -2099,6 +2101,8 @@
     if (countEl)
       countEl.innerHTML =
         (active.length ? 'Найдено: ' : 'Всего: ') + '<b>' + total + '</b>';
+    const summaryEl = document.getElementById(kind + 'FilterSummary');
+    if (summaryEl) summaryEl.classList.toggle('has-chips', active.length > 0);
     const chipsEl = document.getElementById(kind + 'FilterChips');
     if (chipsEl)
       chipsEl.innerHTML = active
@@ -3286,9 +3290,88 @@
     if (!confirm('Удалить?')) return;
     try {
       await apiDelete(API.devices, { id });
+      selectedDevices.delete(id);
       await loadDevicesPage(1, true);
       updateProductSelect();
     } catch (e) {}
+  }
+
+  // ===== Выбор устройств для экспорта и акта =====
+  // Если ничего не выбрано — берутся устройства из таблицы (с учётом фильтров),
+  // если выбрано — только выбранные (выбор сохраняется при смене фильтров).
+  const selectedDevices = new Map(); // id -> устройство
+
+  const isDeviceVisible = d => d.product && String(d.product).trim();
+
+  function getDevicesForOutput() {
+    const visible = devices.filter(isDeviceVisible);
+    if (!selectedDevices.size) return visible;
+    const inTable = visible.filter(d => selectedDevices.has(d.id));
+    const ids = new Set(inTable.map(d => d.id));
+    const others = [...selectedDevices.values()].filter(d => !ids.has(d.id));
+    return [...inTable, ...others];
+  }
+
+  function updateSelectionUI() {
+    const n = selectedDevices.size;
+    const info = document.getElementById('devicesSelectionInfo');
+    if (info) info.classList.toggle('visible', n > 0);
+    const cnt = document.getElementById('devicesSelectedCount');
+    if (cnt) cnt.textContent = n;
+    const all = document.getElementById('devicesSelectAll');
+    if (all) {
+      const visible = devices.filter(isDeviceVisible);
+      const sel = visible.filter(d => selectedDevices.has(d.id)).length;
+      all.checked = visible.length > 0 && sel === visible.length;
+      all.indeterminate = sel > 0 && sel < visible.length;
+    }
+    document.querySelectorAll('#devicesTableBody tr').forEach(tr => {
+      const cb = tr.querySelector('.dev-select');
+      if (cb) tr.classList.toggle('row-selected', cb.checked);
+    });
+  }
+
+  // Добавляет в строку устройства ячейку с флажком выбора
+  function decorateDeviceRow(tr, d) {
+    const selected = selectedDevices.has(d.id);
+    if (selected) selectedDevices.set(d.id, d); // обновляем данные устройства
+    tr.insertAdjacentHTML(
+      'afterbegin',
+      `<td class="col-select"><input type="checkbox" class="dev-select" data-id="${escapeHtml(d.id)}"${selected ? ' checked' : ''} title="Выбрать"></td>`
+    );
+    if (selected) tr.classList.add('row-selected');
+  }
+
+  function initDevicesSelection() {
+    const table = document.getElementById('devicesTable');
+    if (!table || table._selectionBound) return;
+    table._selectionBound = true;
+    table.addEventListener('change', e => {
+      const t = e.target;
+      if (t.id === 'devicesSelectAll') {
+        devices.filter(isDeviceVisible).forEach(d => {
+          if (t.checked) selectedDevices.set(d.id, d);
+          else selectedDevices.delete(d.id);
+        });
+        document
+          .querySelectorAll('#devicesTableBody .dev-select')
+          .forEach(cb => (cb.checked = t.checked));
+      } else if (t.classList.contains('dev-select')) {
+        const d = devices.find(x => x.id === t.dataset.id);
+        if (t.checked && d) selectedDevices.set(d.id, d);
+        else selectedDevices.delete(t.dataset.id);
+      } else return;
+      updateSelectionUI();
+    });
+    document
+      .getElementById('devicesClearSelection')
+      ?.addEventListener('click', () => {
+        selectedDevices.clear();
+        document
+          .querySelectorAll('#devicesTableBody .dev-select')
+          .forEach(cb => (cb.checked = false));
+        updateSelectionUI();
+      });
   }
 
   function renderDevicesTable() {
@@ -3296,18 +3379,17 @@
     if (!tb) return;
     tb.innerHTML = '';
     const isAdmin = currentUserRole === 'admin';
-    const colSpan = isAdmin ? 11 : 10;
-    const visibleDevices = devices.filter(
-      d => d.product && String(d.product).trim()
-    );
+    const colSpan = isAdmin ? 12 : 11;
+    const visibleDevices = devices.filter(isDeviceVisible);
     if (!visibleDevices.length) {
       tb.innerHTML = `<tr><td colspan="${colSpan}" class="no-records">Нет устройств</td></tr>`;
+      updateSelectionUI();
       return;
     }
     const thead = document.querySelector('#devicesTable thead tr');
     if (thead) {
       thead.innerHTML =
-        '<th>Изделие</th><th>Устройство</th><th>Серийный номер</th><th>Основание поставки</th><th>Реквизиты СП</th><th>Реквизиты ЛСИ</th><th>Расположение</th><th>Характеристики</th><th>Примечание</th><th>Дата добавления</th>' +
+        '<th class="col-select"><input type="checkbox" id="devicesSelectAll" title="Выбрать все устройства в таблице"></th><th>Изделие</th><th>Устройство</th><th>Серийный номер</th><th>Основание поставки</th><th>Реквизиты СП</th><th>Реквизиты ЛСИ</th><th>Расположение</th><th>Характеристики</th><th>Примечание</th><th>Дата добавления</th>' +
         (isAdmin ? '<th>Действия</th>' : '');
     }
     visibleDevices.forEach(d => {
@@ -3321,6 +3403,7 @@
           openDeviceEditModal(d.id)
         );
       }
+      decorateDeviceRow(tr, d);
       tb.appendChild(tr);
     });
     if (!devicesAllLoaded) {
@@ -3329,6 +3412,7 @@
       tr.innerHTML = `<td colspan="${colSpan}" style="text-align:center;padding:1rem;color:var(--text-secondary);">Загрузка...</td>`;
       tb.appendChild(tr);
     }
+    updateSelectionUI();
   }
   function appendDevicesTable(newDevices) {
     const tb = document.getElementById('devicesTableBody');
@@ -3347,15 +3431,17 @@
           openDeviceEditModal(d.id)
         );
       }
+      decorateDeviceRow(tr, d);
       tb.appendChild(tr);
     });
     if (!devicesAllLoaded) {
-      const colSpan = isAdmin ? 11 : 10;
+      const colSpan = isAdmin ? 12 : 11;
       const tr = document.createElement('tr');
       tr.id = 'devicesLoader';
       tr.innerHTML = `<td colspan="${colSpan}" style="text-align:center;padding:1rem;color:var(--text-secondary);">Загрузка...</td>`;
       tb.appendChild(tr);
     }
+    updateSelectionUI();
   }
 
   function updateDeviceFilterSelects() {
@@ -3479,7 +3565,7 @@
       const newBtn = exportDevicesBtn.cloneNode(true);
       exportDevicesBtn.parentNode.replaceChild(newBtn, exportDevicesBtn);
       newBtn.addEventListener('click', () => {
-        const f = devices;
+        const f = getDevicesForOutput();
         exportToCSV(
           f.map(d => ({
             ...d,
@@ -3506,7 +3592,7 @@
       const newBtn = printActBtn.cloneNode(true);
       printActBtn.parentNode.replaceChild(newBtn, printActBtn);
       newBtn.addEventListener('click', () => {
-        const devs = devices;
+        const devs = getDevicesForOutput();
         if (!devs.length) {
           alert('Нет устройств');
           return;
