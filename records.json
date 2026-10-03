@@ -60,7 +60,7 @@
     "username": "admin",
     "requestNumber": "3",
     "importance": "2",
-    "status": "malfunction",
+    "status": "repair",
     "serialNumber": "первый",
     "newSerialNumber": "",
     "product": "Тест",
@@ -78,9 +78,14 @@
     "replaceProduct": "",
     "replaceType": "",
     "replaceLocation": "",
-    "completed": false,
+    "completed": true,
     "id": "rec_1790942573831",
-    "createdAt": "2026-10-02T12:02:53.831Z"
+    "createdAt": "2026-10-02T12:02:53.831Z",
+    "fullRecoveryDate": "2026-10-03T10:51",
+    "defectAct": "уцау",
+    "completedAt": "2026-10-03T07:51:25.608Z",
+    "newDeviceSerial": "",
+    "newDeviceType": ""
   },
   {
     "username": "admin",

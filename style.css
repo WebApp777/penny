@@ -29,9 +29,9 @@
   --table-hover: rgba(124, 92, 252, 0.1);
   --suggest-bg: #1a1a3e;
   --suggest-hover: rgba(124, 92, 252, 0.2);
-  --completed-bg: rgba(46, 213, 115, 0.15);
-  --repair-bg: rgba(255, 165, 2, 0.12);
-  --archive-bg: rgba(46, 213, 115, 0.12);
+  --completed-bg: rgba(46, 213, 115, 0.2);
+  --repair-bg: rgba(255, 165, 2, 0.2);
+  --archive-bg: rgba(46, 213, 115, 0.2);
 }
 
 [data-theme='light'] {
@@ -59,9 +59,9 @@
   --table-hover: rgba(108, 92, 231, 0.05);
   --suggest-bg: #ffffff;
   --suggest-hover: rgba(108, 92, 231, 0.1);
-  --completed-bg: rgba(39, 174, 96, 0.1);
-  --repair-bg: rgba(243, 156, 18, 0.1);
-  --archive-bg: rgba(39, 174, 96, 0.1);
+  --completed-bg: rgba(39, 174, 96, 0.2);
+  --repair-bg: rgba(243, 156, 18, 0.2);
+  --archive-bg: rgba(39, 174, 96, 0.2);
 }
 
 * {
@@ -813,7 +813,7 @@ td:nth-child(9) {
   display: flex;
   gap: 4px;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-end;
   flex-wrap: nowrap;
   position: relative;
   overflow: visible !important;

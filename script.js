@@ -503,6 +503,38 @@
     fu.value = cv;
   }
 
+  // Сессия: после входа обновление страницы не выкидывает из аккаунта
+  // в течение 30 минут (отсчёт от момента входа; вкладка закрыта — сессия сброшена)
+  const SESSION_KEY = 'penny_session';
+  const SESSION_TTL_MS = 30 * 60 * 1000;
+  function saveSession(username) {
+    try {
+      sessionStorage.setItem(
+        SESSION_KEY,
+        JSON.stringify({ user: username, loginAt: Date.now() })
+      );
+    } catch (e) {}
+  }
+  function clearSession() {
+    try {
+      sessionStorage.removeItem(SESSION_KEY);
+    } catch (e) {}
+  }
+  function restoreSession() {
+    try {
+      const s = JSON.parse(sessionStorage.getItem(SESSION_KEY) || 'null');
+      if (!s || !s.user || !s.loginAt) return false;
+      if (Date.now() - s.loginAt > SESSION_TTL_MS || !users[s.user]) {
+        clearSession();
+        return false;
+      }
+      login(s.user);
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
   function login(username) {
     const user = users[username];
     currentUser = username;
@@ -541,6 +573,7 @@
   }
 
   function logout() {
+    clearSession();
     filtersRestored = { records: false, devices: false };
     currentUser = null;
     currentUserRole = null;
@@ -582,6 +615,7 @@
       el.classList.add('visible');
       return;
     }
+    saveSession(u);
     login(u);
   });
 
@@ -1289,7 +1323,7 @@
     else if (r.completed || r.status === 'info' || r.status === 'move')
       tr.classList.add('completed');
     else if (r.status === 'malfunction')
-      tr.style.background = 'rgba(255,71,87,0.08)';
+      tr.style.background = 'rgba(255,71,87,0.2)';
     const isMalfunctionActive = r.status === 'malfunction' && !r.completed;
     const isRepairActive = r.status === 'repair' && !r.completed;
     const isReplaceActive = r.status === 'replace' && !r.completed;
@@ -3730,7 +3764,7 @@
         loadDevicesPage(devicesPage + 1);
     });
     loadingScreen.classList.add('hidden');
-    authContainer.classList.remove('hidden');
+    if (!restoreSession()) authContainer.classList.remove('hidden');
   }
   init();
 })();
